@@ -2,6 +2,8 @@ import { allTimeEntries, formatHours, sumHours } from '@/lib/vault/time';
 import { parseIso, today, toIso } from '@/lib/dates';
 import { EntryRow, LogEntry, type EntryView } from '@/components/timebalance/TimeLog';
 import { CustomRange } from '@/components/timebalance/CustomRange';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { NAV_GLYPH } from '@/components/NavIcons';
 import { EMPTY } from '@/copy/empty';
 import {
   Card,
@@ -132,13 +134,13 @@ export default async function TimebalancePage({
             <EntryRow key={entry.id} entry={entry} />
           ))}
           {views.length === 0 ? (
-            <EmptyState size="lg" standalone>
-              {entries.length === 0
-                ? EMPTY.timebalance.none
-                : total === 0 && shown.length === 0
-                  ? EMPTY.timebalance.zero
-                  : EMPTY.timebalance.range}
-            </EmptyState>
+            entries.length === 0 ? (
+              <EmptyState glyph={NAV_GLYPH.timebalance} {...EMPTY.timebalance.none} standalone />
+            ) : total === 0 && shown.length === 0 ? (
+              <EmptyState glyph={NAV_GLYPH.timebalance} {...EMPTY.timebalance.zero} standalone />
+            ) : (
+              <EmptyState glyph={EMPTY_GLYPH.search} {...EMPTY.timebalance.range} standalone />
+            )
           ) : null}
         </Card>
       </Stack>

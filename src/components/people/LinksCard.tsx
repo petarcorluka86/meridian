@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { addLinkAction, removeLinkAction } from '@/app/people/actions';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { EMPTY } from '@/copy/empty';
 import {
   AddIcon,
   Button,
@@ -21,23 +23,13 @@ import styles from './Person.module.css';
 
 export type LinkView = { label: string; url: string; host: string };
 
-export function LinksCard({
-  slug,
-  name,
-  links,
-}: {
-  slug: string;
-  name: string;
-  links: LinkView[];
-}) {
+export function LinksCard({ slug, links }: { slug: string; links: LinkView[] }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState('');
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-
-  const first = name.split(' ')[0] ?? name;
 
   const add = () =>
     startTransition(async () => {
@@ -95,18 +87,10 @@ export function LinksCard({
         </CardRow>
       ))}
 
+      {/* No button of its own: Add link is already in the header, and a second
+          one in the middle of the card competes with it. */}
       {links.length === 0 && !adding ? (
-        <EmptyState
-          title={`No links for ${first} yet`}
-          action={
-            <Button variant="primary" onClick={() => setAdding(true)} icon={<AddIcon />}>
-              Add a link
-            </Button>
-          }
-        >
-          Their growth plan, the on-call rotation, a repo you keep opening — anything you would
-          otherwise hunt for in a chat thread.
-        </EmptyState>
+        <EmptyState glyph={EMPTY_GLYPH.link} {...EMPTY.person.links} />
       ) : null}
 
       {adding ? (

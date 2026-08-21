@@ -1,10 +1,10 @@
-import { PrIcon } from '@/components/overview/OverviewIcons';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { OVERVIEW_GLYPH, PrIcon } from '@/components/overview/OverviewIcons';
 import { EMPTY } from '@/copy/empty';
 import { openedLabel, type PullRequest } from '@/lib/sources/github';
 import type { Freshness } from '@/lib/sources/cache';
 import {
   Avatar,
-  Banner,
   ButtonLink,
   Card,
   CardHeader,
@@ -85,12 +85,9 @@ export function ReviewCard({
         connected && freshness.state === 'missing' ? (
           <SkeletonRows rows={3} avatar />
         ) : connected ? (
-          <EmptyState>{EMPTY.overview.review}</EmptyState>
+          <EmptyState glyph={OVERVIEW_GLYPH.pr} {...EMPTY.overview.review} />
         ) : (
-          <Banner
-            tone="warning"
-            description="GitHub is not connected. Add GITHUB_TOKEN, GITHUB_LOGIN and GITHUB_REPOS to .env and restart."
-          />
+          <EmptyState glyph={EMPTY_GLYPH.plug} {...EMPTY.sources.github} />
         )
       ) : null}
     </Card>

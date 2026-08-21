@@ -4,6 +4,8 @@ import { renderMarkdown, splitTitle } from '@/lib/markdown';
 import { shortDate } from '@/lib/dates';
 import { NoteFilters } from '@/components/notes/NoteFilters';
 import { NewNote } from '@/components/notes/NewNote';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { NAV_GLYPH } from '@/components/NavIcons';
 import { NoteEditor, type EditorNote } from '@/components/notes/NoteEditor';
 import { EMPTY } from '@/copy/empty';
 import {
@@ -129,13 +131,13 @@ export default async function NotesPage({
 
         {filtered.length === 0 ? (
           <Stack gap={3}>
-            <EmptyState>
-              {vault.notes.length === 0
-                ? EMPTY.notes.none
-                : person === 'inbox'
-                  ? EMPTY.notes.inbox
-                  : EMPTY.notes.filtered}
-            </EmptyState>
+            {vault.notes.length === 0 ? (
+              <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.notes.none} />
+            ) : person === 'inbox' ? (
+              <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.notes.inbox} />
+            ) : (
+              <EmptyState glyph={EMPTY_GLYPH.search} {...EMPTY.notes.filtered} />
+            )}
             {/* A filter that matched nothing gets a sentence, not a button. The
                 action appears only when there is genuinely nothing to write yet. */}
             {vault.notes.length === 0 ? (
@@ -151,9 +153,7 @@ export default async function NotesPage({
         <NoteEditor note={editorNote} people={people} />
       ) : (
         <div className={`scroll ${styles.editorCol}`}>
-          <Text level="body" tone="muted">
-            {EMPTY.notes.none}
-          </Text>
+          <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.notes.unselected} standalone />
         </div>
       )}
     </div>

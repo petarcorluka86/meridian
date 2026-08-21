@@ -3,6 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { addTaskAction } from '@/app/tasks/actions';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { NAV_GLYPH } from '@/components/NavIcons';
+import { EMPTY } from '@/copy/empty';
 import {
   AddIcon,
   Button,
@@ -88,11 +91,11 @@ export function PersonTasks({
       ))}
 
       {shown.length === 0 ? (
-        <EmptyState>
-          {filter === 'open' && prio === 'all'
-            ? `No open tasks for ${firstName}.`
-            : `No ${filter === 'all' ? '' : `${filter} `}tasks for ${firstName} with this filter.`}
-        </EmptyState>
+        filter === 'open' && prio === 'all' ? (
+          <EmptyState glyph={NAV_GLYPH.tasks} {...EMPTY.person.tasks} />
+        ) : (
+          <EmptyState glyph={EMPTY_GLYPH.search} {...EMPTY.person.tasksFiltered} />
+        )
       ) : null}
 
       <CardFooter>

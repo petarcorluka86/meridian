@@ -1,11 +1,12 @@
+/*
+ * One shape everywhere: centred, with room around it. An empty card that draws
+ * its tile at the same size as every other empty card is how a screen full of
+ * them reads as one state rather than several accidents.
+ */
 .empty {
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-6) var(--space-5);
   border-top: 1px solid var(--line);
-}
-
-/* The whole screen is empty, not one card in it. */
-.empty[data-size="lg"] {
-  padding: var(--space-4);
+  text-align: center;
 }
 
 /* Nothing above it to be separated from. */
@@ -13,7 +14,7 @@
   border-top: 0;
 }
 
-/* Reading width: the fuller empty state is two sentences, not a column. */
+/* Reading width: the line under the title is one sentence, not a column. */
 .copy {
-  max-width: 52ch;
+  max-width: 42ch;
 }

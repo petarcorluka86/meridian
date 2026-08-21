@@ -3,8 +3,9 @@ import os from 'node:os';
 import { loadConfig } from '@/lib/env';
 import { buildTree, firstFile, readPreview } from '@/lib/vault/tree';
 import { VaultTree } from '@/components/vault/VaultTree';
-import { HeaderFileIcon } from '@/components/vault/FileIcons';
+import { FILE_GLYPH, HeaderFileIcon } from '@/components/vault/FileIcons';
 import { EMPTY } from '@/copy/empty';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Text } from '@/components/ui/Text';
 import styles from '@/components/vault/Vault.module.css';
 
@@ -26,11 +27,11 @@ export default async function VaultPage({
   const selected = file ?? firstFile(tree);
   const preview = selected ? readPreview(selected) : { state: 'missing' as const };
 
-  const emptyLine =
+  const nothingToShow =
     preview.state === 'empty'
       ? EMPTY.vault.emptyFile
       : preview.state === 'binary'
-        ? 'Not a text file.'
+        ? EMPTY.vault.binary
         : EMPTY.vault.missing;
 
   return (
@@ -52,17 +53,13 @@ export default async function VaultPage({
                   {preview.body}
                 </Text>
               ) : (
-                <Text level="small" tone="muted">
-                  {emptyLine}
-                </Text>
+                <EmptyState glyph={FILE_GLYPH.file} {...nothingToShow} standalone />
               )}
             </div>
           </>
         ) : (
           <div className={styles.previewBody}>
-            <Text level="small" tone="muted">
-              {EMPTY.vault.emptyFolder}
-            </Text>
+            <EmptyState glyph={FILE_GLYPH.folder} {...EMPTY.vault.emptyFolder} standalone />
           </div>
         )}
       </div>

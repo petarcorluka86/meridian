@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { CalIcon } from '@/components/overview/OverviewIcons';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { CalIcon, OVERVIEW_GLYPH } from '@/components/overview/OverviewIcons';
 import { EMPTY } from '@/copy/empty';
 import type { Freshness } from '@/lib/sources/cache';
 import {
-  Banner,
   ButtonLink,
   Card,
   CardHeader,
@@ -115,14 +115,12 @@ export function MeetingsCard({
           // lie about the day.
           <SkeletonRows rows={2} />
         ) : connected ? (
-          <EmptyState>
-            {index === todayIndex ? EMPTY.overview.meetings : 'Nothing on this day.'}
-          </EmptyState>
-        ) : (
-          <Banner
-            tone="warning"
-            description="Calendar is not connected. Set the GOOGLE_ keys or CALENDAR_ICAL_ADDRESS in .env and restart."
+          <EmptyState
+            glyph={OVERVIEW_GLYPH.cal}
+            {...(index === todayIndex ? EMPTY.overview.meetings : EMPTY.overview.meetingsOtherDay)}
           />
+        ) : (
+          <EmptyState glyph={EMPTY_GLYPH.plug} {...EMPTY.sources.calendar} />
         )
       ) : null}
     </Card>

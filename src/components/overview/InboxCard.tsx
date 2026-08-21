@@ -1,4 +1,5 @@
-import { InboxIcon } from '@/components/overview/OverviewIcons';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { InboxIcon, OVERVIEW_GLYPH } from '@/components/overview/OverviewIcons';
 import { EMPTY } from '@/copy/empty';
 import type { Freshness } from '@/lib/sources/cache';
 import {
@@ -67,7 +68,10 @@ export function InboxCard({
         subdomain && freshness.state === 'missing' ? (
           <SkeletonRows rows={2} avatar />
         ) : (
-          <EmptyState>{subdomain ? EMPTY.overview.inbox : 'BambooHR is not connected.'}</EmptyState>
+          <EmptyState
+            {...(subdomain ? EMPTY.overview.inbox : EMPTY.sources.bamboo)}
+            glyph={subdomain ? OVERVIEW_GLYPH.inbox : EMPTY_GLYPH.plug}
+          />
         )
       ) : null}
       {subdomain ? (

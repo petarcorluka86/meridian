@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { addPlanAction, removePlanAction } from '@/app/people/actions';
 import { Confirm } from '@/components/Confirm';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { EMPTY } from '@/copy/empty';
 import { MONTHS } from '@/lib/comp';
 import {
   AddIcon,
@@ -91,11 +93,7 @@ export function PlansCard({
         ))}
       </Blurred>
 
-      {plans.length === 0 ? (
-        <EmptyState>
-          Nothing planned. Anything you add shows in the compensation history below as planned.
-        </EmptyState>
-      ) : null}
+      {plans.length === 0 ? <EmptyState glyph={EMPTY_GLYPH.rise} {...EMPTY.person.plans} /> : null}
 
       <CardFooter>
         <span className={styles.amount}>

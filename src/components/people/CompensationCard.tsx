@@ -1,5 +1,7 @@
 'use client';
 
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { EMPTY } from '@/copy/empty';
 import {
   Blurred,
   Card,
@@ -26,7 +28,6 @@ export type CompHistoryRow = {
 };
 
 export function CompensationCard({
-  name,
   rate,
   paidPer,
   history,
@@ -35,7 +36,6 @@ export function CompensationCard({
   hasData,
   note,
 }: {
-  name: string;
   rate: string;
   paidPer: string;
   history: CompHistoryRow[];
@@ -46,8 +46,6 @@ export function CompensationCard({
   note: string | null;
 }) {
   const { revealed, left, toggle } = useReveal();
-  const first = name.split(' ')[0] ?? name;
-
   if (!hasData) {
     return (
       <Card>
@@ -55,9 +53,11 @@ export function CompensationCard({
           title="Compensation"
           end={<RevealButton revealed={revealed} left={left} onToggle={toggle} />}
         />
-        <EmptyState>
-          BambooHR has no compensation rows for {first}.{note ? ` ${note}` : ''}
-        </EmptyState>
+        <EmptyState
+          glyph={EMPTY_GLYPH.rise}
+          {...EMPTY.person.compensation}
+          body={`${EMPTY.person.compensation.body}${note ? ` ${note}` : ''}`}
+        />
       </Card>
     );
   }

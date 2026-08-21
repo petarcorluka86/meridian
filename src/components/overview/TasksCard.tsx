@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { TasksIcon } from '@/components/overview/OverviewIcons';
+import { OVERVIEW_GLYPH, TasksIcon } from '@/components/overview/OverviewIcons';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
 import { EMPTY } from '@/copy/empty';
 import {
   ButtonLink,
@@ -105,9 +106,11 @@ export function TasksCard({ open }: { open: OpenTask[] }) {
       ))}
       {shown.length === 0 ? (
         // Nothing open at all reads differently from a filter that matched nothing.
-        <EmptyState size="lg">
-          {open.length > 0 ? EMPTY.tasks.filtered : EMPTY.overview.whole}
-        </EmptyState>
+        open.length > 0 ? (
+          <EmptyState glyph={EMPTY_GLYPH.search} {...EMPTY.overview.tasksFiltered} />
+        ) : (
+          <EmptyState glyph={OVERVIEW_GLYPH.tasks} {...EMPTY.overview.tasks} />
+        )
       ) : null}
     </Card>
   );

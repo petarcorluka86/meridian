@@ -14,6 +14,8 @@ import {
   type CompHistoryRow,
 } from '@/components/people/PersonCards';
 import { PersonTasks } from '@/components/people/PersonTasks';
+import { NAV_GLYPH } from '@/components/NavIcons';
+import { EMPTY } from '@/copy/empty';
 import {
   Avatar,
   Card,
@@ -170,7 +172,9 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
                     />
                   </CardRow>
                 ))}
-                {notes.length === 0 ? <EmptyState>No notes about {first} yet.</EmptyState> : null}
+                {notes.length === 0 ? (
+                  <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.person.notes} />
+                ) : null}
               </Card>
             </>
           }
@@ -178,7 +182,6 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
             <>
               <LinksCard
                 slug={slug}
-                name={person.displayName}
                 links={links.map((l) => ({
                   label: l.label,
                   url: l.url,
@@ -198,7 +201,6 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
               />
 
               <CompensationCard
-                name={person.displayName}
                 rate={at.active ? formatEur(at.active.amount) : '—'}
                 paidPer={comp?.paidPer ?? 'Month'}
                 history={history}

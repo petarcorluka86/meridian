@@ -4,6 +4,7 @@ import { Caveat, Note, Section, Doc } from '@/stories/Showcase';
 import { ButtonLink } from './Button';
 import { Card, CardBody, CardFooter, CardHeader, CardRow, CardToolbar } from './Card';
 import { ChipLink } from './Chip';
+import { OVERVIEW_GLYPH } from '@/components/overview/OverviewIcons';
 import { EmptyState } from './EmptyState';
 import { SyncBadge } from './SyncBadge';
 import { Pill } from './Pill';
@@ -150,16 +151,14 @@ export const Empty: StoryObj = {
         <div style={{ maxWidth: 560 }}>
           <Card>
             <CardHeader title="Waiting on you" />
-            <EmptyState>{EMPTY.overview.inbox}</EmptyState>
+            <EmptyState glyph={OVERVIEW_GLYPH.inbox} {...EMPTY.overview.inbox} />
           </Card>
         </div>
       </Section>
       <Section title="The whole screen, empty">
         <div style={{ maxWidth: 560 }}>
           <Card>
-            <EmptyState size="lg" standalone>
-              {EMPTY.overview.whole}
-            </EmptyState>
+            <EmptyState glyph={OVERVIEW_GLYPH.tasks} {...EMPTY.overview.tasks} standalone />
           </Card>
         </div>
       </Section>
