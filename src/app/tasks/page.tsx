@@ -149,7 +149,7 @@ export default async function TasksPage({
             <div key={group.key}>
               <CardGroup label={group.label} tone={group.tone} count={group.rows.length} />
               {group.rows.map((task) => (
-                <TaskRow key={task.id} task={task} />
+                <TaskRow key={task.id} task={task} people={people} />
               ))}
             </div>
           ))}

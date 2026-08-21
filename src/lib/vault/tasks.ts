@@ -83,3 +83,57 @@ export async function setTaskStatus(id: string, done: boolean): Promise<void> {
     return next;
   });
 }
+
+/**
+ * What the edit dialog can change, and nothing else.
+ *
+ * `status`, `completedAt` and `createdAt` are deliberately not here: ticking a
+ * task off is `setTaskStatus`, and a form that also carried the status would let
+ * a dialog left open in one tab undo a tick made in another.
+ */
+export type TaskPatch = {
+  title: string;
+  priority: TaskEntry['priority'];
+  dueDate: string | null;
+  personSlug: string | null;
+  kind: TaskEntry['kind'];
+};
+
+export async function updateTask(id: string, patch: TaskPatch): Promise<void> {
+  const title = patch.title.trim();
+  if (!title) throw new Error('A task needs a title.');
+
+  await mutate((tasks) => {
+    // Thrown before anything is written, so a task deleted by hand between
+    // opening the dialog and saving it does not come back.
+    if (!tasks.some((task) => task.id === id)) {
+      throw new Error('That task is no longer in the vault.');
+    }
+    return tasks.map((task) =>
+      task.id === id
+        ? {
+            ...task,
+            title,
+            priority: patch.priority,
+            dueDate: patch.dueDate,
+            personSlug: patch.personSlug || null,
+            kind: patch.kind,
+            updatedAt: stamp(),
+          }
+        : task,
+    );
+  });
+}
+
+/**
+ * Gone, not marked done. The snapshot `write.ts` takes before every write is
+ * what makes this recoverable — `npm run vault:restore` has the row.
+ */
+export async function deleteTask(id: string): Promise<void> {
+  await mutate((tasks) => {
+    if (!tasks.some((task) => task.id === id)) {
+      throw new Error('That task is no longer in the vault.');
+    }
+    return tasks.filter((task) => task.id !== id);
+  });
+}

@@ -327,11 +327,11 @@ to be hiding.
 | `TextLink` | a link in a line of text or a row. `ButtonLink` is the control; this is the words |
 | `TextInput` `Textarea` `Select` `DateInput` `Checkbox` `Field` | every field |
 | `Table` `THead` `TBody` `TR` `TH` `TD` | data with columns |
-| `Dialog` | the one modal. `Confirm` is its one usage |
+| `Dialog` | the one modal. Two usages: `Confirm`, and `TaskDialog` |
 | `DayStepper` | walks a card through the days its cache can answer for |
 | `Banner` `EmptyState` `Pill` `CategoryPill` `Stat` `Icon` `IconTile` `Avatar` `Rail` `Prose` | the rest |
 | `icons.tsx` | the action glyphs — one per verb, see below |
-| `TaskRow` `SyncBadge` `Reveal` `Skeleton` | the four that only make sense here |
+| `TaskRow` `TaskDialog` `SyncBadge` `Reveal` `Skeleton` | the five that only make sense here |
 
 `Page` carries `data-screen`, which is what the pixel gate measures.
 
@@ -447,7 +447,7 @@ The Catalogue embeds the real stories rather than rebuilding them. Component doc
 are the JSDoc already on the components, picked up by `react-docgen`.
 
 **Two stubs, and both are named.** `.storybook/stubs/tasks-actions.ts` stands in
-for `toggleTaskAction` and `app-actions.ts` for `syncSourceAction`, aliased in
+for the three task actions and `app-actions.ts` for `syncSourceAction`, aliased in
 `viteFinal`, because a Server Action cannot exist in a browser-only build —
 importing the real module drags the vault and `node:fs` into the bundle. A third
 is a decision, not a convenience.

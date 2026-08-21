@@ -220,8 +220,10 @@ function Guide() {
       'grouped by when they are due',
       [
         'Late, Today, Upcoming and No date, with a count per group.',
-        'Priority is a thin colour rail rather than a badge; the due date is a pill that turns red when late and blue for today.',
+        'Priority is a thin colour rail rather than a badge; the due date is a pill that turns red when late and blue for today. A task with no date carries no pill.',
         'Add with priority, due date and person in one row — Enter is enough.',
+        'Tick the box to mark one done, here or on the Overview or a person’s page.',
+        'The pencil opens the task: title, priority, due date, who it is for, and whether you are waiting on somebody. Deleting is in the same dialog, behind a second press — a snapshot is kept, so npm run vault:restore can still bring it back.',
       ],
     ],
     [

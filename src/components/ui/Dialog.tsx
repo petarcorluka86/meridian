@@ -27,8 +27,14 @@ const WarningIcon = () => (
  * click that started inside it does not, and the element named by `initialFocus`
  * takes focus on open.
  *
- * A dialog is for a decision that cannot be undone. Anything else belongs on the
+ * A dialog is for a decision that cannot be undone, or for the one form that has
+ * nowhere on the page to live — editing a task, which is reachable from three
+ * screens and cannot expand a row on any of them. Anything else belongs on the
  * page.
+ *
+ * The body is passed through as given: a sentence arrives already wrapped in
+ * `Text`, and a form arrives as fields. Wrapping it here put the fields inside a
+ * span.
  */
 export function Dialog({
   open,
@@ -70,11 +76,13 @@ export function Dialog({
         if (event.target === event.currentTarget) onClose();
       }}
     >
+      {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: `aria-modal` is valid on both roles this can take; the rule cannot see through the ternary and reads the element as having no role at all */}
       <div
         ref={dialogRef}
         tabIndex={-1}
         className={styles.dialog}
-        role="alertdialog"
+        // An alert interrupts; a form does not. The tone is what tells them apart.
+        role={tone === 'danger' ? 'alertdialog' : 'dialog'}
         aria-modal="true"
         aria-label={title}
       >
@@ -84,11 +92,7 @@ export function Dialog({
             {title}
           </Text>
         </header>
-        <div className={styles.body}>
-          <Text level="body" tone="muted">
-            {children}
-          </Text>
-        </div>
+        <div className={styles.body}>{children}</div>
         <div className={styles.footer}>{footer}</div>
       </div>
     </div>

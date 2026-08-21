@@ -91,6 +91,15 @@ export const EveryTone: StoryObj = {
             {
               ...base,
               id: 'd',
+              priority: 'normal',
+              title: 'Read the platform proposal',
+              dueDate: null,
+              dueLabel: null,
+              dueTone: 'none',
+            },
+            {
+              ...base,
+              id: 'e',
               done: true,
               title: 'Send the onboarding plan',
               dueLabel: 'Done',
@@ -99,6 +108,10 @@ export const EveryTone: StoryObj = {
           ]}
         />
       </Section>
+      <Note>
+        A task with no date carries no pill. No date is most of the list, and a grey “no date” on
+        every row that is merely not urgent says nothing — the absence says it.
+      </Note>
       <Note>
         A done row keeps its position and loses its hue: the rail goes to the soft border and the
         title drops to the faint ink. Nothing moves, so ticking a box does not reflow the list under

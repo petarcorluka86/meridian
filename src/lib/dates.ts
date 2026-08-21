@@ -70,9 +70,15 @@ export function longDate(iso: string): string {
 
 export type DueTone = 'late' | 'today' | 'upcoming' | 'none' | 'done';
 
-/** "3 days late" · "today" · "22 Aug" · "no date". */
-export function dueLabel(due: string | null, now = today()): string {
-  if (!due) return 'no date';
+/**
+ * "3 days late" · "today" · "22 Aug", and `null` for a task with no date.
+ *
+ * No date is not a state worth a word: it is most of the list, and labelling it
+ * put a grey "no date" pill on every row that was merely not urgent. The absence
+ * of a pill says it.
+ */
+export function dueLabel(due: string | null, now = today()): string | null {
+  if (!due) return null;
   const delta = daysBetween(now, due);
   if (delta < 0) return `${-delta} ${-delta === 1 ? 'day' : 'days'} late`;
   if (delta === 0) return 'today';
