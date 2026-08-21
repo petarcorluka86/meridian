@@ -2,6 +2,8 @@ import { getVault } from '@/lib/vault/index';
 import { photoPath } from '@/lib/sources/cache';
 import { daysBetween, dueLabel, dueTone, today } from '@/lib/dates';
 import { AddTask } from '@/components/tasks/AddTask';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { NAV_GLYPH } from '@/components/NavIcons';
 import { EMPTY } from '@/copy/empty';
 import {
   Card,
@@ -153,13 +155,13 @@ export default async function TasksPage({
           ))}
 
           {views.length === 0 ? (
-            <EmptyState>
-              {vault.tasks.length === 0
-                ? EMPTY.tasks.none
-                : filter === 'open' && prio === 'all'
-                  ? EMPTY.tasks.allDone
-                  : EMPTY.tasks.filtered}
-            </EmptyState>
+            vault.tasks.length === 0 ? (
+              <EmptyState glyph={NAV_GLYPH.tasks} {...EMPTY.tasks.none} />
+            ) : filter === 'open' && prio === 'all' ? (
+              <EmptyState glyph={NAV_GLYPH.tasks} {...EMPTY.tasks.allDone} />
+            ) : (
+              <EmptyState glyph={EMPTY_GLYPH.search} {...EMPTY.tasks.filtered} />
+            )
           ) : null}
         </Card>
       </Stack>

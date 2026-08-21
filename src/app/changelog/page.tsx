@@ -9,6 +9,7 @@ import {
   type DiffRow,
 } from '@/lib/git';
 import { ChangelogActions } from '@/components/changelog/ChangelogActions';
+import { NAV_GLYPH } from '@/components/NavIcons';
 import { EMPTY } from '@/copy/empty';
 import {
   Card,
@@ -155,16 +156,21 @@ export default async function ChangelogPage({
           title="Changelog"
           subtitle={
             repo.kind === 'not-a-repo'
-              ? 'The vault is not a git repository yet'
-              : 'The vault sits inside another repository'
+              ? EMPTY.changelog.notARepo.title
+              : EMPTY.changelog.nested.title
           }
         />
         <Card>
-          <EmptyState size="lg" standalone>
-            {repo.kind === 'not-a-repo'
-              ? 'Run git init in the vault folder to start tracking history. Everything else keeps working without it.'
-              : `The vault resolves to the repository at ${repo.toplevel}. Committing from here would sweep up files outside the vault, so saving is disabled until the vault is its own repository.`}
-          </EmptyState>
+          {repo.kind === 'not-a-repo' ? (
+            <EmptyState glyph={NAV_GLYPH.vault} {...EMPTY.changelog.notARepo} standalone />
+          ) : (
+            <EmptyState
+              glyph={NAV_GLYPH.vault}
+              {...EMPTY.changelog.nested}
+              body={`The vault resolves to the repository at ${repo.toplevel}. ${EMPTY.changelog.nested.body}`}
+              standalone
+            />
+          )}
         </Card>
       </Page>
     );
@@ -314,9 +320,7 @@ export default async function ChangelogPage({
           ))}
           {files.length === 0 ? (
             <Card>
-              <EmptyState size="lg" standalone>
-                Nothing left to commit. The vault matches the last commit.
-              </EmptyState>
+              <EmptyState glyph={NAV_GLYPH.changelog} {...EMPTY.changelog.saved} standalone />
             </Card>
           ) : null}
 
@@ -339,7 +343,9 @@ export default async function ChangelogPage({
                   </Pill>
                 </CardRow>
               ))}
-              {commits.length === 0 ? <EmptyState>{EMPTY.changelog.noCommits}</EmptyState> : null}
+              {commits.length === 0 ? (
+                <EmptyState glyph={NAV_GLYPH.changelog} {...EMPTY.changelog.noCommits} />
+              ) : null}
             </Card>
           </div>
         </div>

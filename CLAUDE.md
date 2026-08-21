@@ -91,7 +91,11 @@ file, it belongs in Help instead.
 - **Integrations are read-only.** No request to BambooHR, Google or GitHub may use
   a method other than GET. Credentials never reach the browser.
 - **Empty states and error lines come from `src/copy/`.** One wording per
-  situation, used everywhere. Do not paraphrase at the call site.
+  situation, used everywhere. Do not paraphrase at the call site. An empty-state
+  entry carries its `tone` as well as its words, so the same emptiness cannot be
+  green on one screen and grey on the next — and it is spread in whole,
+  `{...EMPTY.tasks.allDone}`. The glyph is the only part the call site chooses,
+  because it is the card's own icon and the catalogue does not know it.
 - **Nothing derived is written to disk** — balances, counts and days-since are
   recomputed. A number that is never written down cannot drift.
 - **A malformed file costs only itself.** Arrays validate per row; a bad entry is

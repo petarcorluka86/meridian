@@ -14,6 +14,17 @@
   color: var(--icon);
 }
 
+/*
+ * The empty state's tile. Its size comes off the space scale rather than the two
+ * control heights, because it is an ornament and not something you can press.
+ */
+.tile[data-size="lg"] {
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line-strong);
+}
+
 .tile[data-size="sm"] {
   width: var(--control-sm);
   height: var(--control-sm);
@@ -39,4 +50,21 @@
 .tile[data-tone="info"] {
   background: var(--info-bg);
   color: var(--info);
+}
+
+/* Only the outlined size has a line to tone. */
+.tile[data-size="lg"][data-tone="accent"] {
+  border-color: var(--accent-border);
+}
+.tile[data-size="lg"][data-tone="danger"] {
+  border-color: var(--danger-border);
+}
+.tile[data-size="lg"][data-tone="warning"] {
+  border-color: var(--warning-border);
+}
+.tile[data-size="lg"][data-tone="success"] {
+  border-color: var(--success-border);
+}
+.tile[data-size="lg"][data-tone="info"] {
+  border-color: var(--info-border);
 }

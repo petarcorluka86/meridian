@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { EMPTY } from '@/copy/empty';
-import { HomeIcon, OutIcon } from '@/components/overview/OverviewIcons';
+import { EMPTY, type Empty } from '@/copy/empty';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { HomeIcon, OutIcon, OVERVIEW_GLYPH } from '@/components/overview/OverviewIcons';
 import type { Freshness } from '@/lib/sources/cache';
 import {
   Avatar,
@@ -56,6 +57,8 @@ type Props = {
 function Presence({
   title,
   icon,
+  glyph,
+  empty,
   rows,
   days,
   todayIndex,
@@ -65,6 +68,10 @@ function Presence({
 }: {
   title: string;
   icon: React.ReactNode;
+  /** The card's own shape, for the tile its empty state draws. */
+  glyph: React.ReactNode;
+  /** What "nobody" means for this card: in the office, or all here today. */
+  empty: Empty;
   rows: PresenceRow[];
   days: Day[];
   todayIndex: number;
@@ -97,13 +104,13 @@ function Presence({
       />
       {children(onDay)}
       {onDay.length === 0 ? (
-        <EmptyState>
-          {!connected
-            ? 'BambooHR is not connected.'
-            : beforeToday
-              ? 'Meridian only asks BambooHR for time off from today onwards, so it cannot say who was away before that.'
-              : EMPTY.overview.presence}
-        </EmptyState>
+        !connected ? (
+          <EmptyState glyph={EMPTY_GLYPH.plug} {...EMPTY.sources.bamboo} />
+        ) : beforeToday ? (
+          <EmptyState glyph={glyph} {...EMPTY.overview.presencePast} />
+        ) : (
+          <EmptyState glyph={glyph} {...empty} />
+        )
       ) : null}
     </Card>
   );
@@ -111,7 +118,13 @@ function Presence({
 
 export function WorkingFromHomeCard(props: Props) {
   return (
-    <Presence title="Working from home" icon={<HomeIcon />} {...props}>
+    <Presence
+      title="Working from home"
+      icon={<HomeIcon />}
+      glyph={OVERVIEW_GLYPH.home}
+      empty={EMPTY.overview.home}
+      {...props}
+    >
       {(onDay) =>
         onDay.map((row) => (
           <CardRow key={row.slug}>
@@ -130,7 +143,13 @@ export function WorkingFromHomeCard(props: Props) {
 
 export function OutCard(props: Props) {
   return (
-    <Presence title="Out" icon={<OutIcon />} {...props}>
+    <Presence
+      title="Out"
+      icon={<OutIcon />}
+      glyph={OVERVIEW_GLYPH.out}
+      empty={EMPTY.overview.out}
+      {...props}
+    >
       {(onDay) =>
         onDay.map((row) => (
           <CardRow key={row.slug}>

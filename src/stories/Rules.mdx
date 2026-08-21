@@ -62,8 +62,11 @@ this that is not automatic.
 - **There is no spinner over content.** The server renders from cache and the
   freshness pill carries the state; a revalidation never blanks what is on
   screen. `Skeleton` appears only when a source has never answered.
-- **Empty states come from `src/copy/`.** One wording per situation. An
-  unreadable file is not an empty state — it gets a `Banner` naming the file.
+- **Empty states come from `src/copy/`.** One wording *and one tone* per
+  situation, spread in whole: `{...EMPTY.tasks.allDone}`. Three parts and no
+  fourth — the card's own icon on a tinted tile, a title, one line under it. No
+  buttons: the card's header already has the control. An unreadable file is not
+  an empty state — it gets a `Banner` naming the file.
 
 ## The migration is done
 

@@ -14,6 +14,8 @@ import {
 import { PeopleTable, type CompRowView } from '@/components/people/PeopleTable';
 import { initials } from '@/components/people/avatar';
 import { SyncButton } from '@/components/people/SyncButton';
+import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
+import { NAV_GLYPH } from '@/components/NavIcons';
 import { loadConfig } from '@/lib/env';
 import { EMPTY } from '@/copy/empty';
 import {
@@ -136,11 +138,11 @@ export default async function PeoplePage({
 
       {people.length === 0 ? (
         <Card>
-          <EmptyState size="lg" standalone>
-            {bamboo.freshness.state === 'unconfigured'
-              ? 'BambooHR is not connected. Add the BAMBOOHR_ keys to .env and restart, or add people to people/entries.json by hand.'
-              : EMPTY.people.none}
-          </EmptyState>
+          {bamboo.freshness.state === 'unconfigured' ? (
+            <EmptyState glyph={EMPTY_GLYPH.plug} {...EMPTY.people.unconfigured} standalone />
+          ) : (
+            <EmptyState glyph={NAV_GLYPH.people} {...EMPTY.people.none} standalone />
+          )}
         </Card>
       ) : detailed ? (
         <PeopleTable

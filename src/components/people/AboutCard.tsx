@@ -3,8 +3,9 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveAboutAction } from '@/app/people/actions';
+import { NAV_GLYPH } from '@/components/NavIcons';
+import { EMPTY } from '@/copy/empty';
 import {
-  AddIcon,
   Button,
   Card,
   CardBody,
@@ -47,8 +48,6 @@ export function AboutCard({
         setError(result.message);
       }
     });
-
-  const first = name.split(' ')[0] ?? name;
 
   return (
     <Card>
@@ -109,17 +108,8 @@ export function AboutCard({
           <Prose html={html} />
         </CardBody>
       ) : (
-        <EmptyState
-          standalone
-          title={`Nothing written about ${first} yet.`}
-          action={
-            <Button variant="primary" onClick={() => setEditing(true)} icon={<AddIcon />}>
-              Write it
-            </Button>
-          }
-        >
-          How they work, what they want, what to watch.
-        </EmptyState>
+        // No button of its own: Edit is already in the header.
+        <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.person.about} standalone />
       )}
     </Card>
   );
