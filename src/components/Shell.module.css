@@ -1,0 +1,51 @@
+/*
+ * The shell: a fixed sidebar and one scrolling column. No header, no breadcrumb
+ * and no page chrome above the content — the screen title is the first thing in
+ * the content itself.
+ */
+.shell {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.sidebar {
+  width: 236px;
+  flex: 0 0 236px;
+  background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  display: flex;
+  flex-direction: column;
+  /* `NavList` brings the horizontal inset for the rows. */
+  padding: var(--space-5) 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-5) var(--space-5);
+}
+
+.brandMark {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: grid;
+  place-items: center;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* The vault-problem banner, which shares a screen's gutter without being one —
+   the page below brings its own top space. */
+.aboveScreen {
+  padding: var(--space-6) clamp(var(--space-5), 3vw, var(--space-7)) 0;
+  max-width: 1040px;
+}

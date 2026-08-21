@@ -1,0 +1,136 @@
+/*
+ * Every field in the app, at one height and one radius. Text, textarea, select,
+ * date and checkbox — nothing else takes typing.
+ */
+/*
+ * A label above its control. The only labelled shape in the app: everywhere else
+ * the surrounding row says what a field is and the field takes `ariaLabel`.
+ */
+.labelled {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.labelled[data-grow] {
+  flex: 1 1 240px;
+}
+
+.field {
+  min-height: var(--control-md);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  font: var(--type-small);
+  color: var(--fg-strong);
+  background: var(--field);
+  width: 100%;
+  min-width: 0;
+}
+
+.field::placeholder {
+  color: var(--fg-faint);
+}
+
+.field:disabled {
+  color: var(--fg-faint);
+  background: var(--surface-muted);
+  cursor: not-allowed;
+}
+
+.field[data-size="sm"] {
+  min-height: var(--control-sm);
+  padding: 0 var(--space-2);
+}
+
+/* The note editor's title: the card is the frame, and the title is the loudest
+   thing in it. */
+.field[data-heading] {
+  font: var(--type-subheading);
+}
+
+/* Sits inside a card row with nothing around it — quick capture, the note title.
+   The card is the frame, so a second border would be a box in a box. */
+.field[data-bare] {
+  border: 0;
+  background: var(--clear);
+  padding: 0;
+  font: var(--type-body);
+}
+
+.textarea {
+  composes: field;
+  padding: var(--space-3);
+  resize: vertical;
+  min-height: calc(var(--space-7) * 2);
+}
+
+/* A note's body is typed as Markdown, so it is shown in the mono stack — the
+   only place raw text the user writes is not the sans. */
+.textarea[data-mono] {
+  font: var(--type-mono);
+}
+
+.textarea[data-bare] {
+  border: 0;
+  background: var(--clear);
+  min-height: calc(var(--space-7) * 8);
+}
+
+.select {
+  composes: field;
+  width: auto;
+  padding-right: var(--space-6);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: var(--shadow-lift);
+  /* The chevron is drawn here rather than fetched: the CSP allows nothing from
+     the internet, and an icon font would be a request. */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b66' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9.5l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+}
+
+/* The small select keeps room for its chevron: the size rule above resets the
+   padding on both sides, and without this the arrow lands on the text. */
+.select[data-size="sm"] {
+  padding-right: var(--space-5);
+  background-position: right var(--space-2) center;
+}
+
+.date {
+  composes: field;
+  width: auto;
+  cursor: pointer;
+  box-shadow: var(--shadow-lift);
+}
+
+.checkbox {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--fg-faint);
+  border-radius: var(--radius-inner);
+  background: var(--surface);
+  font: var(--type-micro);
+  cursor: pointer;
+  /* The tick is always rendered, merely invisible, so ticking does not move the
+     row by a pixel. */
+  color: var(--clear);
+}
+
+.checkbox[data-checked] {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent-border);
+}
+
+.checkbox:disabled {
+  cursor: not-allowed;
+  border-color: var(--line-strong);
+}

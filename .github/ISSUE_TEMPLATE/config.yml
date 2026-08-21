@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: How the app works
+    url: https://github.com/petarcorluka86/meridian/blob/main/README.md
+    about: Everything a user needs is on the Help screen inside the app. Start it and open Help.
+  - name: Security issue
+    url: https://github.com/petarcorluka86/meridian/blob/main/SECURITY.md
+    about: Do not open an issue. Report it privately — see SECURITY.md.

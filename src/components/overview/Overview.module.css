@@ -1,0 +1,7 @@
+/*
+ * One rule: the meetings card's clock column, which has to be a fixed width so
+ * every meeting's title starts at the same place.
+ */
+.clock {
+  flex: 0 0 106px;
+}

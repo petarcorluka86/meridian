@@ -1,0 +1,178 @@
+/*
+ * The design system's foundations. Every decision about colour, size, space,
+ * shape and type is made once, here, and nowhere else.
+ *
+ * The point of the file is propagation: change a value here and every screen
+ * follows, because no component is allowed to write the value out itself.
+ * `tests/unit/design-system.test.ts` is what makes that true rather than hoped
+ * for — it fails the build on a colour, a radius, a spacing step or a font
+ * declared anywhere but a primitive.
+ *
+ * The scales are closed. Eight type levels, seven spacing steps, five radii,
+ * two shadows. A ninth type level is a change to this file and a change to
+ * `Text`, deliberately — not a number somebody picks at a call site.
+ */
+:root {
+  /* ---------------------------------------------------------------- Type ---
+   * Full `font` shorthands, so a rule is `font: var(--type-label)` and cannot
+   * get the line-height wrong. Tracking cannot live in the shorthand, so the
+   * three levels that need it have a companion token; `Text` pairs them.
+   */
+  --sans: system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, Menlo, monospace;
+
+  --type-display: 650 34px / 1.15 var(--sans);
+  --type-title: 600 27px / 1.2 var(--sans);
+  --type-heading: 600 20px / 1.25 var(--sans);
+  --type-subheading: 600 16px / 1.3 var(--sans);
+  --type-body: 400 15px / 1.5 var(--sans);
+  --type-small: 400 13px / 1.5 var(--sans);
+  --type-label: 500 13px / 1 var(--sans);
+  --type-micro: 600 11px / 1 var(--sans);
+  --type-mono: 400 12px / 1.4 var(--mono);
+
+  /*
+   * The tenth level, and the reason there are ten: a diff line is doubled so a
+   * line that wraps still reads as one row against its unwrapped neighbour.
+   * Nothing but the diff viewer uses it.
+   */
+  --type-diff: 400 12px / 2 var(--mono);
+
+  --tracking-display: -0.03em;
+  --tracking-title: -0.02em;
+  --tracking-micro: 0.02em;
+
+  /* --------------------------------------------------------------- Space ---
+   * Seven steps on a 4px grid. Every gap, padding and margin in the app is one
+   * of these. The app used to have seventeen gap values, which is the same as
+   * having none.
+   */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* --------------------------------------------------------------- Shape --- */
+  --radius-xs: 2px;
+  --radius-inner: 6px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+
+  /* Controls share two heights, so a button, a select and a chip standing in a
+     row line up without anybody nudging padding. */
+  --control-md: 34px;
+  --control-sm: 28px;
+
+  /* ------------------------------------------------------------- Surfaces ---
+   * The app sits on a paper ground, not on white. A card is white on top of it
+   * and a card header is a shade sunk into it — that is where the depth comes
+   * from, since almost nothing here casts a shadow.
+   */
+  --bg: #f2f0ec;
+  --surface: oklch(1 0 0);
+  --surface-sunken: oklch(0.972 0.003 70);
+  --surface-muted: oklch(0.955 0.004 70);
+  --field: oklch(0.99 0.002 70);
+
+  /* Two line weights: inside a card, and around one. */
+  --line: oklch(0.94 0.004 70);
+  --line-strong: oklch(0.885 0.004 70);
+
+  /* ----------------------------------------------------------- Foreground ---
+   * Four steps, named by weight of voice rather than by lightness. A number is
+   * strong, a label is muted, a placeholder is faint.
+   */
+  --fg-strong: oklch(0.24 0.012 70);
+  --fg: oklch(0.4 0.01 70);
+  --fg-muted: oklch(0.55 0.01 70);
+  --fg-faint: oklch(0.66 0.01 70);
+  --fg-inverted: oklch(0.99 0 0);
+
+  /* A selected control inverts to near-black rather than to the accent: a
+     selection is a state, and the accent means action. */
+  --selected: oklch(0.27 0.01 70);
+  --selected-fg: var(--fg-inverted);
+
+  /* -------------------------------------------------------------- Accent ---
+   * One blue, and it means interactive. Nothing decorative is this colour.
+   */
+  --accent: oklch(0.52 0.16 250);
+  --accent-hover: oklch(0.44 0.16 250);
+  --accent-border: oklch(0.46 0.16 250);
+  --accent-bg: oklch(0.955 0.03 250);
+  --accent-fg: var(--fg-inverted);
+  --accent-ring: oklch(0.62 0.13 250);
+
+  /* --------------------------------------------------------------- Tones ---
+   * Four meanings, three roles each: the text colour, the tint behind it, and
+   * the line around it. Everything that carries status in this app — a pill, a
+   * banner, a toast, a rail — picks one of these four and never invents a fifth.
+   *
+   * danger  something failed, or is about to be destroyed
+   * warning something is old, missing or unfinished. Nothing is broken
+   * success something is settled, saved or even
+   * info    something is scheduled or planned
+   */
+  --danger: oklch(0.47 0.16 25);
+  --danger-bg: oklch(0.95 0.04 25);
+  --danger-border: oklch(0.88 0.06 25);
+  --danger-solid: oklch(0.52 0.17 25);
+
+  --warning: oklch(0.44 0.12 62);
+  --warning-bg: oklch(0.96 0.04 75);
+  --warning-border: oklch(0.88 0.06 80);
+
+  --success: oklch(0.45 0.11 155);
+  --success-bg: oklch(0.95 0.035 155);
+  --success-border: oklch(0.86 0.06 155);
+
+  --info: oklch(0.45 0.13 255);
+  --info-bg: oklch(0.95 0.03 255);
+  --info-border: oklch(0.87 0.05 255);
+
+  /* ---------------------------------------------------- Category palette ---
+   * A note's category is a colour before it is a word, and the six are a fixed
+   * set — not four tones with two invented. They live here rather than being
+   * computed from a hue at the call site, so recolouring a category is an edit
+   * to this file like every other colour decision.
+   */
+  --cat-1on1: oklch(0.4 0.11 250);
+  --cat-1on1-bg: oklch(0.95 0.035 250);
+  --cat-feedback: oklch(0.4 0.11 150);
+  --cat-feedback-bg: oklch(0.95 0.035 150);
+  --cat-incident: oklch(0.4 0.11 25);
+  --cat-incident-bg: oklch(0.95 0.035 25);
+  --cat-planning: oklch(0.4 0.11 290);
+  --cat-planning-bg: oklch(0.95 0.035 290);
+  --cat-idea: oklch(0.4 0.11 70);
+  --cat-idea-bg: oklch(0.95 0.035 70);
+  --cat-generic: var(--fg-muted);
+  --cat-generic-bg: var(--surface-muted);
+
+  /* ---------------------------------------------------------------- Icons ---
+   * One colour. An icon that sits beside a label is decoration and takes this;
+   * an icon that means something takes a tone, like everything else that means
+   * something. There used to be nine icon hues carrying no information.
+   */
+  --icon: var(--fg-muted);
+
+  /* ----------------------------------------------------------- Elevation ---
+   * Two, and the first is almost nothing: a 1px hint under a control so it
+   * reads as raised off the card. The second belongs to the dialog alone.
+   */
+  --shadow-lift: 0 1px 2px oklch(0.5 0.01 70 / 0.08);
+  --shadow-dialog: 0 18px 50px oklch(0.3 0.01 70 / 0.22);
+  --scrim: oklch(0.3 0.01 70 / 0.35);
+
+  /* ---------------------------------------------------------------- Misc --- */
+  --ring: 2px solid var(--accent-ring);
+  --transition: 0.12s ease;
+
+  /* Never the CSS keyword `transparent`: it resolves to transparent black, and
+     a border animating or blending from it flashes grey. */
+  --clear: oklch(0 0 0 / 0);
+}

@@ -1,0 +1,64 @@
+/*
+ * An inset column of rounded rows, one of which can be selected: the sidebar,
+ * Help's sections, the vault tree, the changelog's changed files.
+ *
+ * All four were written by hand, and three of them forgot the inset — so the
+ * rows sat flush against the card they were in and the gap between them was
+ * whatever the line-height happened to leave.
+ *
+ * Not `CardRow`: that is a full-width row with a hairline above it, for a list
+ * that is the card's content. These are controls that happen to be stacked.
+ */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+}
+
+.item {
+  /* Indentation is a spacing step per level, set by the caller. The tree is the
+     only thing that uses it. */
+  --indent: 0px;
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-md);
+  text-align: left;
+  border: 0;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  background: var(--clear);
+  text-decoration: none;
+  /* The row owns its colour. Without this a row that is a link takes the anchor
+     colour from the global sheet, and every icon in the sidebar turned blue. */
+  color: var(--icon);
+  padding: var(--space-2) var(--space-3);
+  padding-left: calc(var(--space-3) + var(--indent));
+}
+
+/*
+ * `:hover` and not just the base rule: the global sheet has `a:hover`, which is
+ * one specificity step above a class — so a row that is a link went accent-blue
+ * on hover however plainly the class stated its colour.
+ */
+.item:hover:not([data-selected]) {
+  background: var(--surface-sunken);
+  color: var(--fg-strong);
+}
+
+/* One selected style for all four, and it is the same near-neutral fill the
+   sidebar has always used. Help's was an accent-tinted panel, which made "you
+   are here" look like "this is a link". */
+.item[data-selected] {
+  background: var(--surface-muted);
+  color: var(--fg-strong);
+}
+
+/* Takes the leftover width so a trailing count or path sits at the end. */
+.label {
+  flex: 1;
+  min-width: 0;
+}

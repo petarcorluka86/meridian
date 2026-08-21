@@ -1,0 +1,27 @@
+/*
+ * Two rules the primitives cannot express: the header's contact column, and the
+ * fact that a link row's label has to shrink before its host does.
+ */
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: flex-end;
+}
+
+/* A field that takes the leftover width of a footer, with a floor: without one
+   it collapses to nothing when the button beside it grows. */
+.grow {
+  flex: 1 1 120px;
+  min-width: 90px;
+}
+
+.narrow {
+  flex: 0 1 140px;
+  min-width: 0;
+}
+
+.amount {
+  flex: 0 1 90px;
+  min-width: 0;
+}

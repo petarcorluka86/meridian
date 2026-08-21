@@ -1,0 +1,161 @@
+/*
+ * The container the whole app is built out of. It was declared twenty-one times
+ * across eleven modules; it is declared here.
+ *
+ * White surface, one line, `--radius-card`, and `overflow: hidden` so a row's
+ * border disappears into the corner. Depth comes from the sunken header, not
+ * from a shadow.
+ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+/* The whole card is the target — the people grid. */
+.link {
+  composes: card;
+  display: block;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+.link:hover {
+  background: var(--surface-sunken);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* A header can carry a title, a count, a day stepper and a sync badge. In the
+     narrow column that is more than fits, and wrapping is better than clipping. */
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--line);
+}
+
+/* No rows under it: the bottom border would look like it is waiting for content
+   that never arrives. */
+.header[data-bare] {
+  border-bottom: 0;
+}
+
+.body {
+  padding: var(--space-4);
+}
+
+/* A row in a list. The top border rather than the bottom, so the last row does
+   not draw a line against the card's own edge. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--line);
+}
+.card > .row:first-child,
+.header + .row {
+  border-top: 0;
+}
+
+.row[data-pending] {
+  opacity: 0.55;
+}
+
+/* A row that carries a tone: a form's error, a saved confirmation. Edge to edge,
+   because it belongs to the card rather than sitting on top of it. */
+.row[data-tone="danger"] {
+  background: var(--danger-bg);
+  border-top-color: var(--danger-border);
+}
+.row[data-tone="warning"] {
+  background: var(--warning-bg);
+  border-top-color: var(--warning-border);
+}
+.row[data-tone="success"] {
+  background: var(--success-bg);
+  border-top-color: var(--success-border);
+}
+
+/*
+ * A heading between groups of rows — Late, Today, Upcoming. Sunken like the card
+ * header, so a long list reads as sections rather than as one run.
+ */
+.group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--line);
+}
+
+.row[data-interactive] {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+  background: var(--clear);
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  font: inherit;
+}
+.row[data-interactive]:hover {
+  background: var(--surface-sunken);
+}
+
+/* Chosen out of several. The inset bar rather than a tick, because the row is
+   the control and a tick would look like a checkbox you could clear. */
+.row[data-selected] {
+  background: var(--accent-bg);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--line);
+}
+
+/* A strip of controls between the header and the rows: filter chips, a range
+   picker. On the surface, not the sunken shade, so it reads as part of the list
+   rather than part of the header. */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+/*
+ * A toned card: a panel that is about a problem rather than about data. The
+ * header takes the tone's line so the whole thing reads as one object.
+ */
+.card[data-tone="warning"] {
+  background: var(--warning-bg);
+  border-color: var(--warning-border);
+}
+.card[data-tone="warning"] .header {
+  background: var(--clear);
+  border-bottom-color: var(--warning-border);
+}
+.card[data-tone="danger"] {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+}
+.card[data-tone="danger"] .header {
+  background: var(--clear);
+  border-bottom-color: var(--danger-border);
+}

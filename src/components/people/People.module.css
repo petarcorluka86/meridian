@@ -1,0 +1,6 @@
+/* One rule: the roster grid, which is the only auto-filling grid in the app. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--space-4);
+}

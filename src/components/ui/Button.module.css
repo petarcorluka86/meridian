@@ -1,0 +1,97 @@
+/*
+ * Three levels, one shape. The neutral level used to be declared in four
+ * modules with four paddings; there is now one rule and one height.
+ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-md);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--clear);
+  border-radius: var(--radius-control);
+  font: var(--type-label);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.button[data-size="sm"] {
+  min-height: var(--control-sm);
+  padding: 0 var(--space-3);
+}
+
+.button[data-variant="primary"] {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-lift);
+}
+.button[data-variant="primary"]:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.button[data-variant="neutral"] {
+  color: var(--fg);
+  background: var(--surface);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-lift);
+}
+.button[data-variant="neutral"]:hover:not(:disabled) {
+  background: var(--surface-sunken);
+}
+
+.button[data-variant="danger"] {
+  color: var(--fg-inverted);
+  background: var(--danger-solid);
+  border-color: var(--danger);
+  box-shadow: var(--shadow-lift);
+}
+.button[data-variant="danger"]:hover:not(:disabled) {
+  background: var(--danger);
+}
+
+/* No fill and no border, for an action that must not compete with the row it
+   sits in — Skip, Cancel inside a wizard, an inline Undo. */
+.button[data-variant="ghost"] {
+  color: var(--fg-muted);
+  background: var(--clear);
+}
+.button[data-variant="ghost"]:hover:not(:disabled) {
+  color: var(--fg-strong);
+  background: var(--surface-muted);
+}
+
+/* Greying out is reserved for genuinely disabled. A button whose form is merely
+   empty stays lit and does nothing when pressed — the alternative is a screen of
+   dead controls with no explanation. */
+.button:disabled {
+  color: var(--fg-faint);
+  background: var(--surface-muted);
+  border-color: var(--line);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.button[data-pending] {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.button[data-full] {
+  width: 100%;
+}
+
+/* Icon only: square, so a row of them lines up and none is wider than the rest.
+   `ariaLabel` is required by the type, because there is no text to read. */
+.button[data-icon] {
+  padding: 0;
+  width: var(--control-md);
+}
+.button[data-icon][data-size="sm"] {
+  width: var(--control-sm);
+}

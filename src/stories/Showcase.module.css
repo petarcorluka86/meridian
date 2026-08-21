@@ -1,0 +1,71 @@
+/*
+ * Layout for the stories, and nothing else.
+ *
+ * There is no colour, no font and no card shape in this file: the furniture is
+ * built out of `Text`, `Card`, `Banner` and `Table` like everything else, so the
+ * stories demonstrate the system by being made of it. What is left is the
+ * measuring apparatus — a swatch grid, a fixed label column, a box tall enough
+ * to show a rail — and the `design-system` gate holds it to the same rules as
+ * the app.
+ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
+  gap: var(--space-2);
+}
+
+/* The colour itself, at a size big enough to judge. */
+.fill {
+  height: 54px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* The one token with no colour to show: a chequer says "nothing here". */
+.fillEmpty {
+  composes: fill;
+  background-image:
+    linear-gradient(45deg, var(--surface-muted) 25%, var(--clear) 25%),
+    linear-gradient(-45deg, var(--surface-muted) 25%, var(--clear) 25%),
+    linear-gradient(45deg, var(--clear) 75%, var(--surface-muted) 75%),
+    linear-gradient(-45deg, var(--clear) 75%, var(--surface-muted) 75%);
+  background-size: 12px 12px;
+  background-position:
+    0 0,
+    0 6px,
+    6px -6px,
+    -6px 0;
+}
+
+/* The label column, wide enough for a token name and its value. */
+.specLabel {
+  flex: 0 0 178px;
+  /* A label may carry a second line naming where the level is used. */
+  white-space: pre-line;
+}
+
+.specBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* A rail is 3px wide and takes its height from the row it sits in, so it needs
+   a row with a height to sit in. */
+.railBox {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  height: 34px;
+}
+
+.docWidth {
+  max-width: 1180px;
+}
+
+.proseWidth {
+  max-width: 74ch;
+}

@@ -1,0 +1,59 @@
+/*
+ * The one place a card says where its numbers came from, and the only control
+ * that both reports state and does something about it.
+ *
+ * Shaped like a pill because it reads as a status; a button because pressing it
+ * goes and looks again.
+ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--clear);
+  border-radius: var(--radius-pill);
+  font: var(--type-micro);
+  letter-spacing: var(--tracking-micro);
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--fg-muted);
+  background: var(--surface-muted);
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.badge:hover:not(:disabled) {
+  color: var(--fg-strong);
+  border-color: var(--line-strong);
+}
+
+.badge[data-tone="warning"] {
+  color: var(--warning);
+  background: var(--warning-bg);
+}
+.badge[data-tone="danger"] {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.spin {
+  display: inline-flex;
+}
+
+/* In flight. The icon turns; the number does not change until the server says so. */
+.badge[data-syncing] {
+  cursor: progress;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .badge[data-syncing] .spin {
+    animation: spin 0.9s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}

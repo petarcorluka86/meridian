@@ -1,0 +1,86 @@
+/*
+ * A table for data that genuinely has columns — the roster, the hours log. A
+ * list of one thing per row is a stack of `CardRow`s, not a table.
+ */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--line);
+  font: var(--type-micro);
+  letter-spacing: var(--tracking-micro);
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* A header that sorts. A bare link here would go accent-coloured and read as a
+   destination rather than as a control. */
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: 0;
+  padding: 0;
+  background: var(--clear);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.td {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--line);
+  font: var(--type-small);
+  color: var(--fg);
+  vertical-align: middle;
+}
+
+.tbody tr:first-child .td {
+  border-top: 0;
+}
+
+.th[data-align="start"],
+.td[data-align="start"] {
+  text-align: left;
+}
+.th[data-align="end"],
+.td[data-align="end"] {
+  text-align: right;
+}
+.th[data-align="center"],
+.td[data-align="center"] {
+  text-align: center;
+}
+
+.td[data-numeric] {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tr {
+  position: relative;
+}
+
+.tr[data-interactive]:hover .td {
+  background: var(--surface-sunken);
+}
+
+/* One anchor, stretched over its row. The text stays where it is; only the hit
+   area grows. */
+.rowLink {
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+}
+.rowLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}

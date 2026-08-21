@@ -1,0 +1,167 @@
+/*
+ * Space, and the only place in the app that spends it. Every gap and every
+ * padding is one of the seven steps, chosen by number rather than by pixel.
+ */
+.stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 0;
+}
+
+.stack[data-gap="0"],
+.row[data-gap="0"] {
+  gap: 0;
+}
+.stack[data-gap="1"],
+.row[data-gap="1"] {
+  gap: var(--space-1);
+}
+.stack[data-gap="2"],
+.row[data-gap="2"] {
+  gap: var(--space-2);
+}
+.stack[data-gap="3"],
+.row[data-gap="3"] {
+  gap: var(--space-3);
+}
+.stack[data-gap="4"],
+.row[data-gap="4"] {
+  gap: var(--space-4);
+}
+.stack[data-gap="5"],
+.row[data-gap="5"] {
+  gap: var(--space-5);
+}
+.stack[data-gap="6"],
+.row[data-gap="6"] {
+  gap: var(--space-6);
+}
+.stack[data-gap="7"],
+.row[data-gap="7"] {
+  gap: var(--space-7);
+}
+
+.row[data-wrap] {
+  flex-wrap: wrap;
+}
+.row[data-align="start"],
+.stack[data-align="start"] {
+  align-items: flex-start;
+}
+.row[data-align="center"],
+.stack[data-align="center"] {
+  align-items: center;
+}
+.row[data-align="end"],
+.stack[data-align="end"] {
+  align-items: flex-end;
+}
+.row[data-align="baseline"],
+.stack[data-align="baseline"] {
+  align-items: baseline;
+}
+.row[data-align="stretch"],
+.stack[data-align="stretch"] {
+  align-items: stretch;
+}
+.row[data-justify="start"],
+.stack[data-justify="start"] {
+  justify-content: flex-start;
+}
+.row[data-justify="end"],
+.stack[data-justify="end"] {
+  justify-content: flex-end;
+}
+.row[data-justify="between"],
+.stack[data-justify="between"] {
+  justify-content: space-between;
+}
+.row[data-justify="center"],
+.stack[data-justify="center"] {
+  justify-content: center;
+}
+
+/* Takes the leftover width. The old code wrote `margin-left: auto` into
+   whichever element happened to be last, which is why a chip once flew to the
+   far side of a form. */
+.spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.divider {
+  flex: 0 0 auto;
+  background: var(--line);
+}
+.divider[data-orientation="vertical"] {
+  width: 1px;
+  height: var(--space-5);
+}
+.divider[data-orientation="horizontal"] {
+  width: 100%;
+  height: 1px;
+}
+
+/* The one page frame. Every screen is this wide and this far from the edge. */
+.page {
+  padding: var(--space-6) clamp(var(--space-5), 3vw, var(--space-7)) var(--space-7);
+  max-width: 1520px;
+}
+
+/* For something that sits directly above a page and shares its gutter — the
+   vault-problem banner. The page below brings its own top space. */
+.page[data-flush] {
+  padding-bottom: 0;
+}
+
+/* The single-column screens — Tasks, Notes, Timebalance — where 1520px of line
+   length would be unreadable. */
+.page[data-width="narrow"] {
+  max-width: 1040px;
+}
+
+.pageTitle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+
+/* Two columns that become one when there is no room, at the one breakpoint the
+   app has. The widths are flex bases rather than media queries, so the fold
+   happens when the content needs it. */
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+.columnMain {
+  flex: 1 1 520px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.columnSide {
+  flex: 1 1 340px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}

@@ -1,0 +1,11 @@
+/*
+ * A number with a label under it — a balance, a count, an amount owed. The value
+ * is the loud thing on the card and the label is quiet, which is the opposite of
+ * how a form reads.
+ */
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}

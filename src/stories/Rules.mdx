@@ -1,0 +1,82 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { GateTable } from './GateTable';
+
+<Meta title="Rules" />
+
+# How this design system works
+
+One rule sits above the rest, and everything else follows from it:
+
+> **A value is written down once, in `src/styles/tokens.css`. Nothing else in the
+> app writes a colour, a size, a space or a shape.**
+
+That is what makes a change propagate. Recolour the accent or round the corners
+differently and every button, chip, card and dialog on every screen follows,
+because there is nowhere else for those decisions to be hiding.
+
+## The two layers
+
+**Foundations** — `src/styles/tokens.css`, 81 tokens and the only file in the
+app allowed to hold a value. Closed scales: ten type levels, seven spacing steps,
+five radii, two shadows, two control heights, four tones, one icon colour and a
+category palette. An eleventh of anything is an edit to that file and to a
+primitive, on purpose.
+
+**Primitives** — `src/components/ui/`. Everything the screens are built from:
+`Text`, `Code`, `CodeBlock`, `Button`, `Chip`, `Segmented`, `Toggle`, `Card`,
+`Table`, `Dialog`, `Banner`, `Pill`, `EmptyState`, `Stat`, `Icon`, `IconTile`,
+`Avatar`, `Rail`, `Prose`, the field set, the layout set, and the four that only
+make sense in this app — `TaskRow`, `SyncBadge`, `Reveal`, `Skeleton`.
+
+A screen imports from `@/components/ui` and writes CSS only for layout that is
+genuinely its own. If a rule sets a colour, a font, a radius or a spacing value,
+it belongs in a primitive instead.
+
+## What is gated
+
+A rule with a gate is a rule you can rely on. A rule without one is an intention.
+
+<GateTable />
+
+The last two are the ones to watch. Nothing can tell you that a `Pill` which
+toggles something should have been a `Chip`, or that a primitive has quietly
+grown a ninth variant. That is what review is for, and it is the only part of
+this that is not automatic.
+
+## The choices, briefly
+
+- **A chip is never an action.** It narrows what is on screen. If pressing it
+  does anything else, it is a `Button`.
+- **Nothing clickable is a pill.** A pill is a status.
+- **Selected inverts to near-black, not to the accent.** A selection is a state;
+  the accent means action.
+- **One primary button per form**, and it is the only blue-filled thing on the
+  screen. Danger exists only inside the confirm dialog.
+- **Priority is a rail, not a badge.** A badge puts a word beside every title and
+  makes the list about priority.
+- **Four tones, everywhere.** Danger failed, warning is old or unfinished,
+  success is settled, info is scheduled. A fifth meaning is a product decision,
+  not a colour.
+- **Greying out is reserved for genuinely disabled.** A button whose form is
+  merely empty stays lit and does nothing when pressed.
+- **There is no spinner over content.** The server renders from cache and the
+  freshness pill carries the state; a revalidation never blanks what is on
+  screen. `Skeleton` appears only when a source has never answered.
+- **Empty states come from `src/copy/`.** One wording per situation. An
+  unreadable file is not an empty state — it gets a `Banner` naming the file.
+
+## The migration is done
+
+Every screen is built out of the primitives. `NOT_YET_MIGRATED` in
+`tests/unit/design-system.test.ts` is empty, the alias layer the old screens
+depended on is deleted, and the compatibility shim went with it.
+
+Two files are exempt and always will be, both named in that test with the
+reason: `global-error.tsx`, which cannot depend on the stylesheet that may be
+what just broke, and the `themeColor` in `layout.tsx`, which the browser chrome
+reads before any stylesheet exists.
+
+What is left of the screens' own CSS is layout that no primitive covers: a tree's
+indentation, a diff's two aligned columns, a roster's auto-filling grid, a
+meetings card's clock column. Nine module files, none of which sets a colour, a
+font, a radius or a spacing value of its own.

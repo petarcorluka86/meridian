@@ -1,0 +1,139 @@
+/*
+ * The eight type levels, and the only place in the app a `font` is declared.
+ * A level pairs its shorthand with its tracking, so the two cannot come apart.
+ */
+.text {
+  margin: 0;
+  font: var(--type-body);
+  color: var(--fg);
+  text-wrap: pretty;
+}
+
+.text[data-level="display"] {
+  font: var(--type-display);
+  letter-spacing: var(--tracking-display);
+}
+.text[data-level="title"] {
+  font: var(--type-title);
+  letter-spacing: var(--tracking-title);
+}
+.text[data-level="heading"] {
+  font: var(--type-heading);
+  letter-spacing: var(--tracking-title);
+}
+.text[data-level="subheading"] {
+  font: var(--type-subheading);
+}
+.text[data-level="body"] {
+  font: var(--type-body);
+}
+.text[data-level="small"] {
+  font: var(--type-small);
+}
+.text[data-level="label"] {
+  font: var(--type-label);
+}
+.text[data-level="micro"] {
+  font: var(--type-micro);
+  letter-spacing: var(--tracking-micro);
+}
+.text[data-level="mono"] {
+  font: var(--type-mono);
+}
+
+/* Headings default to the strong ink without every call site saying so. */
+.text[data-level="display"],
+.text[data-level="title"],
+.text[data-level="heading"],
+.text[data-level="subheading"] {
+  color: var(--fg-strong);
+}
+
+.text[data-tone="strong"] {
+  color: var(--fg-strong);
+}
+.text[data-tone="default"] {
+  color: var(--fg);
+}
+.text[data-tone="muted"] {
+  color: var(--fg-muted);
+}
+.text[data-tone="faint"] {
+  color: var(--fg-faint);
+}
+.text[data-tone="inverted"] {
+  color: var(--fg-inverted);
+}
+/* Takes the colour of whatever it sits in — a nav item, a toned button. */
+.text[data-tone="inherit"] {
+  color: inherit;
+}
+.text[data-tone="accent"] {
+  color: var(--accent);
+}
+.text[data-tone="danger"] {
+  color: var(--danger);
+}
+.text[data-tone="warning"] {
+  color: var(--warning);
+}
+.text[data-tone="success"] {
+  color: var(--success);
+}
+.text[data-tone="info"] {
+  color: var(--info);
+}
+
+/*
+ * One line, whole. Different from `truncate`: that gives up the end of the string
+ * to fit, which is right for a title somebody can read elsewhere and wrong for
+ * "↵ to add", which became "↵ to a…".
+ */
+.text[data-nowrap] {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  text-wrap: nowrap;
+}
+
+/* One line, ellipsised, and it never pushes its row wider. */
+.text[data-truncate] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-wrap: nowrap;
+}
+
+.text[data-numeric] {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Inline code: a filename, a token name, an env var. Mono at the surrounding
+ * size, on a tint, so it reads as a literal without breaking the line rhythm.
+ */
+.code {
+  font: var(--type-mono);
+  color: var(--fg-strong);
+  background: var(--surface-muted);
+  border-radius: var(--radius-xs);
+  padding: 0 var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * A command to type, or an error exactly as the system reported it. On the
+ * surface rather than the tint, so it reads as something to copy.
+ */
+.block {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-inner);
+  font: var(--type-mono);
+  color: var(--fg);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

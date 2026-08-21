@@ -1,0 +1,29 @@
+/*
+ * A link inside a line of text or a row — not a control, which is `ButtonLink`.
+ *
+ * Two behaviours, and the difference is whether it leaves the app. A link within
+ * the app takes the row's ink: the whole row is usually the target, so colouring
+ * the words as well would say it twice. A link out is the accent and carries the
+ * external glyph, because leaving is a real change of context and should look
+ * like one.
+ */
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  text-decoration: none;
+  color: var(--fg-strong);
+}
+
+.link:hover {
+  color: var(--fg);
+}
+
+.link[data-external] {
+  color: var(--accent);
+}
+.link[data-external]:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}

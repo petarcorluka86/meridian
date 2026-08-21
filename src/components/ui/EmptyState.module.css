@@ -1,0 +1,19 @@
+.empty {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+/* The whole screen is empty, not one card in it. */
+.empty[data-size="lg"] {
+  padding: var(--space-4);
+}
+
+/* Nothing above it to be separated from. */
+.empty[data-standalone] {
+  border-top: 0;
+}
+
+/* Reading width: the fuller empty state is two sentences, not a column. */
+.copy {
+  max-width: 52ch;
+}

@@ -1,0 +1,73 @@
+{
+  "name": "meridian",
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/petarcorluka86/meridian.git"
+  },
+  "bugs": {
+    "url": "https://github.com/petarcorluka86/meridian/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p ${PORT:-3210}",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p ${PORT:-3210}",
+    "lint": "biome lint",
+    "lint:fix": "biome lint --write",
+    "format": "biome format --write",
+    "check": "biome check",
+    "check:fix": "biome check --write",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "verify": "npm run type-check && npm run check && npm test",
+    "pixel": "node scripts/free-gate-ports.mjs && playwright test --config tests/pixel/playwright.config.ts",
+    "pixel:accept": "node scripts/free-gate-ports.mjs && playwright test --config tests/pixel/playwright.config.ts --update-snapshots",
+    "storybook": "storybook dev -p 6006 --host 127.0.0.1 --no-open",
+    "storybook:build": "storybook build -o artifacts/storybook",
+    "vault": "tsx --import ./scripts/tsx-alias.mjs scripts/vault-cli.ts",
+    "vault:doctor": "tsx --import ./scripts/tsx-alias.mjs scripts/vault-doctor.ts",
+    "vault:restore": "tsx --import ./scripts/tsx-alias.mjs scripts/vault-restore.ts",
+    "vault:scan": "tsx --import ./scripts/tsx-alias.mjs scripts/vault-scan.ts",
+    "vault:hook": "tsx --import ./scripts/tsx-alias.mjs scripts/install-vault-hook.ts",
+    "github:sync": "tsx --import ./scripts/tsx-alias.mjs scripts/github-sync.ts",
+    "calendar:sync": "tsx --import ./scripts/tsx-alias.mjs scripts/calendar-sync.ts",
+    "bamboo:comp": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-comp.ts",
+    "bamboo:inbox": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-inbox.ts",
+    "bamboo:sync": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-sync.ts",
+    "bamboo:whoami": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-whoami.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "next": "^16.2.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "rehype-sanitize": "^6.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "tsx": "^4.19.2",
+    "unified": "^11.0.5",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.9",
+    "@playwright/test": "^1.50.0",
+    "@storybook/addon-a11y": "^10.5.10",
+    "@storybook/addon-docs": "^10.5.10",
+    "@storybook/nextjs-vite": "^10.5.10",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "storybook": "^10.5.10",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.2",
+    "vite": "^7.3.6",
+    "vitest": "^3.0.0"
+  }
+}

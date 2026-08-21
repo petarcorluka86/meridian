@@ -1,0 +1,28 @@
+/*
+ * Priority is a 3px rail down the left edge of a row, never a badge. A badge
+ * puts a word beside every title and makes the list about priority; a rail is
+ * readable down the whole list at once and costs no horizontal room.
+ */
+.rail {
+  width: 3px;
+  flex: 0 0 3px;
+  align-self: stretch;
+  border-radius: var(--radius-xs);
+  background: var(--line-strong);
+}
+
+.rail[data-priority="urgent"] {
+  background: var(--danger);
+}
+.rail[data-priority="important"] {
+  background: var(--warning);
+}
+.rail[data-priority="normal"] {
+  background: var(--info-border);
+}
+
+/* Done drops the hue rather than fading it. A completed urgent task is not a
+   slightly less urgent task. */
+.rail[data-done] {
+  background: var(--line-strong);
+}

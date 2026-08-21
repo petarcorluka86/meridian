@@ -1,0 +1,137 @@
+/*
+ * The diff viewer, which is the one screen in the app with a layout no primitive
+ * covers: two aligned columns of lines, each with a number, a mark and a tinted
+ * cell. Everything else on the screen is a primitive.
+ *
+ * Colour, size and space all come from tokens; the widths here are the diff's own
+ * geometry — a gutter is 1px and a line number column is as wide as five digits.
+ */
+/* The commit message is one line long, so it does not take the whole header. */
+.message {
+  flex: 0 0 240px;
+}
+
+.columns {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.fileCol {
+  flex: 0 1 250px;
+  min-width: 210px;
+}
+
+.diffCol {
+  flex: 1 1 560px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The status of a changed file: added, deleted, or edited in place. */
+.dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: var(--radius-pill);
+  background: var(--fg-faint);
+}
+.dotAdded {
+  composes: dot;
+  background: var(--success);
+}
+.dotDeleted {
+  composes: dot;
+  background: var(--danger);
+}
+.dotChanged {
+  composes: dot;
+  background: var(--info);
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* One line of the diff. The line-height is doubled so a wrapped line still reads
+   as one row against its neighbour. */
+.row {
+  display: flex;
+  background: var(--surface);
+}
+
+.half {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.gutter {
+  width: 1px;
+  background: var(--line);
+}
+
+.num {
+  font: var(--type-diff);
+  color: var(--fg-faint);
+  width: 46px;
+  flex: 0 0 46px;
+  text-align: right;
+  padding-right: var(--space-2);
+  user-select: none;
+}
+
+.mark {
+  font: var(--type-diff);
+  width: 16px;
+  flex: 0 0 16px;
+  text-align: center;
+  user-select: none;
+  color: var(--fg-faint);
+}
+.markDel {
+  composes: mark;
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+.markAdd {
+  composes: mark;
+  color: var(--success);
+  background: var(--success-bg);
+}
+.markEmpty {
+  composes: mark;
+  background: var(--surface-muted);
+  color: var(--clear);
+}
+
+.cell {
+  flex: 1 1 0;
+  min-width: 0;
+  font: var(--type-diff);
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 0 var(--space-3);
+  color: var(--fg);
+}
+.cellDel {
+  composes: cell;
+  background: var(--danger-bg);
+  color: var(--danger);
+  box-shadow: inset 2px 0 0 var(--danger);
+}
+.cellAdd {
+  composes: cell;
+  background: var(--success-bg);
+  color: var(--success);
+  box-shadow: inset 2px 0 0 var(--success);
+}
+.cellEmpty {
+  composes: cell;
+  background: var(--surface-muted);
+  color: var(--clear);
+}

@@ -1,0 +1,114 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks';
+import * as Text from '../components/ui/Text.stories';
+import * as Layout from '../components/ui/Layout.stories';
+import * as Button from '../components/ui/Button.stories';
+import * as Chip from '../components/ui/Chip.stories';
+import * as Input from '../components/ui/Input.stories';
+import * as Card from '../components/ui/Card.stories';
+import * as Table from '../components/ui/Table.stories';
+import * as Dialog from '../components/ui/Dialog.stories';
+import * as Banner from '../components/ui/Banner.stories';
+import * as Pill from '../components/ui/Pill.stories';
+import * as EmptyState from '../components/ui/EmptyState.stories';
+import * as Prose from '../components/ui/Prose.stories';
+import * as Avatar from '../components/ui/Avatar.stories';
+import * as Rail from '../components/ui/Rail.stories';
+import * as CategoryChip from '../components/ui/Category.stories';
+import * as SyncBadge from '../components/ui/SyncBadge.stories';
+import * as Skeleton from '../components/ui/Skeleton.stories';
+import * as Reveal from '../components/ui/Reveal.stories';
+import * as TaskRow from '../components/ui/TaskRow.stories';
+import * as Sidebar from '../components/Shell.stories';
+
+<Meta title="Catalogue" />
+
+# Everything, on one page
+
+Twenty primitives, and the app is built out of them. Each one is embedded from
+its own story rather than rebuilt here, so this page cannot drift — pick one in
+the sidebar under **Components** for its variants and the reasoning.
+
+Everything below takes its colour, size, spacing and shape from
+`src/styles/tokens.css`. Change a value there and every one of these moves, on
+every screen, at once. That is the whole point, and
+`tests/unit/design-system.test.ts` is what keeps it true.
+
+## Text
+
+<Story of={Text.Scale} />
+
+## Layout
+
+<Story of={Layout.Gaps} />
+
+## Button
+
+<Story of={Button.Variants} />
+
+## Chip
+
+<Story of={Chip.Sizes} />
+
+## Input
+
+<Story of={Input.EveryField} />
+
+## Card
+
+<Story of={Card.Anatomy} />
+
+## Table
+
+<Story of={Table.InACard} />
+
+## Dialog
+
+<Story of={Dialog.Confirmation} />
+
+## Banner
+
+<Story of={Banner.Tones} />
+
+## Pill
+
+<Story of={Pill.Tones} />
+
+## Empty state
+
+<Story of={EmptyState.Sizes} />
+
+## Prose
+
+<Story of={Prose.RenderedMarkdown} />
+
+## Avatar
+
+<Story of={Avatar.Sizes} />
+
+## Priority rail
+
+<Story of={Rail.EveryLevel} />
+
+## Category chip
+
+<Story of={CategoryChip.AllSix} />
+
+## Sync badge
+
+<Story of={SyncBadge.EveryState} />
+
+## Skeleton
+
+<Story of={Skeleton.Rows} />
+
+## Reveal
+
+<Story of={Reveal.OneCard} />
+
+## Task row
+
+<Story of={TaskRow.EveryTone} />
+
+## Sidebar
+
+<Story of={Sidebar.NavItemStates} />

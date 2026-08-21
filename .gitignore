@@ -1,0 +1,17 @@
+node_modules
+.next
+.next-*
+next-env.d.ts
+*.tsbuildinfo
+
+.env
+.env.local
+
+artifacts/
+*storybook.log
+storybook-static/
+test-results/
+playwright-report/
+
+.DS_Store
+src/fixtures/vault/.snapshots/

@@ -1,0 +1,78 @@
+@import "./tokens.css";
+
+/*
+ * The document, and nothing else. Every visible decision belongs to a primitive
+ * in `src/components/ui/`; what is left here is what has no component to hang
+ * off — the page ground, the box model, the focus ring and the scrollbar.
+ */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * The default, so nothing renders in the browser's serif before a `Text` gets to
+ * it. Every visible string should still go through `Text` — this is the floor,
+ * not a licence to skip it.
+ */
+body {
+  font: var(--type-body);
+  color: var(--fg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* A bare anchor still has to look like a link. Anything that should look like a
+   control is `ButtonLink`, `ChipLink` or `CardRowLink`. */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+a:hover {
+  color: var(--accent-hover);
+}
+
+input,
+textarea,
+button,
+select {
+  font-family: inherit;
+}
+
+/* One focus ring, from one token. A control that hides it is a control somebody
+   cannot reach with a keyboard. */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: var(--ring);
+  outline-offset: 1px;
+}
+
+button:focus {
+  outline: none;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: var(--ring);
+  outline-offset: 2px;
+}
+
+::placeholder {
+  color: var(--fg-faint);
+}
+
+.scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.scroll::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: var(--radius-inner);
+  border: 3px solid var(--bg);
+}

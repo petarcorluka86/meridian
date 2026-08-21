@@ -1,0 +1,82 @@
+[
+  {
+    "id": "2026-08-12-01",
+    "date": "2026-08-12",
+    "hoursDelta": -1.5,
+    "note": "Doctor, left early",
+    "createdAt": "2026-08-12T12:30:55.099Z",
+    "updatedAt": "2026-08-12T12:30:55.099Z"
+  },
+  {
+    "id": "2026-08-10-02",
+    "date": "2026-08-10",
+    "hoursDelta": 0.5,
+    "note": "Release check",
+    "createdAt": "2026-08-10T12:30:55.099Z",
+    "updatedAt": "2026-08-10T12:30:55.099Z"
+  },
+  {
+    "id": "2026-08-06-03",
+    "date": "2026-08-06",
+    "hoursDelta": -1,
+    "note": "Long lunch, personal",
+    "createdAt": "2026-08-06T12:30:55.099Z",
+    "updatedAt": "2026-08-06T12:30:55.099Z"
+  },
+  {
+    "id": "2026-07-20-04",
+    "date": "2026-07-20",
+    "hoursDelta": 1,
+    "note": "Workshop prep on the weekend",
+    "createdAt": "2026-07-20T12:30:55.099Z",
+    "updatedAt": "2026-07-20T12:30:55.099Z"
+  },
+  {
+    "id": "2026-07-06-05",
+    "date": "2026-07-06",
+    "hoursDelta": -2,
+    "note": "Left early",
+    "createdAt": "2026-07-06T12:30:55.099Z",
+    "updatedAt": "2026-07-06T12:30:55.099Z"
+  },
+  {
+    "id": "2026-06-24-06",
+    "date": "2026-06-24",
+    "hoursDelta": -0.5,
+    "note": "",
+    "createdAt": "2026-06-24T12:30:55.099Z",
+    "updatedAt": "2026-06-24T12:30:55.099Z"
+  },
+  {
+    "id": "2026-06-18-07",
+    "date": "2026-06-18",
+    "hoursDelta": -1,
+    "note": "Sick afternoon",
+    "createdAt": "2026-06-18T12:30:55.099Z",
+    "updatedAt": "2026-06-18T12:30:55.099Z"
+  },
+  {
+    "id": "2026-06-16-08",
+    "date": "2026-06-16",
+    "hoursDelta": -2,
+    "note": "Took time back",
+    "createdAt": "2026-06-16T12:30:55.099Z",
+    "updatedAt": "2026-06-16T12:30:55.099Z"
+  },
+  {
+    "id": "2026-06-15-09",
+    "date": "2026-06-15",
+    "hoursDelta": 2,
+    "note": "Incident, evening work",
+    "createdAt": "2026-06-15T12:30:55.099Z",
+    "updatedAt": "2026-06-15T12:30:55.099Z"
+  },
+  {
+    "id": "2026-06-02-10",
+    "date": "2026-06-02",
+    "hoursDelta": 5.5,
+    "note": "Release night",
+    "createdAt": "2026-06-02T12:30:55.099Z",
+    "updatedAt": "2026-06-02T12:30:55.099Z"
+  }
+]

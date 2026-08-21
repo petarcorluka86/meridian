@@ -1,0 +1,12 @@
+.countdown {
+  font: var(--type-mono);
+  color: var(--fg-muted);
+}
+
+/* Not merely visually obscured — unselectable, so a screenshot is the only way
+   to take the number out, and untouchable so nothing behind it is clickable. */
+.hidden {
+  filter: blur(7px);
+  user-select: none;
+  pointer-events: none;
+}

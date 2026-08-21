@@ -1,0 +1,51 @@
+/*
+ * A message about the whole screen rather than about one row: a save confirmed,
+ * a file the app cannot read, a warning before something leaves the machine.
+ *
+ * Four tones, the same four as everything else. The left border carries the
+ * tone, so a stack of banners reads down its edge.
+ */
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--fg);
+}
+
+.banner[data-tone="success"] {
+  border-color: var(--success-border);
+  border-left-color: var(--success);
+  background: var(--success-bg);
+  color: var(--success);
+}
+.banner[data-tone="warning"] {
+  border-color: var(--warning-border);
+  border-left-color: var(--warning);
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.banner[data-tone="danger"] {
+  border-color: var(--danger-border);
+  border-left-color: var(--danger);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.banner[data-tone="info"] {
+  border-color: var(--info-border);
+  border-left-color: var(--info);
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}

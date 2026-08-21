@@ -1,0 +1,42 @@
+/*
+ * An icon on a tinted square. The tone says what kind of thing the row is —
+ * hours gained or hours owed, a source that answered or one that did not — at a
+ * glance, before any of the text is read.
+ */
+.tile {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--control-md);
+  height: var(--control-md);
+  border-radius: var(--radius-control);
+  background: var(--surface-muted);
+  color: var(--icon);
+}
+
+.tile[data-size="sm"] {
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border-radius: var(--radius-inner);
+}
+
+.tile[data-tone="accent"] {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+.tile[data-tone="danger"] {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.tile[data-tone="warning"] {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.tile[data-tone="success"] {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.tile[data-tone="info"] {
+  background: var(--info-bg);
+  color: var(--info);
+}

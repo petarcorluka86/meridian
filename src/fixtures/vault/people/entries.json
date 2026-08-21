@@ -1,0 +1,128 @@
+[
+  {
+    "slug": "ana-horvat",
+    "displayName": "Ana Horvat",
+    "hr": {
+      "jobTitle": "Senior Backend Engineer",
+      "department": "Engineering",
+      "hireDate": "2023-04-03",
+      "supervisorEmployeeId": "100",
+      "workEmail": "ana@yourcompany.com",
+      "workPhone": null,
+      "employeeId": "123"
+    },
+    "mine": {
+      "contactCadenceDays": 14,
+      "growth": {
+        "currentLevel": null,
+        "targetLevel": null
+      }
+    },
+    "status": "active"
+  },
+  {
+    "slug": "marko-maric",
+    "displayName": "Marko Marić",
+    "hr": {
+      "jobTitle": "Backend Engineer",
+      "department": "Engineering",
+      "hireDate": "2024-09-02",
+      "supervisorEmployeeId": "100",
+      "workEmail": "marko@yourcompany.com",
+      "workPhone": null,
+      "employeeId": "124"
+    },
+    "mine": {
+      "contactCadenceDays": 14,
+      "growth": {
+        "currentLevel": null,
+        "targetLevel": null
+      }
+    },
+    "status": "active"
+  },
+  {
+    "slug": "petra-kovac",
+    "displayName": "Petra Kovač",
+    "hr": {
+      "jobTitle": "Platform Engineer",
+      "department": "Engineering",
+      "hireDate": "2024-01-08",
+      "supervisorEmployeeId": "100",
+      "workEmail": "petra@yourcompany.com",
+      "workPhone": null,
+      "employeeId": "125"
+    },
+    "mine": {
+      "contactCadenceDays": 14,
+      "growth": {
+        "currentLevel": null,
+        "targetLevel": null
+      }
+    },
+    "status": "active"
+  },
+  {
+    "slug": "dora-simic",
+    "displayName": "Dora Šimić",
+    "hr": {
+      "jobTitle": "Frontend Engineer",
+      "department": "Engineering",
+      "hireDate": "2022-03-14",
+      "supervisorEmployeeId": "100",
+      "workEmail": "dora@yourcompany.com",
+      "workPhone": null,
+      "employeeId": "126"
+    },
+    "mine": {
+      "contactCadenceDays": 14,
+      "growth": {
+        "currentLevel": null,
+        "targetLevel": null
+      }
+    },
+    "status": "active"
+  },
+  {
+    "slug": "lea-novak",
+    "displayName": "Lea Novak",
+    "hr": {
+      "jobTitle": "Engineer, Data",
+      "department": "Engineering",
+      "hireDate": "2026-05-04",
+      "supervisorEmployeeId": "100",
+      "workEmail": "lea@yourcompany.com",
+      "workPhone": null,
+      "employeeId": "127"
+    },
+    "mine": {
+      "contactCadenceDays": 14,
+      "growth": {
+        "currentLevel": null,
+        "targetLevel": null
+      }
+    },
+    "status": "active"
+  },
+  {
+    "slug": "ivan-babic",
+    "displayName": "Ivan Babić",
+    "hr": {
+      "jobTitle": "Staff Engineer",
+      "department": "Engineering",
+      "hireDate": "2021-06-01",
+      "supervisorEmployeeId": "100",
+      "workEmail": "ivan@yourcompany.com",
+      "workPhone": null,
+      "employeeId": "128"
+    },
+    "mine": {
+      "contactCadenceDays": 14,
+      "growth": {
+        "currentLevel": null,
+        "targetLevel": null
+      }
+    },
+    "status": "active"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "name": "Meridian",
+  "short_name": "Meridian",
+  "description": "A local hub for running a team",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#f2f0ec",
+  "background_color": "#f2f0ec",
+  "icons": [
+    { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" }
+  ]
+}

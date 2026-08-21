@@ -1,0 +1,53 @@
+/*
+ * Two panes. The tree itself is a `NavList`; what is left here is the split, the
+ * two columns and the file preview.
+ */
+.split {
+  display: flex;
+  height: 100%;
+  min-height: 100vh;
+}
+
+.treeCol {
+  flex: 0 1 290px;
+  min-width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  overflow-y: auto;
+}
+
+.treeHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-5) var(--space-3);
+}
+
+/* The one icon in the app that animates: a folder's chevron turns as it opens. */
+.chevron {
+  flex: 0 0 auto;
+  transition: transform var(--transition);
+}
+.chevronOpen {
+  composes: chevron;
+  transform: rotate(90deg);
+}
+
+.previewCol {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.previewHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.previewBody {
+  padding: var(--space-5) var(--space-5) var(--space-7);
+}

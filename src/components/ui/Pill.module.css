@@ -1,0 +1,71 @@
+/*
+ * One status shape, five tones. Everything that used to be its own pill — the
+ * due pill, the freshness pill, the waiting badge, the category chip — is this
+ * component with a different tone.
+ */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  font: var(--type-micro);
+  letter-spacing: var(--tracking-micro);
+  white-space: nowrap;
+  color: var(--fg-muted);
+  background: var(--surface-muted);
+}
+
+/* The larger size carries a sentence rather than a word — a failed source
+   naming what went wrong. */
+.pill[data-size="md"] {
+  padding: var(--space-1) var(--space-2);
+  font: var(--type-label);
+  letter-spacing: normal;
+}
+
+.pill[data-tone="danger"] {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+.pill[data-tone="warning"] {
+  color: var(--warning);
+  background: var(--warning-bg);
+}
+.pill[data-tone="success"] {
+  color: var(--success);
+  background: var(--success-bg);
+}
+.pill[data-tone="info"] {
+  color: var(--info);
+  background: var(--info-bg);
+}
+.pill[data-tone="accent"] {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.pill[data-category="1on1"] {
+  color: var(--cat-1on1);
+  background: var(--cat-1on1-bg);
+}
+.pill[data-category="feedback"] {
+  color: var(--cat-feedback);
+  background: var(--cat-feedback-bg);
+}
+.pill[data-category="incident"] {
+  color: var(--cat-incident);
+  background: var(--cat-incident-bg);
+}
+.pill[data-category="planning"] {
+  color: var(--cat-planning);
+  background: var(--cat-planning-bg);
+}
+.pill[data-category="idea"] {
+  color: var(--cat-idea);
+  background: var(--cat-idea-bg);
+}
+.pill[data-category="generic"] {
+  color: var(--cat-generic);
+  background: var(--cat-generic-bg);
+}

@@ -1,0 +1,53 @@
+/*
+ * A day at a time. Shaped like the segmented control — a track with the label
+ * between two round steps — because it is the same kind of thing: one choice out
+ * of a sequence, with no room for a wrong answer.
+ *
+ * White rather than sunken: it sits on a card header, which is already the sunken
+ * shade, and a track the same colour as its ground is not a track.
+ */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+}
+
+.step {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--clear);
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    color var(--transition);
+}
+
+.step:hover:not(:disabled) {
+  color: var(--fg-strong);
+  background: var(--surface-sunken);
+}
+
+/* The end of what the cache holds. Disabled rather than absent, so the control
+   does not change width as you walk to the edge of it. */
+.step:disabled {
+  color: var(--fg-faint);
+  cursor: not-allowed;
+}
+
+/* Wide enough for the longest label — "Yesterday" — so stepping does not shuffle
+   the header, and no wider, because the header has a title and a badge to fit
+   beside it. */
+.label {
+  min-width: 72px;
+  text-align: center;
+}

@@ -1,0 +1,16 @@
+#!/bin/sh
+# The read-only guarantee is the most important property of this repo.
+# Refuse the commit if it no longer holds.
+npx vitest run tests/unit/readonly.test.ts --reporter=dot || {
+  echo ""
+  echo "Commit refused: outbound requests are no longer read-only."
+  echo "See the rule at the top of CLAUDE.md."
+  exit 1
+}
+
+# Biome runs in milliseconds, so there is no excuse for a commit that fails it.
+npx biome check --error-on-warnings || {
+  echo ""
+  echo "Commit refused: biome check failed. Try npm run check:fix."
+  exit 1
+}

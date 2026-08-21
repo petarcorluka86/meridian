@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
+  <title>Meridian</title>
+  <!-- The rounded square is broken where the diagonal crosses it, and the
+       diagonal runs past both corners. Identical to what the sidebar draws. -->
+  <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 4 H9 A5 5 0 0 0 4 9 V20" />
+    <path d="M8 26 H21 A5 5 0 0 0 26 21 V10" />
+    <path d="M3.5 26.5 L26.5 3.5" />
+  </g>
+</svg>

@@ -1,0 +1,56 @@
+/*
+ * A list column beside an editor column. Layout only — every colour, size and
+ * space on this screen comes from a primitive.
+ */
+.split {
+  display: flex;
+  height: 100%;
+  min-height: 100vh;
+}
+
+.listCol {
+  flex: 0 1 320px;
+  min-width: 230px;
+  background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  overflow-y: auto;
+}
+
+.listHead {
+  padding: var(--space-5) var(--space-4) var(--space-4);
+}
+
+/* A row is the whole note: title on one line, then its badges. Not a `CardRow`,
+   because this column is the card. */
+.noteRow {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-top: 1px solid var(--line);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  background: var(--clear);
+  text-decoration: none;
+}
+.noteRow:hover {
+  background: var(--surface-sunken);
+}
+
+.noteRowSelected {
+  composes: noteRow;
+  background: var(--accent-bg);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.editorCol {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-5) var(--space-7);
+}
+
+/* The editor is a reading column, not the full width of the window. */
+.column {
+  max-width: 720px;
+}

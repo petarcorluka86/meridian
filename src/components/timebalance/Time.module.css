@@ -1,0 +1,44 @@
+/*
+ * Two rules the primitives cannot express: the summary row's dividers, and the
+ * editable log row's inline form. Everything else on this screen is a primitive.
+ */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.rule {
+  width: 1px;
+  height: var(--space-7);
+  background: var(--line);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The row turns into a form in place, so the fields take the width the text had. */
+.editing {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Widths, not flex bases: these wrap a field inside a `Field`, whose flex axis
+   is the column — a basis here would set the height. */
+.hours {
+  display: block;
+  width: 100px;
+}
+
+.reason {
+  display: block;
+  flex: 1 1 180px;
+  min-width: 0;
+}

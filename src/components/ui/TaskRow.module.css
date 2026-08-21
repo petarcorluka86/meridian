@@ -1,0 +1,6 @@
+/* One rule the primitives cannot express: the title takes the leftover width and
+   fades when the task is done. Everything else on the row is a primitive. */
+.title {
+  flex: 1;
+  min-width: 0;
+}

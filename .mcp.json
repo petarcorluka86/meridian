@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "meridian-vault": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "--import", "./scripts/tsx-alias.mjs", "mcp/vault-server.ts"],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "env": {}
+    }
+  }
+}

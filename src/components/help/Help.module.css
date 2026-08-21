@@ -1,0 +1,99 @@
+/*
+ * A section list beside a reading column. Layout and one prose list — every
+ * other decision on this screen belongs to a primitive.
+ */
+.split {
+  display: flex;
+  height: 100%;
+  min-height: 100vh;
+}
+
+.nav {
+  flex: 0 1 244px;
+  min-width: 200px;
+  background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  overflow-y: auto;
+  /* `NavList` brings the horizontal inset for the rows, so this only sets the
+     top and bottom of the column. */
+  padding: var(--space-5) 0;
+}
+
+.navHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 var(--space-5) var(--space-4);
+}
+
+.navGroup {
+  padding: var(--space-3) var(--space-5) 0;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+}
+
+/* Reading width. Beyond this a line of prose is hard to track back to. */
+.inner {
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* A bulleted list: the one element `Text` cannot wrap, because the bullets and
+   the indent belong to the list rather than to each line. */
+.list {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font: var(--type-body);
+  color: var(--fg);
+}
+.list strong {
+  color: var(--fg-strong);
+}
+
+/* A folder tree or a command block, edge to edge inside its card. */
+.tree,
+.code {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--surface-muted);
+  border-top: 1px solid var(--line);
+  font: var(--type-mono);
+  color: var(--fg);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.note {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.statusKey {
+  min-width: 190px;
+}

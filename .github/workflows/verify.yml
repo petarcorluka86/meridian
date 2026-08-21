@@ -1,0 +1,72 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      # Split out of `npm run verify` so a red build says which gate went red
+      # without opening the log.
+      - name: Type-check
+        run: npm run type-check
+      - name: Lint and format (biome)
+        run: npm run check
+      # The unit tests are also the invariants: the read-only enforcement, the
+      # fixture guard, the vault write paths and the design-system token rules.
+      - name: Tests
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  # The pixel gate does not run here. Its baselines are recorded on the machine
+  # somebody actually looks at the screens on, and macOS is the only platform
+  # this is meant for. A clone on anything else skips the gate with the command
+  # to record its own.
+
+  commit-messages:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Conventional Commits
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._-]+\))?!?: .{1,72}$'
+          failed=0
+          while read -r sha; do
+            [ -z "$sha" ] && continue
+            # Merge commits are GitHub's wording, not the author's.
+            [ "$(git rev-list --parents -n1 "$sha" | wc -w)" -gt 2 ] && continue
+            subject=$(git log -1 --format=%s "$sha")
+            if ! printf '%s' "$subject" | grep -Eq "$pattern"; then
+              echo "not a Conventional Commit: ${sha:0:8} $subject"
+              failed=1
+            fi
+          done < <(git rev-list "$BASE..$HEAD")
+          if [ "$failed" -ne 0 ]; then
+            echo ""
+            echo "See the Commits section of CONTRIBUTING.md."
+            exit 1
+          fi
+        shell: bash

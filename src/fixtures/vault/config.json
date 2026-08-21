@@ -1,0 +1,8 @@
+{
+  "thresholds": {
+    "contactGapDays": 14,
+    "timeBalanceLimitHours": 20,
+    "uncommittedChangesDays": 3
+  },
+  "dataVersion": 1
+}

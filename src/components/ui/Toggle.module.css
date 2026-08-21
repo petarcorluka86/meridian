@@ -1,0 +1,56 @@
+/*
+ * A switch, for a setting that takes effect immediately — Drafts only, Draft.
+ * A checkbox would imply a form to submit.
+ *
+ * The knob is positioned rather than padded: 2px is the control's own geometry,
+ * like the checkbox's 19px and the rail's 3px, not a spacing decision.
+ */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.track {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  flex: 0 0 34px;
+  display: inline-block;
+  border-radius: var(--radius-pill);
+  background: var(--line-strong);
+  transition: background var(--transition);
+}
+
+.input:checked + .track {
+  background: var(--accent);
+}
+
+.input:focus-visible + .track {
+  outline: var(--ring);
+  outline-offset: 2px;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
+  transition: transform var(--transition);
+}
+
+.input:checked + .track .knob {
+  transform: translateX(14px);
+}

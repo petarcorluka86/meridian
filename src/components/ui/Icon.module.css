@@ -1,0 +1,31 @@
+/*
+ * Every icon in the app is this shape: a 24-unit square viewBox, stroked, round
+ * caps, no fill. Three sizes and two weights, and the colour comes from whatever
+ * it sits in — so an icon inside an `IconTile` or a toned `Text` follows without
+ * being told.
+ */
+.icon {
+  flex: 0 0 auto;
+}
+
+.icon[data-tone="muted"] {
+  color: var(--icon);
+}
+.icon[data-tone="strong"] {
+  color: var(--fg-strong);
+}
+.icon[data-tone="accent"] {
+  color: var(--accent);
+}
+.icon[data-tone="danger"] {
+  color: var(--danger);
+}
+.icon[data-tone="warning"] {
+  color: var(--warning);
+}
+.icon[data-tone="success"] {
+  color: var(--success);
+}
+.icon[data-tone="info"] {
+  color: var(--info);
+}

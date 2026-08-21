@@ -1,0 +1,53 @@
+/*
+ * Until a photo has been cached through the app, a person is their initials —
+ * never a remote avatar, because that would be the browser fetching from the
+ * internet, which the CSP forbids and the privacy promise rules out.
+ */
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  /* A line as well as a fill: on the paper ground the fill alone is invisible,
+     and this component sits on both. */
+  border: 1px solid var(--line-strong);
+  color: var(--fg-muted);
+  font: var(--type-micro);
+  letter-spacing: var(--tracking-micro);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Over the monogram, not instead of it: a path that has gone stale leaves the
+   initials rather than an empty circle. */
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Named by the row they go in, not by a number. A row that carries two lines of
+   text wants a face as tall as both of them. */
+.avatar[data-size="sm"] {
+  width: 24px;
+  height: 24px;
+}
+.avatar[data-size="md"] {
+  width: 40px;
+  height: 40px;
+  font: var(--type-label);
+  letter-spacing: var(--tracking-micro);
+}
+.avatar[data-size="lg"] {
+  width: 56px;
+  height: 56px;
+  font: var(--type-subheading);
+}
+.avatar[data-size="xl"] {
+  width: 92px;
+  height: 92px;
+  font: var(--type-title);
+}

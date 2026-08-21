@@ -1,0 +1,74 @@
+/*
+ * The one place the app styles content it did not lay out itself: Markdown from
+ * a person's About and from the note reader, run through `rehype-sanitize`
+ * first.
+ *
+ * The generated HTML has no class names to hang off, so this is the only rule
+ * set in the system that reaches for bare element selectors.
+ */
+.prose {
+  font: var(--type-body);
+  color: var(--fg);
+  text-wrap: pretty;
+}
+
+.prose p {
+  margin: 0 0 var(--space-3);
+}
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+  margin: var(--space-5) 0 var(--space-2);
+  color: var(--fg-strong);
+}
+.prose h1 {
+  font: var(--type-heading);
+  letter-spacing: var(--tracking-title);
+}
+.prose h2 {
+  font: var(--type-subheading);
+}
+.prose h3 {
+  font: var(--type-body);
+  font-weight: 600;
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-5);
+}
+.prose li {
+  margin-bottom: var(--space-1);
+}
+
+.prose strong {
+  color: var(--fg-strong);
+  font-weight: 600;
+}
+
+.prose code {
+  font: var(--type-mono);
+  background: var(--surface-muted);
+  border-radius: var(--radius-xs);
+  padding: 0 var(--space-1);
+}
+
+.prose pre {
+  font: var(--type-mono);
+  background: var(--surface-muted);
+  border-radius: var(--radius-inner);
+  padding: var(--space-3);
+  overflow-x: auto;
+}
+
+.prose blockquote {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--line-strong);
+  color: var(--fg-muted);
+}

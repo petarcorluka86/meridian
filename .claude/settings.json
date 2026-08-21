@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run vault:*)",
+      "Bash(npm run vault -- *)",
+      "Bash(npm test:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run verify:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run check:*)",
+      "Bash(npm run format:*)",
+      "Bash(npx biome check:*)",
+      "Bash(npx biome lint:*)",
+      "Bash(npm run pixel:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(git -C * status:*)",
+      "Bash(git -C * log:*)",
+      "Bash(git -C * diff:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)"
+    ]
+  }
+}
