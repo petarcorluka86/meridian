@@ -79,6 +79,10 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
       };
     });
 
+  // The roster, for the edit dialog's Who field: a task on this page can be
+  // moved to somebody else, which is the whole reason the field is there.
+  const people = vault.people.map((p) => ({ slug: p.slug, name: p.displayName }));
+
   const personTasks: TaskView[] = vault.tasks
     .filter((t) => t.personSlug === slug)
     .sort((a, b) => (a.dueDate ?? '9999').localeCompare(b.dueDate ?? '9999'))
@@ -116,7 +120,7 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
             </ButtonLink>
           </Row>
           <Row gap={4}>
-            <Avatar name={person.displayName} photo={photo} size="lg" />
+            <Avatar name={person.displayName} photo={photo} size="xl" />
             <Stack gap={1}>
               <Text as="h1" level="heading">
                 {person.displayName}
@@ -152,7 +156,7 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
                 html={renderMarkdown(about)}
               />
 
-              <PersonTasks slug={slug} firstName={first} tasks={personTasks} />
+              <PersonTasks slug={slug} firstName={first} tasks={personTasks} people={people} />
 
               <Card>
                 <CardHeader title="Notes" count={notes.length || undefined} />

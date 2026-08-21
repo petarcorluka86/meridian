@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { Button } from './ui/Button';
 import { Dialog } from './ui/Dialog';
+import { Text } from './ui/Text';
 
 type Props = {
   open: boolean;
@@ -41,7 +42,9 @@ export function Confirm({ open, title, body, action, pending, onCancel, onConfir
         </>
       }
     >
-      {body}
+      <Text level="body" tone="muted">
+        {body}
+      </Text>
     </Dialog>
   );
 }

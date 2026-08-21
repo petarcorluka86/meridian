@@ -4,13 +4,19 @@ import { Confirm } from '@/components/Confirm';
 import { Note, Section, Doc } from '@/stories/Showcase';
 import { Button } from './Button';
 import { Dialog } from './Dialog';
+import { Text } from './Text';
 
 /**
  * The one modal in the app. Escape closes it, a click on the scrim closes it, a
  * click that started inside it does not, and `initialFocus` takes focus on open.
  *
- * A dialog is for a decision that cannot be undone. Anything else belongs on the
+ * A dialog is for a decision that cannot be undone, or for the one form with
+ * nowhere on the page to live — editing a task, which is reachable from three
+ * screens and cannot expand a row on any of them. Anything else belongs on the
  * page.
+ *
+ * The body is passed through as given, so a sentence arrives wrapped in `Text`
+ * and a form arrives as fields.
  */
 const meta = {
   title: 'Components/Dialog',
@@ -38,7 +44,9 @@ export const Danger: StoryObj = {
         </>
       }
     >
-      {BODY}
+      <Text level="body" tone="muted">
+        {BODY}
+      </Text>
     </Dialog>
   ),
 };
@@ -57,14 +65,16 @@ export const Neutral: StoryObj = {
         </>
       }
     >
-      The snapshot from 19 August 09:12 replaces what is on disk now. The current version is
-      snapshotted first, so this is reversible.
+      <Text level="body" tone="muted">
+        The snapshot from 19 August 09:12 replaces what is on disk now. The current version is
+        snapshotted first, so this is reversible.
+      </Text>
     </Dialog>
   ),
 };
 
 export const Confirmation: StoryObj = {
-  name: 'Confirm — the app’s one usage',
+  name: 'Confirm — the destructive one',
   render: () => {
     const [open, setOpen] = useState(false);
     const [pending, setPending] = useState(false);
@@ -80,8 +90,9 @@ export const Confirmation: StoryObj = {
             </Button>
           </Section>
           <Note>
-            Only one destructive action in the app reaches this dialog, and it is the only place a
-            red button exists.
+            Two things open a dialog: pushing to the remote, which is this one, and the pencil on a
+            task row, which opens a form rather than a question. A red button exists only in the two
+            of them.
           </Note>
         </Doc>
         <Confirm

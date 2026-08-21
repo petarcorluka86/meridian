@@ -32,10 +32,12 @@ export function PersonTasks({
   slug,
   firstName,
   tasks,
+  people,
 }: {
   slug: string;
   firstName: string;
   tasks: TaskView[];
+  people: readonly { slug: string; name: string }[];
 }) {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>('open');
@@ -87,7 +89,7 @@ export function PersonTasks({
       />
 
       {shown.map((task) => (
-        <TaskRow key={task.id} task={task} />
+        <TaskRow key={task.id} task={task} people={people} />
       ))}
 
       {shown.length === 0 ? (

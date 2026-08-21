@@ -60,7 +60,8 @@ describe('dates', () => {
   });
 
   it('labels a due date the way a task row shows it', () => {
-    expect(dueLabel(null)).toBe('no date');
+    // No date carries no label at all: the row shows no pill rather than a grey one.
+    expect(dueLabel(null)).toBeNull();
     expect(dueLabel('2026-08-19', '2026-08-19')).toBe('today');
     expect(dueLabel('2026-08-16', '2026-08-19')).toBe('3 days late');
     expect(dueLabel('2026-08-18', '2026-08-19')).toBe('1 day late');

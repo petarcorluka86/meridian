@@ -283,3 +283,126 @@ describe('one bad row costs only itself', () => {
     expect(fs.readFileSync(file, 'utf8')).toBe('{"tasks": []}');
   });
 });
+
+/**
+ * Editing and deleting a task are the two writes the edit dialog can make, and
+ * both go through the same read-modify-write as everything else. What is tested
+ * here is what they must not touch: a task's own history, and rows that are not
+ * the one being changed.
+ */
+describe('editing and deleting a task', () => {
+  const seed = async () => {
+    const { addTask } = await import('@/lib/vault/tasks');
+    await addTask({ title: 'Write the Q3 plan', priority: 'urgent', dueDate: '2026-09-01' });
+    await addTask({ title: 'Book the offsite room' });
+    const rows = () =>
+      JSON.parse(fs.readFileSync(path.join(dir, 'tasks.json'), 'utf8')) as Array<{
+        id: string;
+        title: string;
+        priority: string;
+        dueDate: string | null;
+        status: string;
+        kind: string;
+        personSlug: string | null;
+        completedAt: string | null;
+        createdAt: string;
+        updatedAt: string;
+      }>;
+    return { rows, id: rows().find((t) => t.title === 'Write the Q3 plan')!.id };
+  };
+
+  it('changes the five fields it owns and leaves the rest of the row alone', async () => {
+    const { updateTask } = await import('@/lib/vault/tasks');
+    const { rows, id } = await seed();
+    const before = rows().find((t) => t.id === id)!;
+
+    await updateTask(id, {
+      title: '  Write the Q3 plan properly  ',
+      priority: 'normal',
+      dueDate: null,
+      personSlug: 'ana-horvat',
+      kind: 'waiting',
+    });
+
+    const after = rows().find((t) => t.id === id)!;
+    expect(after.title).toBe('Write the Q3 plan properly');
+    expect(after.priority).toBe('normal');
+    expect(after.dueDate).toBeNull();
+    expect(after.personSlug).toBe('ana-horvat');
+    expect(after.kind).toBe('waiting');
+    // The id is what every other file points at, and the history is not the
+    // dialog's to rewrite.
+    expect(after.id).toBe(before.id);
+    expect(after.createdAt).toBe(before.createdAt);
+    expect(after.status).toBe(before.status);
+    expect(rows()).toHaveLength(2);
+  });
+
+  it('does not let a stale dialog undo a tick made somewhere else', async () => {
+    const { setTaskStatus, updateTask } = await import('@/lib/vault/tasks');
+    const { rows, id } = await seed();
+
+    await setTaskStatus(id, true);
+    await updateTask(id, {
+      title: 'Write the Q3 plan',
+      priority: 'urgent',
+      dueDate: '2026-09-01',
+      personSlug: null,
+      kind: 'task',
+    });
+
+    const after = rows().find((t) => t.id === id)!;
+    expect(after.status).toBe('done');
+    expect(after.completedAt).not.toBeNull();
+  });
+
+  it('refuses a title that is only whitespace, and writes nothing', async () => {
+    const { updateTask } = await import('@/lib/vault/tasks');
+    const { rows, id } = await seed();
+
+    await expect(
+      updateTask(id, {
+        title: '   ',
+        priority: 'normal',
+        dueDate: null,
+        personSlug: null,
+        kind: 'task',
+      }),
+    ).rejects.toThrow(/needs a title/);
+
+    expect(rows().find((t) => t.id === id)!.title).toBe('Write the Q3 plan');
+  });
+
+  it('deletes one row and only that row', async () => {
+    const { deleteTask } = await import('@/lib/vault/tasks');
+    const { rows, id } = await seed();
+
+    await deleteTask(id);
+
+    expect(rows()).toHaveLength(1);
+    expect(rows()[0]!.title).toBe('Book the offsite room');
+  });
+
+  it('says so rather than resurrecting a task deleted by hand', async () => {
+    const { deleteTask, updateTask } = await import('@/lib/vault/tasks');
+    const { rows, id } = await seed();
+
+    await deleteTask(id);
+
+    for (const attempt of [
+      () =>
+        updateTask(id, {
+          title: 'Back from the dead',
+          priority: 'normal',
+          dueDate: null,
+          personSlug: null,
+          kind: 'task',
+        }),
+      () => deleteTask(id),
+    ]) {
+      await expect(attempt()).rejects.toThrow(/no longer in the vault/);
+    }
+
+    expect(rows()).toHaveLength(1);
+  });
+});

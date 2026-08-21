@@ -91,9 +91,13 @@ export function PlansCard({
             />
           </CardRow>
         ))}
+        {/* Inside the blur, not beside it. "No rise planned" is the same fact the
+            Reveal exists to cover: whether somebody has one coming is money-shaped,
+            and reading it off an unblurred card over a shoulder is the leak. */}
+        {plans.length === 0 ? (
+          <EmptyState glyph={EMPTY_GLYPH.rise} {...EMPTY.person.plans} />
+        ) : null}
       </Blurred>
-
-      {plans.length === 0 ? <EmptyState glyph={EMPTY_GLYPH.rise} {...EMPTY.person.plans} /> : null}
 
       <CardFooter>
         <span className={styles.amount}>

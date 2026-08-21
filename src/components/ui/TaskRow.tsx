@@ -1,13 +1,16 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toggleTaskAction } from '@/app/tasks/actions';
 import { Avatar } from './Avatar';
+import { Button } from './Button';
 import { CardRow } from './Card';
+import { EditIcon } from './icons';
 import { Checkbox } from './Input';
 import { Pill, type PillTone } from './Pill';
 import { Rail, type Priority } from './Rail';
+import { TaskDialog, type TaskPerson } from './TaskDialog';
 import { Text } from './Text';
 import { TextLink } from './TextLink';
 import styles from './TaskRow.module.css';
@@ -23,7 +26,7 @@ export type TaskView = {
    * browser means the client's clock decides it — which disagrees with the
    * server's across midnight, and React calls that a hydration mismatch.
    */
-  dueLabel: string;
+  dueLabel: string | null;
   dueTone: 'late' | 'today' | 'upcoming' | 'none' | 'done';
   personName: string | null;
   personSlug: string | null;
@@ -44,10 +47,24 @@ const DUE_TONE: Record<TaskView['dueTone'], PillTone> = {
  * A task, wherever you meet it: Overview, Tasks and a person's page all render
  * this. Assembled entirely from primitives — the rail, the checkbox, the pill,
  * the avatar and the row are the shared ones, not copies of them.
+ *
+ * The pencil opens `TaskDialog`, which is where a task is changed or deleted. It
+ * needs the roster for its Who field, so a screen that renders rows passes
+ * `people`; without it the pencil is not drawn, because an edit dialog that
+ * cannot say who a task belongs to would silently drop that field.
  */
-export function TaskRow({ task, showDue = true }: { task: TaskView; showDue?: boolean }) {
+export function TaskRow({
+  task,
+  people,
+  showDue = true,
+}: {
+  task: TaskView;
+  people?: readonly TaskPerson[];
+  showDue?: boolean;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [editing, setEditing] = useState(false);
 
   const toggle = () =>
     startTransition(async () => {
@@ -86,7 +103,22 @@ export function TaskRow({ task, showDue = true }: { task: TaskView; showDue?: bo
           <Avatar name={task.personName} photo={task.personPhoto} size="sm" />
         </>
       ) : null}
-      {showDue ? <Pill tone={DUE_TONE[task.dueTone]}>{task.dueLabel}</Pill> : null}
+      {/* No date, no pill: it is most of the list, and a grey "no date" on every
+          row that is merely not urgent says nothing. */}
+      {showDue && task.dueLabel ? <Pill tone={DUE_TONE[task.dueTone]}>{task.dueLabel}</Pill> : null}
+      {people ? (
+        <Button
+          iconOnly
+          size="sm"
+          variant="ghost"
+          icon={<EditIcon />}
+          onClick={() => setEditing(true)}
+          ariaLabel={`Edit "${task.title}"`}
+        />
+      ) : null}
+      {editing && people ? (
+        <TaskDialog task={task} people={people} onClose={() => setEditing(false)} />
+      ) : null}
     </CardRow>
   );
 }

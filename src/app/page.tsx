@@ -7,7 +7,7 @@ import { readGithub } from '@/lib/sources/github';
 import { photoPath } from '@/lib/sources/cache';
 import { changedFiles, repoState } from '@/lib/git';
 import { allTimeEntries, sumHours } from '@/lib/vault/time';
-import { addDays, dayWindow, daysBetween, dueLabel, longDate, shortDate, today } from '@/lib/dates';
+import { addDays, dayWindow, dueLabel, dueTone, longDate, shortDate, today } from '@/lib/dates';
 import {
   OutCard,
   type PresenceRow,
@@ -19,8 +19,8 @@ import { MeetingsCard, type MeetingView } from '@/components/overview/MeetingsCa
 import { QuickCapture } from '@/components/overview/QuickCapture';
 import { ReviewCard } from '@/components/overview/ReviewCard';
 import { SavedCard } from '@/components/overview/SavedCard';
-import { TasksCard, type OpenTask } from '@/components/overview/TasksCard';
-import { Columns, Page, PageHeader, Stack, type Tone } from '@/components/ui';
+import { TasksCard } from '@/components/overview/TasksCard';
+import { Columns, Page, PageHeader, Stack, type TaskView, type Tone } from '@/components/ui';
 
 export default async function OverviewPage() {
   const config = loadConfig();
@@ -76,24 +76,26 @@ export default async function OverviewPage() {
   const nameOf = (slug: string | null) =>
     slug ? (vault.peopleBySlug.get(slug)?.displayName ?? slug) : null;
 
-  // Everything due or already late — the morning question. Includes what you are
-  // waiting on someone else for: Tasks filters those out, so this is where they
-  // stay visible.
   // Every open task, including the ones with no date and the ones you are waiting
   // on somebody else for — the Tasks screen filters those out, so this is where
   // they stay visible.
   //
-  // The card filters and sorts it in place; the label and the lateness are
+  // The card filters and sorts it in place; the due label and its tone are
   // resolved here, because the browser's clock must not be what decides them.
-  const open: OpenTask[] = vault.tasks
+  const open: TaskView[] = vault.tasks
     .filter((t) => t.status !== 'done')
     .map((t) => ({
       id: t.id,
       title: t.title,
+      done: false,
       priority: t.priority,
       dueDate: t.dueDate,
       dueLabel: dueLabel(t.dueDate, now),
-      late: t.dueDate ? daysBetween(now, t.dueDate) < 0 : false,
+      dueTone: dueTone(t.dueDate, false, now),
+      personName: nameOf(t.personSlug),
+      personSlug: t.personSlug,
+      personPhoto: photoOf(t.personSlug),
+      kind: t.kind,
     }));
 
   const inbox = bamboo.data?.inbox ?? [];
@@ -146,7 +148,7 @@ export default async function OverviewPage() {
                 freshness={bamboo.inboxFreshness}
               />
 
-              <TasksCard open={open} />
+              <TasksCard open={open} people={people} />
 
               <ReviewCard
                 prs={prs}
