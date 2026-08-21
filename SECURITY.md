@@ -9,7 +9,7 @@ than as hardening.
 **Do not open a public issue.**
 
 Use GitHub's private reporting — the **Security** tab, *Report a vulnerability* —
-or email **petar.corluka@sofascore.com**.
+or email **petarcorluka86@gmail.com**.
 
 Please include what an attacker can do, the steps to reproduce, and the commit
 you saw it on. You will get an acknowledgement within a few days. This is a
