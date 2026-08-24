@@ -603,6 +603,45 @@ legible and reads as a smudge — use the mark alone at those sizes.
 
 ---
 
+## The desktop app
+
+`desktop/build-app.sh` writes `~/Applications/Meridian.app` — drag it to the Dock
+and Meridian opens like any other app. Run it again after changing
+`desktop/Meridian.swift`; nothing else needs it.
+
+The bundle is a window, not a copy of the app. `Meridian.swift` is one
+`WKWebView` plus a launcher: on open it checks 127.0.0.1:3210, starts
+`npm run dev` in this checkout if nothing is listening, and loads the page when
+the port answers. **The repo is the app** — a pull is a new version, and there is
+nothing to package, ship or keep in step. That is also why it is ~400 lines of
+Swift against the system web view rather than Electron: a second browser and a
+build pipeline to bundle a server that already runs on this machine.
+
+Three decisions worth keeping:
+
+**The machine's paths live in `Info.plist`, not in the Swift.** `build-app.sh`
+writes `MeridianProjectDir`, `MeridianPort` and `MeridianCommand` from where it
+was run, so the source has no one checkout's path in it and a second copy is
+`APP_DIR=... PORT=... ./desktop/build-app.sh`.
+
+**It loads `127.0.0.1`, never `localhost`.** The dev server binds the IPv4
+loopback only, and `localhost` can resolve to `::1` first. `src/proxy.ts` allows
+both names, so this is about reaching the socket, not about the Host check.
+
+**It starts the server only if the port is free, and kills it only if it started
+it.** A dev server you are already running is attached to and left alive on quit.
+When the app did start one, quitting kills whatever listens on the port — npm
+spawns `next` as a child, so terminating the shell alone leaks the server.
+
+The launcher runs a bare `zsh -c` and bootstraps the node manager by hand: the
+login files here set up nvm, but the shell that runs node day to day gets fnm
+from `.zshrc`, and it is `fnm use` that honours `.nvmrc`.
+
+The icon is `public/icon-512.png` — the filled tile, per Brand above. The mark
+alone is gone at Dock sizes.
+
+---
+
 ## Commands
 
 | Command | What it does |
@@ -626,6 +665,7 @@ legible and reads as a smudge — use the mark alone at those sizes.
 | `npm run bamboo:whoami -- <name>` | Find an employee id |
 | `npm run calendar:sync` · `npm run github:sync` | Refresh those caches by hand |
 | `node scripts/shot.mjs <url> <out.png> [selector]` | Ad-hoc screenshot while building |
+| `./desktop/build-app.sh` | Build `~/Applications/Meridian.app` — see "The desktop app" above |
 | `npx tsx scripts/build-fixture-vault.ts` | Rebuild `src/fixtures/vault` |
 
 The sync scripts exist for forcing a refresh or seeing an error message. Normal
@@ -679,6 +719,7 @@ src/stories/     Storybook furniture and the Rules page
 src/fixtures/    the fixture vault (committed)
 mcp/             MCP server over the vault
 scripts/         sync, CLI, doctor, fixture builder
+desktop/         the macOS bundle: a WKWebView window and its build script
 tests/unit/      unit tests, including the read-only enforcement
 tests/pixel/     the screen gate and its baselines
 .storybook/      Storybook config and its one stub
