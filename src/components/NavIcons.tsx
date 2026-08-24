@@ -39,6 +39,19 @@ export const NAV_GLYPH = {
       <path d="M8.5 17h4" />
     </>
   ),
+  /*
+   * Stacked layers. The only shape in this set that is neither a rectangle nor a
+   * circle, which is the whole job: `notes` is already a page with lines in it
+   * and `overview` is already a grid, so a third rectangle would be a third
+   * near-miss. The label beside it is what names the section.
+   */
+  projects: (
+    <>
+      <path d="M12 3.5 20.5 8 12 12.5 3.5 8z" />
+      <path d="M3.5 12.5 12 17l8.5-4.5" />
+      <path d="M3.5 16.5 12 21l8.5-4.5" />
+    </>
+  ),
   timebalance: (
     <>
       <circle cx="12" cy="12" r="9" />
@@ -71,6 +84,7 @@ export const OverviewIcon = () => <Icon size="lg">{NAV_GLYPH.overview}</Icon>;
 export const PeopleIcon = () => <Icon size="lg">{NAV_GLYPH.people}</Icon>;
 export const TasksIcon = () => <Icon size="lg">{NAV_GLYPH.tasks}</Icon>;
 export const NotesIcon = () => <Icon size="lg">{NAV_GLYPH.notes}</Icon>;
+export const ProjectsIcon = () => <Icon size="lg">{NAV_GLYPH.projects}</Icon>;
 export const TimebalanceIcon = () => <Icon size="lg">{NAV_GLYPH.timebalance}</Icon>;
 export const VaultIcon = () => <Icon size="lg">{NAV_GLYPH.vault}</Icon>;
 export const ChangelogIcon = () => <Icon size="lg">{NAV_GLYPH.changelog}</Icon>;

@@ -2,6 +2,7 @@
 category: planning
 draft: false
 pinned: false
+project: hiring-two-backend-roles
 ---
 # Hiring plan
 

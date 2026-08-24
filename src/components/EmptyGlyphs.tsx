@@ -1,14 +1,17 @@
 /*
- * The four shapes an empty state needs that no card already owns.
+ * The five shapes an empty state needs that no card already owns.
  *
  * Every other empty state draws its own card's icon — `NAV_GLYPH` or
  * `OVERVIEW_GLYPH` — because the tile is that card saying it has nothing, not a
- * decoration. These four have no card behind them:
+ * decoration. These five have no card behind them:
  *
  *   plug    a source with no credentials. The same shape on every source
  *   search  a filter matched nothing, which is not the same as having nothing
- *   link    a person's links, which the sidebar has no icon for
+ *   link    a person's links, and a project's, which the sidebar has no icon for
  *   rise    a planned pay rise, likewise
+ *   phases  a project's checkpoints — a flag, because that is what a milestone
+ *           marker is. Deliberately not the tasks tick: a phase is not a task,
+ *           and borrowing that glyph would say it was
  *
  * Geometry only, like the two glyph sets it sits beside: `EmptyState` draws it,
  * and the tile it sits in decides the colour.
@@ -37,6 +40,12 @@ export const EMPTY_GLYPH = {
     <>
       <path d="M4 16l5-5 3.5 3.5L20 8" />
       <path d="M15 8h5v5" />
+    </>
+  ),
+  phases: (
+    <>
+      <path d="M6 3v18" />
+      <path d="M6 4.5h13v8H6" />
     </>
   ),
 } as const;

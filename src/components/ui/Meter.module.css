@@ -1,0 +1,29 @@
+/*
+ * The bar, and the groove it sits in. The height is the first step of the
+ * spacing scale: the thinnest thing the app draws that is still a shape rather
+ * than a line, which is exactly what a progress bar wants to be.
+ */
+.track {
+  display: block;
+  width: 100%;
+  block-size: var(--space-1);
+  background: var(--surface-muted);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  block-size: 100%;
+  /* Set by the component, from the data. Zero when it has not been. */
+  inline-size: var(--meter-fill, 0%);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  transition: inline-size var(--transition);
+}
+
+/* Reached the total. A finished project is not the same colour as one that is
+   merely nearly there. */
+.fill[data-tone="success"] {
+  background: var(--success);
+}

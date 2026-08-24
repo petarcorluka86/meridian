@@ -10,6 +10,7 @@ Markdown for prose. Readable and editable without the app that writes them.
     people/<slug>/notes/       dated notes about that person
     notes/inbox/               captured, not filed yet
     notes/general/             about no one in particular
+    projects.json              longer-running work, with its phases
     tasks.json                 tasks
     time.json                  hours owed and owing
     config.json                thresholds
@@ -17,8 +18,9 @@ Markdown for prose. Readable and editable without the app that writes them.
 Two rules matter if you edit by hand.
 
 **The folder says who a note is about.** A note under people/ana-horvat/notes/
-is about Ana. Front matter carries category, draft and pinned only — never the
-person. Moving the file is what changes who it is about.
+is about Ana. Front matter carries category, draft, pinned and project only —
+never the person. Moving the file is what changes who it is about. A project is
+not a folder, so it is the one thing front matter names.
 
 **The slug is the identity.** The folder name under people/ and the slug in
 entries.json must match. A mismatch is reported rather than repaired, because

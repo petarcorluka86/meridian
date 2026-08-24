@@ -9,6 +9,7 @@ import {
   PersonEntry as PersonEntrySchema,
   PlanEntries,
   LinkEntries,
+  ProjectEntry as ProjectEntrySchema,
   TaskEntry as TaskEntrySchema,
   TimeEntry as TimeEntrySchema,
   VaultConfig,
@@ -16,6 +17,7 @@ import {
   type PersonEntry,
   type PlanEntry,
   type LinkEntry,
+  type ProjectEntry,
   type TaskEntry,
   type TimeEntry,
 } from './schemas';
@@ -33,6 +35,12 @@ export type Note = {
   category: NoteCategory;
   draft: boolean;
   pinned: boolean;
+  /**
+   * From front matter, not from the folder. A note about Ana can belong to a
+   * project without leaving her folder, so this is the one thing in there that
+   * names something outside the note.
+   */
+  project: string | null;
   body: string;
   mtimeMs: number;
 };
@@ -47,6 +55,9 @@ export type VaultSnapshot = {
   notes: Note[];
   notesByPath: Map<string, Note>;
   notesByPerson: Map<string, Note[]>;
+  notesByProject: Map<string, Note[]>;
+  projects: ProjectEntry[];
+  projectsById: Map<string, ProjectEntry>;
   tasks: TaskEntry[];
   tasksById: Map<string, TaskEntry>;
   time: TimeEntry[];
@@ -205,6 +216,7 @@ function readNote(root: string, rel: string, problems: VaultProblem[]): Note | n
     category: meta.category,
     draft: meta.draft,
     pinned: meta.pinned,
+    project: meta.project,
     body,
     mtimeMs,
   };
@@ -251,6 +263,7 @@ export function buildSnapshot(): VaultSnapshot {
 
   const peopleRead = readJsonArray(root, 'people/entries.json', PersonEntrySchema, problems);
   const people = peopleRead.rows;
+  const projects = readJsonArray(root, 'projects.json', ProjectEntrySchema, problems).rows;
   const tasks = readJsonArray(root, 'tasks.json', TaskEntrySchema, problems).rows;
   const time = readJsonArray(root, 'time.json', TimeEntrySchema, problems).rows;
   const config = readJsonFile(root, 'config.json', VaultConfig, VaultConfig.parse({}), problems);
@@ -315,6 +328,21 @@ export function buildSnapshot(): VaultSnapshot {
     list.sort((a, b) => ((a.date ?? '') < (b.date ?? '') ? 1 : -1));
   }
 
+  // A note naming a project that is not in projects.json is not a problem worth
+  // reporting: the same is already true of a task naming somebody who is not on
+  // the roster. It simply shows no project, and the project page it would have
+  // appeared on does not exist to look at.
+  const notesByProject = new Map<string, Note[]>();
+  for (const note of notes) {
+    if (!note.project) continue;
+    const list = notesByProject.get(note.project) ?? [];
+    list.push(note);
+    notesByProject.set(note.project, list);
+  }
+  for (const list of notesByProject.values()) {
+    list.sort((a, b) => ((a.date ?? '') < (b.date ?? '') ? 1 : -1));
+  }
+
   return {
     root,
     people,
@@ -325,6 +353,9 @@ export function buildSnapshot(): VaultSnapshot {
     notes,
     notesByPath,
     notesByPerson,
+    notesByProject,
+    projects,
+    projectsById: new Map(projects.map((p) => [p.id, p])),
     tasks,
     tasksById: new Map(tasks.map((t) => [t.id, t])),
     time,

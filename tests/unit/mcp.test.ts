@@ -72,6 +72,7 @@ describe('what the server offers', () => {
   const EXPECTED = [
     'list_people',
     'read_person',
+    'list_projects',
     'read_note',
     'search',
     'add_task',
@@ -87,7 +88,7 @@ describe('what the server offers', () => {
     'vault_problems',
   ];
 
-  it('offers exactly these fifteen tools', async () => {
+  it('offers exactly these sixteen tools', async () => {
     // Agents refer to tools by name, so renaming one is a breaking change and
     // should have to be made here on purpose.
     expect([...(await tools()).keys()]).toEqual(EXPECTED);

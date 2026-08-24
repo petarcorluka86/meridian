@@ -25,6 +25,8 @@ const SCREENS = [
   { name: 'person', url: '/people/ana-horvat' },
   { name: 'tasks', url: '/tasks' },
   { name: 'notes', url: '/notes' },
+  { name: 'projects', url: '/projects' },
+  { name: 'project', url: '/projects/platform-split' },
   { name: 'timebalance', url: '/timebalance' },
   { name: 'vault', url: '/vault' },
   { name: 'help', url: '/help' },

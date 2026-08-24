@@ -47,6 +47,32 @@ export const RemoveIcon = () => (
   </Icon>
 );
 
+/**
+ * Puts something out of the way without destroying it: an arrow going down into
+ * an open tray.
+ *
+ * The same tray as `RestoreIcon` with the arrow reversed — two verbs, so two
+ * glyphs, rather than one shape doing both jobs and meaning neither. The tray is
+ * open rather than a lidded box: every other glyph in this set is a single thin
+ * stroke, and a closed box with an arrow inside it turns to mush at 17px.
+ */
+export const ArchiveIcon = () => (
+  <Icon>
+    <path d="M4 13v4.5A2.5 2.5 0 006.5 20h11a2.5 2.5 0 002.5-2.5V13" />
+    <path d="M12 4v9" />
+    <path d="M8.5 9.5 12 13l3.5-3.5" />
+  </Icon>
+);
+
+/** Brings it back out. Nothing archived was ever deleted, so this always works. */
+export const RestoreIcon = () => (
+  <Icon>
+    <path d="M4 13v4.5A2.5 2.5 0 006.5 20h11a2.5 2.5 0 002.5-2.5V13" />
+    <path d="M12 13V4" />
+    <path d="M8.5 7.5 12 4l3.5 3.5" />
+  </Icon>
+);
+
 /** Asks a source for its data again. */
 export const RefreshIcon = () => (
   <Icon>

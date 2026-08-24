@@ -237,6 +237,18 @@ function Guide() {
       ],
     ],
     [
+      'Projects',
+      'work that runs longer than a task',
+      [
+        'A project is a title, a description, and phases — the checkpoints it has to pass. Phases are not tasks: you tick them off yourself, and they are how you know where the project stands.',
+        'A project with phases shows how far it has got, as a bar and as a fraction. One without them shows neither, because there is nothing to be a fraction of.',
+        'Tasks and notes belong to a project the same way they belong to a person, and can belong to both. Pick the project anywhere you can pick a person — quick capture, the task form, the task dialog, a note’s own row.',
+        'Each project has its own page with its phases, its tasks, its notes and its links.',
+        'Archive a project and it moves to the Archived list. Nothing is deleted, its tasks stay where they are, and it comes back whenever you want it.',
+        'Deleting one is different, and the confirmation says exactly what happens: the project and its phases go, its tasks and notes stay where they are and lose the project.',
+      ],
+    ],
+    [
       'Timebalance',
       '',
       [
@@ -297,6 +309,7 @@ function VaultSection({ vaultPath }: { vaultPath: string }) {
 ├── notes/
 │   ├── inbox/                      captured, not filed yet
 │   └── general/                    not about one person
+├── projects.json                   longer-running work, with its phases and links
 ├── tasks.json                      your tasks
 ├── time.json                       hours owed and owing
 ├── config.json                     your thresholds and defaults
@@ -349,6 +362,7 @@ function VaultSection({ vaultPath }: { vaultPath: string }) {
 category: 1on1        # 1on1 | feedback | incident | planning | idea | generic
 draft: false          # true while it still needs filing
 pinned: true          # held at the top of the list
+project: platform-split   # optional — an id from projects.json
 ---
 # 1:1 — staff track and on-call
 
@@ -359,7 +373,42 @@ She raised the staff track again, third time this quarter.`}</pre>
             Move it into another person’s <Code>notes/</Code> folder and the app follows; move it to{' '}
             <Code>notes/general/</Code> and it stops being about a person.{' '}
             <strong>Who a note is about comes from the folder</strong>, never from the front matter.
-            A note with no front matter still opens — it is treated as generic and not a draft.
+            A project is the one thing a folder cannot say — a note about Ana can belong to a
+            project without leaving her folder — so it is the only key here that names something
+            outside the note. A note with no front matter still opens: generic, not a draft, no
+            project.
+          </Text>
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader
+          title={<>A project</>}
+          end={
+            <Text level="small" tone="muted">
+              one record in projects.json
+            </Text>
+          }
+        />
+        <pre className={styles.code}>{`{
+  "id": "platform-split",
+  "title": "Platform split",
+  "description": "Break the monolith into three services.",
+  "phases": [
+    { "id": "p1", "label": "Boundaries agreed", "note": "", "done": true },
+    { "id": "p2", "label": "Scheduler extracted", "note": "", "done": false }
+  ],
+  "links": [{ "label": "Design doc", "url": "https://…" }],
+  "archived": false
+}`}</pre>
+        <div className={styles.note}>
+          <Text level="small" tone="muted">
+            The <Code>id</Code> is what a task’s <Code>projectId</Code> and a note’s{' '}
+            <Code>project</Code> point at, and it is what the URL uses. There is no folder per
+            project: its notes stay wherever the notes themselves belong, and its links live in this
+            record. <strong>Archiving is a flag</strong> — nothing is removed, and the project comes
+            back exactly as it went in. How far the phases have got is never written down; it is
+            counted every time, like every other number in this vault.
           </Text>
         </div>
       </Card>

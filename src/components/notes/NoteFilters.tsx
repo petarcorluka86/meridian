@@ -5,20 +5,24 @@ import { CATEGORIES, Row, Select, Stack, Toggle } from '@/components/ui';
 
 type Props = {
   people: { slug: string; name: string }[];
+  projects: { id: string; title: string }[];
   person: string;
+  project: string;
   category: string;
   draftsOnly: boolean;
 };
 
-export function NoteFilters({ people, person, category, draftsOnly }: Props) {
+export function NoteFilters({ people, projects, person, project, category, draftsOnly }: Props) {
   const router = useRouter();
 
-  const go = (next: Partial<{ person: string; cat: string; drafts: boolean }>) => {
+  const go = (next: Partial<{ person: string; project: string; cat: string; drafts: boolean }>) => {
     const params = new URLSearchParams();
     const p = next.person ?? person;
+    const pr = next.project ?? project;
     const c = next.cat ?? category;
     const d = next.drafts ?? draftsOnly;
     if (p !== 'all') params.set('person', p);
+    if (pr !== 'all') params.set('project', pr);
     if (c !== 'all') params.set('cat', c);
     if (d) params.set('drafts', '1');
     const q = params.toString();
@@ -50,6 +54,17 @@ export function NoteFilters({ people, person, category, draftsOnly }: Props) {
           options={[
             { value: 'all', label: 'All categories' },
             ...CATEGORIES.map((c) => ({ value: c.value, label: c.label })),
+          ]}
+        />
+        <Select
+          size="sm"
+          value={project}
+          onChange={(value) => go({ project: value })}
+          ariaLabel="Filter by project"
+          options={[
+            { value: 'all', label: 'Any project' },
+            { value: 'none', label: 'No project' },
+            ...projects.map((p) => ({ value: p.id, label: p.title })),
           ]}
         />
       </Row>

@@ -44,6 +44,7 @@ const NoteIcon = () => (
 );
 
 type Person = { slug: string; name: string };
+type Project = { id: string; title: string };
 type Priority = 'normal' | 'important' | 'urgent';
 
 const WHEN = [
@@ -59,7 +60,7 @@ const WHEN = [
  * One field at the top of Overview. Task is the default; a note captured without
  * a person lands in the inbox, and the field says so under it.
  */
-export function QuickCapture({ people }: { people: Person[] }) {
+export function QuickCapture({ people, projects }: { people: Person[]; projects: Project[] }) {
   const router = useRouter();
   const [mode, setMode] = useState<'task' | 'note'>('task');
   const [text, setText] = useState('');
@@ -67,6 +68,7 @@ export function QuickCapture({ people }: { people: Person[] }) {
   const [due, setDue] = useState('none');
   const [customDate, setCustomDate] = useState(today());
   const [person, setPerson] = useState('');
+  const [project, setProject] = useState('');
   const [category, setCategory] = useState<NoteCategory>('idea');
   const [draft, setDraft] = useState(true);
   const [result, setResult] = useState<CaptureResult | null>(null);
@@ -88,11 +90,13 @@ export function QuickCapture({ people }: { people: Person[] }) {
               priority,
               dueDate: dueDate(),
               personSlug: person || null,
+              projectId: project || null,
             })
           : await captureNoteAction({
               title: text,
               category,
               personSlug: person || null,
+              project: project || null,
               draft,
             });
       setResult(res);
@@ -155,6 +159,16 @@ export function QuickCapture({ people }: { people: Person[] }) {
             options={[
               { value: '', label: mode === 'task' ? 'Nobody' : 'Not about a person' },
               ...people.map((p) => ({ value: p.slug, label: p.name })),
+            ]}
+          />
+          <Select
+            size="sm"
+            value={project}
+            onChange={setProject}
+            ariaLabel="Project"
+            options={[
+              { value: '', label: 'No project' },
+              ...projects.map((p) => ({ value: p.id, label: p.title })),
             ]}
           />
         </CardFooter>

@@ -33,11 +33,13 @@ export function PersonTasks({
   firstName,
   tasks,
   people,
+  projects,
 }: {
   slug: string;
   firstName: string;
   tasks: TaskView[];
   people: readonly { slug: string; name: string }[];
+  projects: readonly { id: string; title: string }[];
 }) {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>('open');
@@ -89,7 +91,7 @@ export function PersonTasks({
       />
 
       {shown.map((task) => (
-        <TaskRow key={task.id} task={task} people={people} />
+        <TaskRow key={task.id} task={task} people={people} projects={projects} />
       ))}
 
       {shown.length === 0 ? (

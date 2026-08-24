@@ -17,7 +17,7 @@ const HIDDEN = new Set(['.git', '.DS_Store']);
  * folder reads in the order it matters. Anything unlisted falls through to
  * alphabetical after these.
  */
-const TOP_ORDER = ['people', 'notes', 'tasks.json', 'time.json', 'config.json'];
+const TOP_ORDER = ['people', 'notes', 'projects.json', 'tasks.json', 'time.json', 'config.json'];
 
 function kindOf(name: string): TreeNode['kind'] {
   if (name.endsWith('.json')) return 'json';

@@ -11,6 +11,7 @@ import {
   NotesIcon,
   OverviewIcon,
   PeopleIcon,
+  ProjectsIcon,
   TasksIcon,
   TimebalanceIcon,
   VaultIcon,
@@ -21,6 +22,7 @@ const NAV = [
   { href: '/people', label: 'People', Icon: PeopleIcon },
   { href: '/tasks', label: 'Tasks', Icon: TasksIcon },
   { href: '/notes', label: 'Notes', Icon: NotesIcon },
+  { href: '/projects', label: 'Projects', Icon: ProjectsIcon },
   { href: '/timebalance', label: 'Timebalance', Icon: TimebalanceIcon },
   { href: '/vault', label: 'Vault', Icon: VaultIcon },
   { href: '/changelog', label: 'Changelog', Icon: ChangelogIcon },
@@ -40,7 +42,8 @@ export function Sidebar() {
       </div>
       <NavList label="Screens">
         {NAV.map(({ href, label, Icon }) => {
-          // People stays lit while a person's page is open.
+          // People stays lit while a person's page is open, and Projects while a
+          // project's is.
           const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
           return <NavItem key={href} href={href} icon={<Icon />} label={label} selected={active} />;
         })}

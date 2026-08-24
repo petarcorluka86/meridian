@@ -13,6 +13,7 @@ import type { TaskView } from './TaskRow';
 import { Code, Text } from './Text';
 
 export type TaskPerson = { slug: string; name: string };
+export type TaskProject = { id: string; title: string };
 
 const PRIORITIES = [
   { value: 'normal', label: 'Normal' },
@@ -43,10 +44,13 @@ const KINDS = [
 export function TaskDialog({
   task,
   people,
+  projects,
   onClose,
 }: {
   task: TaskView;
   people: readonly TaskPerson[];
+  /** Absent means no Project field, and the task keeps the project it has. */
+  projects?: readonly TaskProject[];
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -56,6 +60,7 @@ export function TaskDialog({
   const [kind, setKind] = useState<TaskView['kind']>(task.kind);
   const [due, setDue] = useState(task.dueDate ?? '');
   const [person, setPerson] = useState(task.personSlug ?? '');
+  const [project, setProject] = useState(task.projectId ?? '');
   const [armed, setArmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -80,6 +85,7 @@ export function TaskDialog({
         priority,
         dueDate: due || null,
         personSlug: person || null,
+        projectId: project || null,
         kind,
       }),
     );
@@ -181,6 +187,18 @@ export function TaskDialog({
             onChange={setPerson}
           />
         </Field>
+        {projects ? (
+          <Field label="Project">
+            <Select
+              options={[
+                { value: '', label: 'No project' },
+                ...projects.map((p) => ({ value: p.id, label: p.title })),
+              ]}
+              value={project}
+              onChange={setProject}
+            />
+          </Field>
+        ) : null}
         <Field label="Kind">
           <Select
             options={KINDS}

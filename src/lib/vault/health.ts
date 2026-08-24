@@ -67,6 +67,7 @@ function ensureScaffold(vaultPath: string): void {
   const seeds: Array<[string, string]> = [
     ['README.md', VAULT_README],
     ['people/entries.json', '[]\n'],
+    ['projects.json', '[]\n'],
     ['tasks.json', '[]\n'],
     ['time.json', '[]\n'],
     [

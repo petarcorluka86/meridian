@@ -1,0 +1,155 @@
+[
+  {
+    "id": "platform-split",
+    "title": "Platform split",
+    "description": "Break the monolith into the scheduler, the payments service and a thin API in front of both. Three teams, one shared deadline.",
+    "phases": [
+      {
+        "id": "p1",
+        "label": "Boundaries agreed with all three teams",
+        "note": "Written down in the architecture note, signed off by Ana, Ivan and Petra.",
+        "done": true
+      },
+      {
+        "id": "p2",
+        "label": "Scheduler extracted and running in staging",
+        "note": "Two weeks in staging with no incidents before we call it done.",
+        "done": true
+      },
+      {
+        "id": "p3",
+        "label": "Payments service extracted",
+        "note": "The risky one — needs a migration window and a rollback path.",
+        "done": false
+      },
+      {
+        "id": "p4",
+        "label": "API gateway in front of both",
+        "note": "",
+        "done": false
+      },
+      {
+        "id": "p5",
+        "label": "Monolith retired",
+        "note": "",
+        "done": false
+      }
+    ],
+    "links": [
+      {
+        "label": "Architecture note",
+        "url": "https://docs.google.com/document/d/platform-split"
+      },
+      {
+        "label": "Tracking board",
+        "url": "https://github.com/yourcompany/platform/projects/2"
+      }
+    ],
+    "archived": false,
+    "createdAt": "2026-08-12T08:44:41.102Z",
+    "updatedAt": "2026-08-12T08:44:41.102Z"
+  },
+  {
+    "id": "on-call-reset",
+    "title": "On-call reset",
+    "description": "Rewrite the rotation so nobody carries two heavy weeks in a row, and the handover docs are usable by someone new.",
+    "phases": [
+      {
+        "id": "p1",
+        "label": "Current load measured per person",
+        "note": "Six weeks of pager data, per night.",
+        "done": true
+      },
+      {
+        "id": "p2",
+        "label": "New rotation drafted",
+        "note": "",
+        "done": true
+      },
+      {
+        "id": "p3",
+        "label": "Handover docs rewritten",
+        "note": "",
+        "done": true
+      },
+      {
+        "id": "p4",
+        "label": "Autumn rotation published",
+        "note": "Publish by the end of September so nobody plans around a guess.",
+        "done": false
+      }
+    ],
+    "links": [],
+    "archived": false,
+    "createdAt": "2026-08-12T08:44:41.102Z",
+    "updatedAt": "2026-08-12T08:44:41.102Z"
+  },
+  {
+    "id": "hiring-two-backend-roles",
+    "title": "Hiring — two backend roles",
+    "description": "Two open roles for the second half. Everything from the scorecard to the first day.",
+    "phases": [
+      {
+        "id": "p1",
+        "label": "Scorecard and levels agreed with HR",
+        "note": "Mid and senior, same bar as last round.",
+        "done": true
+      },
+      {
+        "id": "p2",
+        "label": "Roles posted",
+        "note": "",
+        "done": false
+      },
+      {
+        "id": "p3",
+        "label": "First loop run and calibrated",
+        "note": "",
+        "done": false
+      },
+      {
+        "id": "p4",
+        "label": "Offers out",
+        "note": "",
+        "done": false
+      }
+    ],
+    "links": [],
+    "archived": false,
+    "createdAt": "2026-08-12T08:44:41.102Z",
+    "updatedAt": "2026-08-12T08:44:41.102Z"
+  },
+  {
+    "id": "design-review-ritual",
+    "title": "Design review ritual",
+    "description": "A lightweight weekly review so architecture decisions stop happening in DMs. No phases — it either runs or it does not.",
+    "phases": [],
+    "links": [],
+    "archived": false,
+    "createdAt": "2026-08-12T08:44:41.102Z",
+    "updatedAt": "2026-08-12T08:44:41.102Z"
+  },
+  {
+    "id": "q2-reorg",
+    "title": "Q2 reorg",
+    "description": "Done and dusted. Kept for the decisions in its notes.",
+    "phases": [
+      {
+        "id": "p1",
+        "label": "Teams announced",
+        "note": "",
+        "done": true
+      },
+      {
+        "id": "p2",
+        "label": "First month reviewed",
+        "note": "",
+        "done": true
+      }
+    ],
+    "links": [],
+    "archived": true,
+    "createdAt": "2026-08-12T08:44:41.102Z",
+    "updatedAt": "2026-08-12T08:44:41.102Z"
+  }
+]

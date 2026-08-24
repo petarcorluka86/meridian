@@ -73,8 +73,10 @@ json('people/petra-kovac/plans.json', [
   { id: 'sp-petra', amount: 3600, month: 1, year: 2027, promotion: '' },
 ]);
 
-const note = (category: string, draft: boolean, pinned: boolean, body: string) =>
-  `---\ncategory: ${category}\ndraft: ${draft}\npinned: ${pinned}\n---\n${body}`;
+const note = (category: string, draft: boolean, pinned: boolean, body: string, project?: string) =>
+  `---\ncategory: ${category}\ndraft: ${draft}\npinned: ${pinned}${
+    project ? `\nproject: ${project}` : ''
+  }\n---\n${body}`;
 
 write(
   'people/ana-horvat/notes/2026-08-12-1on1.md',
@@ -83,6 +85,7 @@ write(
     false,
     true,
     "# 1:1 — staff track and on-call\n\nShe raised the staff track again, third time this quarter. Wants a concrete list of what's missing rather than a general keep going. Fair.\n\nOn-call is heavier than it looks on paper — two nights woken in the last rotation. She'd swap a week with Ivan if he's willing.\n\nNext: write the three-team project into her growth plan, and ask Ivan about the rotation swap.\n",
+    'platform-split',
   ),
 );
 write(
@@ -119,6 +122,7 @@ write(
     false,
     false,
     '# Hiring plan\n\nTwo backend, one platform. Backend first — the payments team is carrying too much.\n\nOpen question for Iva: do we hire senior or grow Marko into the gap?\n',
+    'hiring-two-backend-roles',
   ),
 );
 write(
@@ -132,6 +136,110 @@ write(
 );
 
 const stamp = '2026-08-12T08:44:41.102Z';
+
+const phase = (id: string, label: string, done: boolean, note = '') => ({ id, label, note, done });
+
+json('projects.json', [
+  {
+    id: 'platform-split',
+    title: 'Platform split',
+    description:
+      'Break the monolith into the scheduler, the payments service and a thin API in front of both. Three teams, one shared deadline.',
+    phases: [
+      phase(
+        'p1',
+        'Boundaries agreed with all three teams',
+        true,
+        'Written down in the architecture note, signed off by Ana, Ivan and Petra.',
+      ),
+      phase(
+        'p2',
+        'Scheduler extracted and running in staging',
+        true,
+        'Two weeks in staging with no incidents before we call it done.',
+      ),
+      phase(
+        'p3',
+        'Payments service extracted',
+        false,
+        'The risky one — needs a migration window and a rollback path.',
+      ),
+      phase('p4', 'API gateway in front of both', false),
+      phase('p5', 'Monolith retired', false),
+    ],
+    links: [
+      { label: 'Architecture note', url: 'https://docs.google.com/document/d/platform-split' },
+      { label: 'Tracking board', url: 'https://github.com/yourcompany/platform/projects/2' },
+    ],
+    archived: false,
+    createdAt: stamp,
+    updatedAt: stamp,
+  },
+  {
+    id: 'on-call-reset',
+    title: 'On-call reset',
+    description:
+      'Rewrite the rotation so nobody carries two heavy weeks in a row, and the handover docs are usable by someone new.',
+    phases: [
+      phase('p1', 'Current load measured per person', true, 'Six weeks of pager data, per night.'),
+      phase('p2', 'New rotation drafted', true),
+      phase('p3', 'Handover docs rewritten', true),
+      phase(
+        'p4',
+        'Autumn rotation published',
+        false,
+        'Publish by the end of September so nobody plans around a guess.',
+      ),
+    ],
+    links: [],
+    archived: false,
+    createdAt: stamp,
+    updatedAt: stamp,
+  },
+  {
+    id: 'hiring-two-backend-roles',
+    title: 'Hiring — two backend roles',
+    description:
+      'Two open roles for the second half. Everything from the scorecard to the first day.',
+    phases: [
+      phase(
+        'p1',
+        'Scorecard and levels agreed with HR',
+        true,
+        'Mid and senior, same bar as last round.',
+      ),
+      phase('p2', 'Roles posted', false),
+      phase('p3', 'First loop run and calibrated', false),
+      phase('p4', 'Offers out', false),
+    ],
+    links: [],
+    archived: false,
+    createdAt: stamp,
+    updatedAt: stamp,
+  },
+  {
+    id: 'design-review-ritual',
+    title: 'Design review ritual',
+    description:
+      'A lightweight weekly review so architecture decisions stop happening in DMs. No phases — it either runs or it does not.',
+    phases: [],
+    links: [],
+    archived: false,
+    createdAt: stamp,
+    updatedAt: stamp,
+  },
+  {
+    id: 'q2-reorg',
+    title: 'Q2 reorg',
+    description: 'Done and dusted. Kept for the decisions in its notes.',
+    phases: [phase('p1', 'Teams announced', true), phase('p2', 'First month reviewed', true)],
+    links: [],
+    archived: true,
+    createdAt: stamp,
+    updatedAt: stamp,
+  },
+]);
+
 json('tasks.json', [
   {
     id: '2026-08-12-pay-rise-proposal',
@@ -142,6 +250,7 @@ json('tasks.json', [
     status: 'todo',
     kind: 'task',
     personSlug: null,
+    projectId: null,
     completedAt: null,
     createdAt: stamp,
     updatedAt: stamp,
@@ -155,6 +264,7 @@ json('tasks.json', [
     status: 'todo',
     kind: 'task',
     personSlug: 'ana-horvat',
+    projectId: null,
     completedAt: null,
     createdAt: stamp,
     updatedAt: stamp,
@@ -168,6 +278,7 @@ json('tasks.json', [
     status: 'todo',
     kind: 'task',
     personSlug: null,
+    projectId: null,
     completedAt: null,
     createdAt: stamp,
     updatedAt: stamp,
@@ -181,6 +292,7 @@ json('tasks.json', [
     status: 'todo',
     kind: 'task',
     personSlug: null,
+    projectId: 'hiring-two-backend-roles',
     completedAt: null,
     createdAt: stamp,
     updatedAt: stamp,
@@ -194,6 +306,7 @@ json('tasks.json', [
     status: 'todo',
     kind: 'task',
     personSlug: 'lea-novak',
+    projectId: null,
     completedAt: null,
     createdAt: stamp,
     updatedAt: stamp,
@@ -207,6 +320,7 @@ json('tasks.json', [
     status: 'todo',
     kind: 'task',
     personSlug: null,
+    projectId: 'on-call-reset',
     completedAt: null,
     createdAt: stamp,
     updatedAt: stamp,
@@ -220,6 +334,7 @@ json('tasks.json', [
     status: 'done',
     kind: 'task',
     personSlug: 'ivan-babic',
+    projectId: 'on-call-reset',
     completedAt: '2026-08-17T09:00:00.000Z',
     createdAt: stamp,
     updatedAt: stamp,
@@ -233,6 +348,7 @@ json('tasks.json', [
     status: 'todo',
     kind: 'waiting',
     personSlug: null,
+    projectId: 'platform-split',
     completedAt: null,
     createdAt: stamp,
     updatedAt: stamp,
@@ -246,6 +362,7 @@ json('tasks.json', [
     status: 'todo',
     kind: 'waiting',
     personSlug: 'petra-kovac',
+    projectId: null,
     completedAt: null,
     createdAt: stamp,
     updatedAt: stamp,

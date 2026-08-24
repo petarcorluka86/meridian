@@ -17,6 +17,7 @@ import {
   allTimeEntries,
 } from '../src/lib/vault/time.js';
 import { createNote } from '../src/lib/vault/notes.js';
+import { progressOf } from '../src/lib/vault/projects.js';
 import { today } from '../src/lib/dates.js';
 
 const [command, ...args] = process.argv.slice(2);
@@ -26,10 +27,11 @@ function usage(): never {
 
   people                          list the roster
   tasks [open|done|all]           list tasks
-  task-add <title> [--due YYYY-MM-DD] [--person slug] [--priority urgent|important|normal]
+  task-add <title> [--due YYYY-MM-DD] [--person slug] [--project id] [--priority urgent|important|normal]
   task-done <id>
-  notes [--person slug]           list notes
-  note-add <title> [--person slug] [--category 1on1|feedback|incident|planning|idea|generic]
+  notes [--person slug] [--project id]
+  note-add <title> [--person slug] [--project id] [--category 1on1|feedback|incident|planning|idea|generic]
+  projects [active|archived|all]  list projects and how far their phases have got
   hours                           show the balance
   hours-add <+/-h> [reason] [--date YYYY-MM-DD]
   search <text>                   search notes, tasks and people
@@ -63,6 +65,26 @@ switch (command) {
     break;
   }
 
+  case 'projects': {
+    const which = positional()[0] ?? 'active';
+    const vault = getVault();
+    const projects = vault.projects.filter((p) =>
+      which === 'all' ? true : which === 'archived' ? p.archived : !p.archived,
+    );
+    for (const p of projects) {
+      const { total, done, percent } = progressOf(p);
+      const phases = total ? `${done}/${total} phases ${percent}%` : 'no phases';
+      const open = vault.tasks.filter((t) => t.projectId === p.id && t.status !== 'done').length;
+      const notes = vault.notesByProject.get(p.id)?.length ?? 0;
+      console.log(
+        `${p.archived ? 'A' : ' '} ${p.id.padEnd(28)} ${phases.padEnd(20)} ${open} open, ${notes} ${notes === 1 ? 'note' : 'notes'}`,
+      );
+      console.log(`    ${p.title}`);
+    }
+    if (projects.length === 0) console.log('(none)');
+    break;
+  }
+
   case 'tasks': {
     const which = positional()[0] ?? 'open';
     const tasks = getVault().tasks.filter((t) =>
@@ -72,7 +94,8 @@ switch (command) {
       const mark = t.status === 'done' ? '✓' : ' ';
       console.log(
         `${mark} ${t.priority.padEnd(9)} ${(t.dueDate ?? '—').padEnd(10)} ${t.title}` +
-          (t.personSlug ? `  (${t.personSlug})` : ''),
+          (t.personSlug ? `  (${t.personSlug})` : '') +
+          (t.projectId ? `  [${t.projectId}]` : ''),
       );
       console.log(`    ${t.id}`);
     }
@@ -84,7 +107,13 @@ switch (command) {
     const title = positional().join(' ');
     if (!title) usage();
     const priority = (flag('priority') ?? 'normal') as 'urgent' | 'important' | 'normal';
-    await addTask({ title, priority, dueDate: flag('due'), personSlug: flag('person') });
+    await addTask({
+      title,
+      priority,
+      dueDate: flag('due'),
+      personSlug: flag('person'),
+      projectId: flag('project'),
+    });
     console.log('Added.');
     break;
   }
@@ -99,10 +128,14 @@ switch (command) {
 
   case 'notes': {
     const person = flag('person');
-    const notes = getVault().notes.filter((n) => !person || n.personSlug === person);
+    const project = flag('project');
+    const notes = getVault()
+      .notes.filter((n) => !person || n.personSlug === person)
+      .filter((n) => !project || n.project === project);
     for (const n of notes) {
       console.log(
-        `${(n.date ?? '—').padEnd(11)} ${n.category.padEnd(9)}${n.draft ? ' draft' : '      '} ${n.title}`,
+        `${(n.date ?? '—').padEnd(11)} ${n.category.padEnd(9)}${n.draft ? ' draft' : '      '} ${n.title}` +
+          (n.project ? `  [${n.project}]` : ''),
       );
       console.log(`    ${n.path}`);
     }
@@ -116,6 +149,7 @@ switch (command) {
     const path = await createNote({
       title,
       personSlug: flag('person'),
+      project: flag('project'),
       category: (flag('category') ?? 'generic') as never,
     });
     console.log(path);
@@ -146,6 +180,11 @@ switch (command) {
     for (const p of vault.people) {
       if (p.displayName.toLowerCase().includes(needle) || p.slug.includes(needle)) {
         console.log(`person  ${p.slug}  ${p.displayName}`);
+      }
+    }
+    for (const p of vault.projects) {
+      if (p.title.toLowerCase().includes(needle) || p.id.includes(needle)) {
+        console.log(`project ${p.id}  ${p.title}`);
       }
     }
     for (const t of vault.tasks) {
