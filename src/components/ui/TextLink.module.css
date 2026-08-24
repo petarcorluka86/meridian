@@ -21,9 +21,9 @@
 }
 
 .link[data-external] {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 .link[data-external]:hover {
-  color: var(--accent-hover);
+  color: var(--accent-ink-hover);
   text-decoration: underline;
 }

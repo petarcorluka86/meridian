@@ -50,7 +50,11 @@ this that is not automatic.
   does anything else, it is a `Button`.
 - **Nothing clickable is a pill.** A pill is a status.
 - **Selected inverts to near-black, not to the accent.** A selection is a state;
-  the accent means action.
+  the accent means action. In the dark it inverts the other way, to near-white.
+- **There is one set of tokens and two schemes.** Every colour is a
+  `light-dark()` pair and `color-scheme` picks the half; the accent is the only
+  thing that splits in two, because a blue dark enough to carry white text
+  cannot be read as text itself.
 - **One primary button per form**, and it is the only blue-filled thing on the
   screen. Danger exists only inside the confirm dialog.
 - **Priority is a rail, not a badge.** A badge puts a word beside every title and

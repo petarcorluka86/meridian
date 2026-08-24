@@ -113,7 +113,7 @@
    the control and a tick would look like a checkbox you could clear. */
 .row[data-selected] {
   background: var(--accent-bg);
-  box-shadow: inset 2px 0 0 var(--accent);
+  box-shadow: inset 2px 0 0 var(--accent-ink);
 }
 
 .footer {

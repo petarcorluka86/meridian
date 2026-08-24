@@ -33,7 +33,7 @@
 
 .tile[data-tone="accent"] {
   background: var(--accent-bg);
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 .tile[data-tone="danger"] {
   background: var(--danger-bg);

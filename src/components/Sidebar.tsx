@@ -12,6 +12,7 @@ import {
   OverviewIcon,
   PeopleIcon,
   ProjectsIcon,
+  SettingsIcon,
   TasksIcon,
   TimebalanceIcon,
   VaultIcon,
@@ -26,6 +27,7 @@ const NAV = [
   { href: '/timebalance', label: 'Timebalance', Icon: TimebalanceIcon },
   { href: '/vault', label: 'Vault', Icon: VaultIcon },
   { href: '/changelog', label: 'Changelog', Icon: ChangelogIcon },
+  { href: '/settings', label: 'Settings', Icon: SettingsIcon },
   { href: '/help', label: 'Help', Icon: HelpIcon },
 ] as const;
 

@@ -11,6 +11,13 @@
  * The scales are closed. Eleven type levels, seven spacing steps, five radii,
  * two shadows. A twelfth type level is a change to this file and a change to
  * `Text`, deliberately — not a number somebody picks at a call site.
+ *
+ * There are two schemes and one set of tokens. Every colour is a `light-dark()`
+ * pair, so a component asks for `--fg-muted` and gets the right one — no second
+ * palette, no `.dark` class, nothing to keep in step. Which half is used is one
+ * property, `color-scheme`, set once below and pinned by the two rules at the
+ * foot of this file. `tests/unit/design-system.test.ts` fails the build on a
+ * colour here that has only one of the two.
  */
 :root {
   /* ---------------------------------------------------------------- Type ---
@@ -77,41 +84,70 @@
    * The app sits on a paper ground, not on white. A card is white on top of it
    * and a card header is a shade sunk into it — that is where the depth comes
    * from, since almost nothing here casts a shadow.
+   *
+   * In the dark the ordering turns over with it: the ground is the darkest thing
+   * on screen and everything lifted off it is lighter, so a card header is a
+   * shade *above* its card there rather than below. Depth reads as light in one
+   * scheme and as shadow in the other, which is why these are not inversions of
+   * each other's numbers.
    */
-  --bg: #f2f0ec;
-  --surface: oklch(1 0 0);
-  --surface-sunken: oklch(0.972 0.003 70);
-  --surface-muted: oklch(0.955 0.004 70);
-  --field: oklch(0.99 0.002 70);
+  /* Which half of every pair below is used. `light dark` is "whichever this
+     machine is set to"; the two rules at the foot of this file pin it. */
+  color-scheme: light dark;
+
+  --bg: light-dark(#f2f0ec, #161310);
+  --surface: light-dark(oklch(1 0 0), oklch(0.235 0.008 70));
+  --surface-sunken: light-dark(oklch(0.972 0.003 70), oklch(0.275 0.008 70));
+  --surface-muted: light-dark(oklch(0.955 0.004 70), oklch(0.29 0.008 70));
+  --field: light-dark(oklch(0.99 0.002 70), oklch(0.235 0.008 70));
 
   /* Two line weights: inside a card, and around one. */
-  --line: oklch(0.94 0.004 70);
-  --line-strong: oklch(0.885 0.004 70);
+  --line: light-dark(oklch(0.94 0.004 70), oklch(0.33 0.008 70));
+  --line-strong: light-dark(oklch(0.885 0.004 70), oklch(0.36 0.008 70));
 
   /* ----------------------------------------------------------- Foreground ---
    * Four steps, named by weight of voice rather than by lightness. A number is
-   * strong, a label is muted, a placeholder is faint.
+   * strong, a label is muted, a placeholder is faint. The names survive the
+   * scheme change precisely because they are not lightnesses: in the dark the
+   * strong voice is the brightest and the faint one the dimmest, which is the
+   * same sentence read from the other end.
    */
-  --fg-strong: oklch(0.24 0.012 70);
-  --fg: oklch(0.4 0.01 70);
-  --fg-muted: oklch(0.55 0.01 70);
-  --fg-faint: oklch(0.66 0.01 70);
-  --fg-inverted: oklch(0.99 0 0);
+  --fg-strong: light-dark(oklch(0.24 0.012 70), oklch(0.93 0.008 70));
+  --fg: light-dark(oklch(0.4 0.01 70), oklch(0.89 0.008 70));
+  --fg-muted: light-dark(oklch(0.55 0.01 70), oklch(0.76 0.008 70));
+  --fg-faint: light-dark(oklch(0.66 0.01 70), oklch(0.6 0.008 70));
+  /* Whatever sits on a filled control, and white in both schemes: the fills it
+     sits on — the primary button, a danger button, a ticked box — stay
+     saturated in the dark rather than going pale. */
+  --fg-inverted: light-dark(oklch(0.99 0 0), oklch(0.99 0.008 70));
 
   /* A selected control inverts to near-black rather than to the accent: a
-     selection is a state, and the accent means action. */
-  --selected: oklch(0.27 0.01 70);
-  --selected-fg: var(--fg-inverted);
+     selection is a state, and the accent means action. In the dark it inverts
+     the other way, to near-white — so its ink is the only one in the app that
+     does not follow `--fg-inverted`, which stays white for the coloured fills. */
+  --selected: light-dark(oklch(0.27 0.01 70), oklch(0.93 0.008 70));
+  --selected-fg: light-dark(oklch(0.99 0 0), oklch(0.225 0.008 70));
 
   /* -------------------------------------------------------------- Accent ---
    * One blue, and it means interactive. Nothing decorative is this colour.
+   *
+   * Two of it in the dark, and this is the one place the schemes genuinely
+   * disagree. On paper a single blue can both fill a button and be read as a
+   * word: white text sits on it, and it sits on white. On a dark ground it
+   * cannot — a blue dark enough to carry white text is too dark to read as text
+   * itself. So the fill stays saturated and `--accent-ink` is the lighter one
+   * that words, glyphs and the rails beside a row are drawn in. In the light
+   * scheme they are the same colour, which is the point: the split exists only
+   * where the dark ground forces it.
    */
-  --accent: oklch(0.52 0.16 250);
-  --accent-hover: oklch(0.44 0.16 250);
-  --accent-border: oklch(0.46 0.16 250);
-  --accent-bg: oklch(0.955 0.03 250);
+  --accent: light-dark(oklch(0.52 0.16 250), oklch(0.55 0.16 255));
+  --accent-hover: light-dark(oklch(0.44 0.16 250), oklch(0.62 0.16 255));
+  --accent-border: light-dark(oklch(0.46 0.16 250), oklch(0.62 0.15 255));
+  --accent-bg: light-dark(oklch(0.955 0.03 250), oklch(0.28 0.04 250));
+  --accent-ink: light-dark(oklch(0.52 0.16 250), oklch(0.8 0.12 250));
+  --accent-ink-hover: light-dark(oklch(0.44 0.16 250), oklch(0.87 0.1 250));
   --accent-fg: var(--fg-inverted);
-  --accent-ring: oklch(0.62 0.13 250);
+  --accent-ring: light-dark(oklch(0.62 0.13 250), oklch(0.62 0.13 250));
 
   /* --------------------------------------------------------------- Tones ---
    * Four meanings, three roles each: the text colour, the tint behind it, and
@@ -123,39 +159,44 @@
    * success something is settled, saved or even
    * info    something is scheduled or planned
    */
-  --danger: oklch(0.47 0.16 25);
-  --danger-bg: oklch(0.95 0.04 25);
-  --danger-border: oklch(0.88 0.06 25);
-  --danger-solid: oklch(0.52 0.17 25);
+  --danger: light-dark(oklch(0.47 0.16 25), oklch(0.8 0.12 25));
+  --danger-bg: light-dark(oklch(0.95 0.04 25), oklch(0.28 0.05 25));
+  --danger-border: light-dark(oklch(0.88 0.06 25), oklch(0.36 0.055 25));
+  /* The one fill a tone gets, and it carries `--fg-inverted` — white in both
+     schemes, so the fill is the same red in both. */
+  --danger-solid: light-dark(oklch(0.52 0.17 25), oklch(0.52 0.17 25));
 
-  --warning: oklch(0.44 0.12 62);
-  --warning-bg: oklch(0.96 0.04 75);
-  --warning-border: oklch(0.88 0.06 80);
+  --warning: light-dark(oklch(0.44 0.12 62), oklch(0.8 0.12 62));
+  --warning-bg: light-dark(oklch(0.96 0.04 75), oklch(0.28 0.05 62));
+  --warning-border: light-dark(oklch(0.88 0.06 80), oklch(0.36 0.055 62));
 
-  --success: oklch(0.45 0.11 155);
-  --success-bg: oklch(0.95 0.035 155);
-  --success-border: oklch(0.86 0.06 155);
+  --success: light-dark(oklch(0.45 0.11 155), oklch(0.8 0.12 150));
+  --success-bg: light-dark(oklch(0.95 0.035 155), oklch(0.28 0.045 150));
+  --success-border: light-dark(oklch(0.86 0.06 155), oklch(0.36 0.055 150));
 
-  --info: oklch(0.45 0.13 255);
-  --info-bg: oklch(0.95 0.03 255);
-  --info-border: oklch(0.87 0.05 255);
+  --info: light-dark(oklch(0.45 0.13 255), oklch(0.8 0.12 255));
+  --info-bg: light-dark(oklch(0.95 0.03 255), oklch(0.28 0.048 255));
+  --info-border: light-dark(oklch(0.87 0.05 255), oklch(0.36 0.055 255));
 
   /* ---------------------------------------------------- Category palette ---
    * A note's category is a colour before it is a word, and the six are a fixed
    * set — not four tones with two invented. They live here rather than being
    * computed from a hue at the call site, so recolouring a category is an edit
    * to this file like every other colour decision.
+   *
+   * One hue per category, and the hue is what the reader recognises: only the
+   * lightness moves between schemes.
    */
-  --cat-1on1: oklch(0.4 0.11 250);
-  --cat-1on1-bg: oklch(0.95 0.035 250);
-  --cat-feedback: oklch(0.4 0.11 150);
-  --cat-feedback-bg: oklch(0.95 0.035 150);
-  --cat-incident: oklch(0.4 0.11 25);
-  --cat-incident-bg: oklch(0.95 0.035 25);
-  --cat-planning: oklch(0.4 0.11 290);
-  --cat-planning-bg: oklch(0.95 0.035 290);
-  --cat-idea: oklch(0.4 0.11 70);
-  --cat-idea-bg: oklch(0.95 0.035 70);
+  --cat-1on1: light-dark(oklch(0.4 0.11 250), oklch(0.8 0.1 250));
+  --cat-1on1-bg: light-dark(oklch(0.95 0.035 250), oklch(0.28 0.04 250));
+  --cat-feedback: light-dark(oklch(0.4 0.11 150), oklch(0.8 0.1 150));
+  --cat-feedback-bg: light-dark(oklch(0.95 0.035 150), oklch(0.28 0.04 150));
+  --cat-incident: light-dark(oklch(0.4 0.11 25), oklch(0.8 0.1 25));
+  --cat-incident-bg: light-dark(oklch(0.95 0.035 25), oklch(0.28 0.04 25));
+  --cat-planning: light-dark(oklch(0.4 0.11 290), oklch(0.8 0.1 290));
+  --cat-planning-bg: light-dark(oklch(0.95 0.035 290), oklch(0.28 0.04 290));
+  --cat-idea: light-dark(oklch(0.4 0.11 70), oklch(0.8 0.1 70));
+  --cat-idea-bg: light-dark(oklch(0.95 0.035 70), oklch(0.28 0.04 70));
   --cat-generic: var(--fg-muted);
   --cat-generic-bg: var(--surface-muted);
 
@@ -169,16 +210,45 @@
   /* ----------------------------------------------------------- Elevation ---
    * Two, and the first is almost nothing: a 1px hint under a control so it
    * reads as raised off the card. The second belongs to the dialog alone.
+   *
+   * A shadow in the dark is not a darker version of the same shadow: the ground
+   * is already dark, so the same 8% barely exists. Both go to near-black and
+   * lean on opacity instead.
    */
-  --shadow-lift: 0 1px 2px oklch(0.5 0.01 70 / 0.08);
-  --shadow-dialog: 0 18px 50px oklch(0.3 0.01 70 / 0.22);
-  --scrim: oklch(0.3 0.01 70 / 0.35);
+  --shadow-lift: 0 1px 2px light-dark(oklch(0.5 0.01 70 / 0.08), oklch(0.08 0.006 70 / 0.4));
+  --shadow-dialog: 0 18px 50px light-dark(oklch(0.3 0.01 70 / 0.22), oklch(0.08 0.006 70 / 0.6));
+  --scrim: light-dark(oklch(0.3 0.01 70 / 0.35), oklch(0.08 0.006 70 / 0.35));
 
   /* ---------------------------------------------------------------- Misc --- */
   --ring: 2px solid var(--accent-ring);
   --transition: 0.12s ease;
 
   /* Never the CSS keyword `transparent`: it resolves to transparent black, and
-     a border animating or blending from it flashes grey. */
+     a border animating or blending from it flashes grey. The one colour that is
+     the same in both schemes, because nothing is not a shade of anything. */
   --clear: oklch(0 0 0 / 0);
+}
+
+/*
+ * The three states of the theme, and the whole mechanism for them.
+ *
+ * `color-scheme` is the switch. Every colour above is a `light-dark()` pair, so
+ * this one property decides which half of all forty-four of them is used — and
+ * it decides it for the browser's own furniture at the same time: scrollbars,
+ * form controls, the caret. There is no second palette to keep in step, and no
+ * class to remember to apply.
+ *
+ * The absence of the attribute is `system`: `light dark` means "whichever the
+ * machine is set to". The app's own default is Light rather than that, so the
+ * attribute is normally there — `system` is a choice somebody makes, and it is
+ * the one that removes the attribute again. The server writes it from the stored
+ * setting, so the first paint is already the right scheme; a theme decided in
+ * the browser flashes the wrong one on every page load.
+ */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }

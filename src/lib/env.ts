@@ -12,8 +12,40 @@ import path from 'node:path';
 
 export type EnvProblem = { key: string; message: string };
 
+/**
+ * Which of the two palettes the app paints in, or `system` to take the
+ * machine's own answer. It lives in .env rather than in the vault because it is
+ * a fact about this screen, not about the team: the vault is committed and
+ * shared, and a theme that travelled with it would follow the notes onto
+ * somebody else's Mac.
+ *
+ * Light is the default rather than `system`, deliberately: this app is a light
+ * app that has a dark scheme, and which one it opens in is a choice somebody
+ * makes here rather than one their Mac makes for them at sunset. `system` is one
+ * of the three, and picking it is how you hand the decision back.
+ */
+export type Theme = 'system' | 'light' | 'dark';
+
+export const THEMES = ['system', 'light', 'dark'] as const satisfies readonly Theme[];
+
+function themeOf(raw: string): Theme {
+  // Anything else is the default. A hand-typed value is worth ignoring rather
+  // than blocking on: the wrong colour scheme is not a reason to refuse to open,
+  // and the Settings screen shows which one is actually in force.
+  return (THEMES as readonly string[]).includes(raw) ? (raw as Theme) : 'light';
+}
+
 function expandHome(p: string): string {
   return p.startsWith('~') ? path.join(os.homedir(), p.slice(1)) : p;
+}
+
+/**
+ * The inverse, and it lives beside its opposite rather than being written out
+ * again per screen: a path shown to the reader wears the `~` they typed.
+ */
+export function tildeHome(p: string): string {
+  const home = os.homedir();
+  return p.startsWith(home) ? `~${p.slice(home.length)}` : p;
 }
 
 /**
@@ -62,6 +94,7 @@ function parseEnvFile(text: string): Record<string, string> {
 
 export type Config = {
   envPath: string;
+  theme: Theme;
   envExists: boolean;
   /** Mode is not 0600. A warning, never fatal — the app still opens. */
   envModeWarning: string | null;
@@ -154,6 +187,7 @@ export function loadConfig(): Config {
 
   cached = {
     envPath,
+    theme: themeOf(get('MERIDIAN_THEME')),
     envExists,
     envModeWarning,
     vaultPath,

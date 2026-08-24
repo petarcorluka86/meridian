@@ -1,5 +1,4 @@
-import os from 'node:os';
-import { loadConfig } from '@/lib/env';
+import { loadConfig, tildeHome } from '@/lib/env';
 import { upstream } from '@/lib/git';
 import { readEgress } from '@/lib/sources/egress';
 import { Card, CardBody, CardHeader, Code, NavItem, NavList, Pill, Text } from '@/components/ui';
@@ -58,11 +57,6 @@ const SECTIONS = [
 ] as const;
 
 type SectionId = (typeof SECTIONS)[number]['id'];
-
-function tildeHome(p: string): string {
-  const home = os.homedir();
-  return p.startsWith(home) ? `~${p.slice(home.length)}` : p;
-}
 
 export default async function HelpPage({
   searchParams,
@@ -257,6 +251,15 @@ function Guide() {
         'Every entry is a date, plus or minus hours, and a reason. The total is always the truth of where you stand.',
         'Total, this week and this month sit at the top; the range filters narrow the log below, and a custom range takes two dates.',
         'The pencil on a row edits the date, the hours and the reason; deleting is in the same row, behind a confirmation.',
+      ],
+    ],
+    [
+      'Settings',
+      'how Meridian looks',
+      [
+        'Theme: Light, Dark or System. Meridian opens in Light until you say otherwise; System follows the appearance your Mac is set to and changes with it, including when the Mac switches itself at sunset.',
+        'The choice is kept in Meridian’s own .env, not in the vault — it is about this screen, not about your team, so it does not travel when you push.',
+        'Everything else configurable lives in a file rather than on a screen: thresholds in the vault’s config.json, keys in .env.',
       ],
     ],
     [

@@ -4,6 +4,12 @@
  * The last resort: an error in the root layout itself, where none of the app's
  * own styles or components are available. Deliberately plain and self-contained
  * — a fallback that depends on the thing that just broke is not a fallback.
+ *
+ * It has both schemes because a white page is a worse thing to be shown at
+ * midnight than at noon, and `light-dark()` needs nothing but the `color-scheme`
+ * set on the element below — no stylesheet, no token, no script. It follows the
+ * machine rather than the stored setting: reading that setting means reading the
+ * config, and this page is the one that must not.
  */
 export default function GlobalError({
   error,
@@ -13,13 +19,13 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: 'light dark' }}>
       <body
         style={{
           margin: 0,
           padding: '48px 32px',
-          background: '#f2f0ec',
-          color: '#3d3a36',
+          background: 'light-dark(#f2f0ec, #161310)',
+          color: 'light-dark(#3d3a36, #dedad5)',
           font: '400 15px/1.6 system-ui, sans-serif',
         }}
       >
@@ -35,8 +41,8 @@ export default function GlobalError({
             style={{
               margin: '0 0 20px',
               padding: '12px 14px',
-              background: '#fff',
-              border: '1px solid #ddd8d0',
+              background: 'light-dark(#fff, #211d1a)',
+              border: '1px solid light-dark(#ddd8d0, #383531)',
               borderRadius: 9,
               font: '400 12.5px/1.6 ui-monospace, Menlo, monospace',
               whiteSpace: 'pre-wrap',
@@ -51,8 +57,9 @@ export default function GlobalError({
               font: '500 13px/1 system-ui, sans-serif',
               padding: '9px 14px',
               borderRadius: 8,
-              border: '1px solid #ccc6bd',
-              background: '#fff',
+              border: '1px solid light-dark(#ccc6bd, #403c39)',
+              background: 'light-dark(#fff, #2a2723)',
+              color: 'inherit',
               cursor: 'pointer',
             }}
           >

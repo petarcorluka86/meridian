@@ -20,6 +20,12 @@ import { defineConfig } from '@playwright/test';
  *
  * The values are fake and no request is ever made with them — VAULT_PATH points
  * inside the repository, so every sync refuses before it fetches.
+ *
+ * The theme is the fourth pinned thing, and it takes two: the stored setting is
+ * pinned to `system` so the app defers to the browser, and the browser is then
+ * told which scheme it is — once per project, below. Neither alone is enough. A
+ * developer who had chosen Dark on this machine would otherwise have recorded
+ * the light baselines in the dark.
  */
 const APP = path.resolve(import.meta.dirname, '../..');
 
@@ -27,6 +33,7 @@ const PINNED = {
   VAULT_PATH: './src/fixtures/vault',
   MERIDIAN_NOW: '2026-08-19T12:00:00.000Z',
   MERIDIAN_ENV_PATH: path.join(APP, 'tests/pixel/gate.env'),
+  MERIDIAN_THEME: 'system',
   BAMBOOHR_SUBDOMAIN: 'yourcompany',
   BAMBOOHR_API_KEY: 'gate-not-a-real-key',
   BAMBOOHR_MANAGER_EMPLOYEE_ID: '100',
@@ -47,7 +54,7 @@ const PINNED = {
 export default defineConfig({
   testDir: '.',
   outputDir: '../../artifacts/pixel',
-  snapshotPathTemplate: '{testDir}/baseline/{arg}-{platform}{ext}',
+  snapshotPathTemplate: '{testDir}/baseline/{arg}-{projectName}-{platform}{ext}',
   globalSetup: './global-setup.ts',
   fullyParallel: false,
   workers: 1,
@@ -59,6 +66,17 @@ export default defineConfig({
   },
   timeout: 60_000,
   expect: { timeout: 15_000 },
+  /*
+   * Every screen twice, because there are two of every screen now. The scheme is
+   * emulated rather than stored — `prefers-color-scheme`, which is what
+   * `color-scheme: light dark` in tokens.css reads — so the two runs differ by
+   * nothing but the browser's answer to that one question, and the app under
+   * them is byte for byte the same.
+   */
+  projects: [
+    { name: 'light', use: { colorScheme: 'light' } },
+    { name: 'dark', use: { colorScheme: 'dark' } },
+  ],
   webServer: [
     {
       command: 'npx next dev -H 127.0.0.1 -p 3311',

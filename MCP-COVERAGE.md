@@ -242,7 +242,9 @@ Nothing here is stored. Each is recomputed, and each is a question an agent asks
 | Which sources are configured | `loadConfig()` | `read_sources` | **Open** |
 | Problems with `.env` | `Config.problems` | `read_sources` | **Open** |
 | Read a credential | `rawEnv()` | — | **Never** — credentials never leave the server process, and an MCP client is a different process. |
-| Write `.env` | `lib/env-write.ts` | — | **Never** — the setup wizard writes it, after a check the agent cannot perform. |
+| Write `.env` | `lib/env-write.ts` | — | **Never** — the setup wizard and the Settings screen write it, after a check the agent cannot perform. |
+| Which theme the app is painted in | `Config.theme` | — | **Closed** — one line to expose, and no reason yet: nothing an agent reports back changes with the colour scheme. |
+| Set the theme | `setThemeAction()` | — | **Never** — it is a preference about somebody's own screen, and they are looking at it. |
 | Test a credential against a source | `setup/actions.ts` | — | **Never** — a credential check is a live request made while somebody is watching it. |
 | Point the app at a different vault | `checkVaultAction()` | — | **Never** — same reason. |
 | Install the vault's credential hook | `npm run vault:hook` | — | **Never** — writing an executable into somebody's repository is not a side effect. |
@@ -271,16 +273,16 @@ every other test green, and quietly hands an agent BambooHR.
 
 ## Where it stands
 
-Counted by row: **93 Open**, **8 Closed**, **27 Never** — 128 capabilities, against thirty-two tools.
+Counted by row: **93 Open**, **9 Closed**, **28 Never** — 130 capabilities, against thirty-two tools.
 
 Reading is effectively finished: the Overview, the caches behind it, pay, the
 whole task and note surface, the vault's own health and its git state are all
 reachable, and every cached answer says how old it is. Writing covers the vault's
 own records, and every one of those writes can now be corrected or taken back.
 
-Eight rows are Closed, each with its reason: the vault's file browser and its
+Nine rows are Closed, each with its reason: the vault's file browser and its
 snapshot restore, a person's cached photo, how many projects are finished,
 deleting a note and setting a task description — neither of which the app can do
-either — and editing a roster entry, same. Everything else that is shut is shut
+either — editing a roster entry, same, and which theme the app is painted in. Everything else that is shut is shut
 on purpose: projects are read-only by decision, and nothing here goes to the
 network.

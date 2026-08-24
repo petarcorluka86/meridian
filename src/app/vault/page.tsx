@@ -1,6 +1,5 @@
 import path from 'node:path';
-import os from 'node:os';
-import { loadConfig } from '@/lib/env';
+import { loadConfig, tildeHome } from '@/lib/env';
 import { buildTree, firstFile, readPreview } from '@/lib/vault/tree';
 import { VaultTree } from '@/components/vault/VaultTree';
 import { FILE_GLYPH, HeaderFileIcon } from '@/components/vault/FileIcons';
@@ -8,11 +7,6 @@ import { EMPTY } from '@/copy/empty';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Text } from '@/components/ui/Text';
 import styles from '@/components/vault/Vault.module.css';
-
-function tildeHome(p: string): string {
-  const home = os.homedir();
-  return p.startsWith(home) ? `~${p.slice(home.length)}` : p;
-}
 
 export default async function VaultPage({
   searchParams,

@@ -113,6 +113,11 @@ file, it belongs in Help instead.
   `src/components/ui/`.** A colour, a font, a padding or a radius written anywhere
   else is a value that will be missed when the system changes.
   `tests/unit/design-system.test.ts` fails the build on all five.
+- **A colour is two colours.** Every colour token is a `light-dark()` pair, and
+  `color-scheme` chooses the half — there is no second palette and no `.dark`
+  class. A token with one value is not a smaller decision, it is a token that
+  renders wrong in one scheme and fails nothing, so the same test fails the build
+  on it. See "The two schemes".
 - **One word per concept.** `sync` goes to a source now; `refresh` goes only if
   the freshness window has expired; `vaultChanged()` / `configChanged()` in
   `src/app/changed.ts` say the local data changed. `revalidate` is Next's word
@@ -340,8 +345,11 @@ committed.
 
 Thresholds (`contactGapDays`, `timeBalanceLimitHours`, `uncommittedChangesDays`)
 live in `config.json` inside the vault. Credentials and paths live in `.env` in
-the app folder. There is no settings screen either way. `VAULT_PATH` defaults to
-`~/meridian/vault`.
+the app folder. Neither has a screen, and the Settings screen is not the
+beginning of one: it holds the theme and nothing else, because the theme is the
+one setting that is about this display rather than about the team or about a
+credential. Anything that belongs in a file stays in the file. `VAULT_PATH`
+defaults to `~/meridian/vault`.
 
 ---
 
@@ -353,10 +361,16 @@ src/components/ui/        the primitives, and the only place a value is applied
 src/components/ui/index.ts  the barrel a screen imports from
 ```
 
-**82 tokens.** Eleven type levels, seven spacing steps, five radii, two shadows, two
-control heights, four tones × three roles, one icon colour, a six-entry category
-palette. The scales are closed: an eleventh of anything is an edit to
-`tokens.css` and to a primitive, deliberately.
+**84 tokens, and two schemes out of them.** Eleven type levels, seven spacing
+steps, five radii, two shadows, two control heights, four tones × three roles,
+one icon colour, a six-entry category palette. The scales are closed: an
+eleventh of anything is an edit to `tokens.css` and to a primitive, deliberately.
+
+Every colour is a `light-dark()` pair, so there is one set of tokens rather than
+a palette and a dark palette to keep in step, and `color-scheme` picks the half —
+which also hands the browser's own furniture, scrollbars and date pickers
+included, to the right scheme. A component asks for `--fg-muted` and never asks
+which scheme it is in. See "The two schemes" below.
 
 `Stack` and `Row` also take `gap={0}`, which is on the scale because "no space"
 is a decision rather than an absence: a name with its reason under it is one
@@ -365,6 +379,51 @@ thought, and the leading of the two lines is already the gap between them.
 Recolour the accent or change `--radius-card` and every button, chip, card and
 dialog on every screen follows, because there is nowhere else for those decisions
 to be hiding.
+
+### The two schemes
+
+The theme is `MERIDIAN_THEME` in `.env` — `system`, `light` or `dark` — written
+by the Settings screen through `env-write.ts` like every other key the app
+writes. It is deliberately not in the vault: the vault is committed and shared,
+and a theme that travelled with it would follow the notes onto another machine.
+An absent or unrecognised value means **light**, not `system`: this is a light
+app that has a dark scheme, and which one it opens in is a choice made here
+rather than one the Mac makes at sunset. `system` is one of the three, and
+picking it is how the decision is handed back.
+
+The root layout renders `data-theme` on `<html>` from that setting, and renders
+**nothing at all** for `system` — the absence is what lets `color-scheme: light
+dark` defer to the machine. Since the default is Light, the attribute is normally
+there; `system` is the choice that takes it away. Being server-rendered is the point: a scheme decided
+in the browser paints the wrong one first, on every load.
+
+Three things follow from having two schemes, and all three are decisions rather
+than details:
+
+- **The accent splits in two, and only in the dark.** `--accent` fills — the
+  primary button, the meter, a ticked box — and carries `--accent-fg`, which is
+  white in both schemes. `--accent-ink` is the accent as *words*: links,
+  `Text tone="accent"`, an accent `Pill`, the rail down a selected row. On paper
+  they are the same blue and the split costs nothing; on a dark ground a blue
+  dark enough to carry white text is too dark to read as text, so they part
+  company. `--accent-ink-hover` exists for the same reason: ink hovers brighter
+  there and darker here.
+- **`--selected-fg` is no longer `--fg-inverted`.** A selected chip inverts to
+  near-white in the dark, so its ink is dark — while `--fg-inverted` stays white,
+  because the fills it sits on stay saturated.
+- **`--bg` is written out twice more, and both are named.** `GROUND` in
+  `app/layout.tsx` carries both halves for `themeColor`, which the browser chrome
+  reads before any stylesheet exists, and `app/manifest.ts` reads `GROUND` back —
+  the manifest is generated rather than a static file precisely because it holds
+  a colour and there are now two. `app/global-error.tsx` inlines its own pair and
+  follows the machine rather than the setting: reading the setting means reading
+  the config, and that page is the one that must not.
+
+Storybook has a **Theme** toolbar that sets the same attribute on the same
+element, so the design system's view of itself can be either. The dark values
+come from a Claude Design canvas rather than being derived from the light ones by
+arithmetic — the surfaces, the two blues and the tone tints are the design's, and
+`tests/pixel/baseline/*-dark-darwin.png` is what holds them still.
 
 ### The primitives
 
@@ -445,6 +504,8 @@ title beside them is what names the section.
 6. anything but `Card` and `Dialog` drawing a bordered surface
 7. a variant a primitive offers that has no rule in its stylesheet
 8. a glyph inside a `Button` or `ButtonLink`'s children rather than its `icon`
+9. a colour in `tokens.css` that is not a `light-dark()` pair, or a missing
+   `color-scheme` — one value renders in the wrong scheme and breaks nothing else
 
 Rule 7 exists because of a real bug: `Avatar` gained an `xl` in its type, its
 props and the barrel, and a reformat silently dropped the CSS rule. Every photo
@@ -544,15 +605,19 @@ new baselines in the same commit that caused the change.** A baseline updated on
 its own, or in a commit that does not explain the visual difference, defeats the
 gate entirely.
 
-Baselines live in `tests/pixel/baseline/`, one per screen, suffixed by platform —
+Baselines live in `tests/pixel/baseline/`, one per screen **per scheme**, suffixed
+by both — `overview-dark-darwin.png`. The scheme comes from a Playwright project
+(`light` and `dark`, each pinning `colorScheme`), and the stored theme is pinned
+to `system` alongside the clock and the credentials so the browser's answer is
+the only thing deciding it. Platform is the other half of the suffix —
 font rendering differs enough between systems that one machine's image is not
 another's. A platform with no baselines skips with a message rather than failing,
 because recording them has to be a deliberate act; a baseline generated
 automatically gates nothing. The gate does not run in CI at all, for the same reason: the
 baselines belong to the machine somebody actually looks at the screens on.
 
-Fourteen screens are gated, including Changelog in both diff modes and the setup
-wizard. The archived project list is not among them: it is this screen's own
+Sixteen screens are gated in each scheme, thirty-two images in all, including
+Changelog in both diff modes, Settings and the setup wizard. The archived project list is not among them: it is this screen's own
 state rather than a URL, and the gate can only reach what a URL can. Changelog needs a vault that is its own git repository, so
 `tests/pixel/global-setup.ts` builds a throwaway one in `artifacts/` with a known
 diff, and a second dev server serves it — which is why `next.config.ts` takes its
