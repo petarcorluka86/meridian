@@ -10,6 +10,34 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ## [Unreleased]
 
+### Added
+
+- **Projects** — work that runs longer than a task. A title, a description and
+  phases: the checkpoints it has to pass, ticked off by hand and independent of
+  tasks. A project with phases shows how far it has got as a bar and a fraction;
+  one without them shows neither, because there is nothing to be a fraction of.
+  Each project opens as its own page with its phases, tasks, notes and links.
+- **A project is selectable wherever a person is** — quick capture, the task
+  form, the task edit dialog, a note's own row and the Notes filters. Tasks carry
+  `projectId`; notes carry `project` in their front matter, which is the one key
+  there that names something outside the note, because a project is not a folder.
+- **Archiving** — a flag, never a delete. Nothing is removed, its tasks stay
+  where they are, and restoring gives back exactly what went in. Deleting a
+  project is the destructive one, and the confirmation says what survives: the
+  project and its phases go, its tasks and notes stay where they are and lose the
+  project.
+- **`Meter`** — the design system's one new primitive, a proportion of a known
+  total. Two tones, and `success` is the one that means the total was reached.
+- **`projects.json`** — one new file at the vault root, phases and links nested
+  in each record. No folder per project.
+
+### Changed
+
+- The vault CLI gained `projects`, and `task-add` / `note-add` / `notes` take
+  `--project`. The MCP server gained a read-only `list_projects`; `add_task` and
+  `write_note` take the project, but creating and archiving one stays with the
+  person doing the work.
+
 ## [0.1.0] - 2026-08-21
 
 The first public version.

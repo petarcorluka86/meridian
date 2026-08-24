@@ -8,7 +8,7 @@
  *
  * Registration lives here rather than in vault-server.ts so it can be tested.
  * The entry point connects to stdio on import, which means importing it in a
- * test hangs — so the wiring, fifteen tools an agent writes the vault through,
+ * test hangs — so the wiring, sixteen tools an agent writes the vault through,
  * had no test at all: whether each schema matches what its handler passes down,
  * and whether a bad argument is refused rather than written.
  */
@@ -31,6 +31,7 @@ import {
   setNoteMeta,
 } from '../src/lib/vault/notes.js';
 import { addLink, addPlan, saveAbout } from '../src/lib/vault/people.js';
+import { progressOf } from '../src/lib/vault/projects.js';
 import { changedFiles, commitAll, fileDiffs, repoState } from '../src/lib/git.js';
 import { NOTE_CATEGORIES } from '../src/lib/vault/schemas.js';
 import { today } from '../src/lib/dates.js';
@@ -98,6 +99,40 @@ export function registerTools(server: Tooling): void {
     },
   );
 
+  /*
+   * Read-only on purpose. An agent needs to *name* a project to file a task or a
+   * note against it, which is what this gives it. Creating one, phasing it out
+   * and archiving it are decisions about how the work is shaped, and those belong
+   * to the person doing the work — `npm run vault -- projects` lists them in a
+   * terminal, and the screen is where they are changed.
+   */
+  server.tool(
+    'list_projects',
+    'Projects, with how far their phases have got. Read only — the id is what a task or note points at.',
+    { includeArchived: z.boolean().default(false) },
+    async ({ includeArchived }) => {
+      const vault = getVault();
+      return text(
+        vault.projects
+          .filter((p) => includeArchived || !p.archived)
+          .map((p) => {
+            const { total, done, percent } = progressOf(p);
+            return {
+              id: p.id,
+              title: p.title,
+              description: p.description,
+              archived: p.archived,
+              phases: { total, done, percent },
+              nextPhase: p.phases.find((phase) => !phase.done)?.label ?? null,
+              openTasks: vault.tasks.filter((t) => t.projectId === p.id && t.status !== 'done')
+                .length,
+              notes: vault.notesByProject.get(p.id)?.length ?? 0,
+            };
+          }),
+      );
+    },
+  );
+
   server.tool(
     'read_note',
     'One note, with its front matter and body.',
@@ -110,7 +145,7 @@ export function registerTools(server: Tooling): void {
 
   server.tool(
     'search',
-    'Search people, tasks and note contents.',
+    'Search people, projects, tasks and note contents.',
     { query: z.string().min(1) },
     async ({ query }) => {
       const needle = query.toLowerCase();
@@ -119,9 +154,18 @@ export function registerTools(server: Tooling): void {
         people: vault.people
           .filter((p) => p.displayName.toLowerCase().includes(needle) || p.slug.includes(needle))
           .map((p) => ({ slug: p.slug, name: p.displayName })),
+        projects: vault.projects
+          .filter((p) => p.title.toLowerCase().includes(needle) || p.id.includes(needle))
+          .map((p) => ({ id: p.id, title: p.title, archived: p.archived })),
         tasks: vault.tasks
           .filter((t) => t.title.toLowerCase().includes(needle))
-          .map((t) => ({ id: t.id, title: t.title, due: t.dueDate, done: t.status === 'done' })),
+          .map((t) => ({
+            id: t.id,
+            title: t.title,
+            due: t.dueDate,
+            done: t.status === 'done',
+            project: t.projectId,
+          })),
         notes: vault.notes
           .filter(
             (n) => n.title.toLowerCase().includes(needle) || n.body.toLowerCase().includes(needle),
@@ -143,6 +187,7 @@ export function registerTools(server: Tooling): void {
         .nullable()
         .optional(),
       personSlug: z.string().nullable().optional(),
+      projectId: z.string().nullable().optional(),
     },
     async (input) => {
       await addTask({
@@ -150,6 +195,7 @@ export function registerTools(server: Tooling): void {
         priority: input.priority ?? 'normal',
         dueDate: input.dueDate ?? null,
         personSlug: input.personSlug ?? null,
+        projectId: input.projectId ?? null,
       });
       return text('Added.');
     },
@@ -173,16 +219,18 @@ export function registerTools(server: Tooling): void {
       title: z.string().min(1),
       body: z.string().default(''),
       personSlug: z.string().nullable().optional(),
+      project: z.string().nullable().optional(),
       category: z.enum(NOTE_CATEGORIES).optional(),
       draft: z.boolean().optional(),
     },
     async (input) => {
       if (input.path) {
         await saveNoteBody(input.path, input.title, input.body);
-        if (input.category || input.draft !== undefined) {
+        if (input.category || input.draft !== undefined || input.project !== undefined) {
           await setNoteMeta(input.path, {
             ...(input.category ? { category: input.category } : {}),
             ...(input.draft !== undefined ? { draft: input.draft } : {}),
+            ...(input.project !== undefined ? { project: input.project } : {}),
           });
         }
         return text(input.path);
@@ -191,6 +239,7 @@ export function registerTools(server: Tooling): void {
         title: input.title,
         body: input.body,
         personSlug: input.personSlug ?? null,
+        project: input.project ?? null,
         category: input.category ?? 'generic',
         draft: input.draft ?? false,
       });

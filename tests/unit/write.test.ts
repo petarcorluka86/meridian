@@ -304,6 +304,7 @@ describe('editing and deleting a task', () => {
         status: string;
         kind: string;
         personSlug: string | null;
+        projectId: string | null;
         completedAt: string | null;
         createdAt: string;
         updatedAt: string;
@@ -311,7 +312,7 @@ describe('editing and deleting a task', () => {
     return { rows, id: rows().find((t) => t.title === 'Write the Q3 plan')!.id };
   };
 
-  it('changes the five fields it owns and leaves the rest of the row alone', async () => {
+  it('changes the six fields it owns and leaves the rest of the row alone', async () => {
     const { updateTask } = await import('@/lib/vault/tasks');
     const { rows, id } = await seed();
     const before = rows().find((t) => t.id === id)!;
@@ -321,6 +322,7 @@ describe('editing and deleting a task', () => {
       priority: 'normal',
       dueDate: null,
       personSlug: 'ana-horvat',
+      projectId: 'platform-split',
       kind: 'waiting',
     });
 
@@ -329,6 +331,7 @@ describe('editing and deleting a task', () => {
     expect(after.priority).toBe('normal');
     expect(after.dueDate).toBeNull();
     expect(after.personSlug).toBe('ana-horvat');
+    expect(after.projectId).toBe('platform-split');
     expect(after.kind).toBe('waiting');
     // The id is what every other file points at, and the history is not the
     // dialog's to rewrite.
@@ -348,6 +351,7 @@ describe('editing and deleting a task', () => {
       priority: 'urgent',
       dueDate: '2026-09-01',
       personSlug: null,
+      projectId: null,
       kind: 'task',
     });
 
@@ -366,6 +370,7 @@ describe('editing and deleting a task', () => {
         priority: 'normal',
         dueDate: null,
         personSlug: null,
+        projectId: null,
         kind: 'task',
       }),
     ).rejects.toThrow(/needs a title/);
@@ -396,6 +401,7 @@ describe('editing and deleting a task', () => {
           priority: 'normal',
           dueDate: null,
           personSlug: null,
+          projectId: null,
           kind: 'task',
         }),
       () => deleteTask(id),

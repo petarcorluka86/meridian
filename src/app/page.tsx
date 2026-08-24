@@ -110,8 +110,12 @@ export default async function OverviewPage() {
       personName: nameOf(t.personSlug),
       personSlug: t.personSlug,
       personPhoto: photoOf(t.personSlug),
+      projectId: t.projectId,
+      projectName: t.projectId ? (vault.projectsById.get(t.projectId)?.title ?? null) : null,
       kind: t.kind,
     }));
+
+  const projects = vault.projects.map((p) => ({ id: p.id, title: p.title }));
 
   const inbox = bamboo.data?.inbox ?? [];
   // Every leave the cache holds; the cards pick the day. BambooHR is only asked
@@ -147,7 +151,7 @@ export default async function OverviewPage() {
     <Page>
       <PageHeader title={`${longDate(now)}!`} level="display" />
       <Stack gap={4}>
-        <QuickCapture people={people} />
+        <QuickCapture people={people} projects={projects} />
 
         <Columns
           main={
@@ -163,7 +167,7 @@ export default async function OverviewPage() {
                 freshness={bamboo.inboxFreshness}
               />
 
-              <TasksCard open={open} people={people} />
+              <TasksCard open={open} people={people} projects={projects} />
 
               <ReviewCard
                 prs={prs}

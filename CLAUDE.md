@@ -52,6 +52,7 @@ Two places, and nothing is written in both.
 | Anything a user reads | The **Help** screen, `src/app/help/page.tsx` | The only source of truth. Never restate it in a Markdown file. |
 | Anything an engineer or an agent reads | **This file** | The only source of truth. Architecture, decisions, conventions, commands. |
 | What a component looks like | **Storybook**, `npm run storybook` | Shows rather than tells. Renders the real components; states no rule this file does not already state. See "Storybook" below. |
+| Which capabilities the MCP server reaches | **`MCP-COVERAGE.md`** | The only source of truth for that one question. A registry, not prose — it holds no explanation this file does not already hold. See "For agents" below. |
 
 `README.md` is the badges, the two commands needed before the app can show you
 Help, and a pointer to each of the files below. Nothing else — an explanation
@@ -87,7 +88,12 @@ file, it belongs in Help instead.
   has to be added there deliberately.
 - **Every path goes through `safeVaultPath()`** in `src/lib/vault/paths.ts`.
 - **A note's person comes from its folder**, never from front matter. Front matter
-  carries `category`, `draft`, `pinned` and nothing that repeats the path.
+  carries `category`, `draft`, `pinned`, `project` and nothing that repeats the
+  path. A project is not a folder, so it is the one key there that names something
+  outside the note.
+- **A project is selectable wherever a person is** — quick capture, the task form,
+  the task dialog, a note's own row, the Notes filters. A field that exists on one
+  of those and not the others is how a task ends up unfindable from its project.
 - **Integrations are read-only.** No request to BambooHR, Google or GitHub may use
   a method other than GET. Credentials never reach the browser.
 - **Empty states and error lines come from `src/copy/`.** One wording per
@@ -96,8 +102,9 @@ file, it belongs in Help instead.
   green on one screen and grey on the next — and it is spread in whole,
   `{...EMPTY.tasks.allDone}`. The glyph is the only part the call site chooses,
   because it is the card's own icon and the catalogue does not know it.
-- **Nothing derived is written to disk** — balances, counts and days-since are
-  recomputed. A number that is never written down cannot drift.
+- **Nothing derived is written to disk** — balances, counts, days-since and a
+  project's phase progress are recomputed; `progressOf()` counts the phases every
+  time. A number that is never written down cannot drift.
 - **A malformed file costs only itself.** Arrays validate per row; a bad entry is
   skipped and reported, the rest still load.
 - **Pages are server components that call the store directly.** No `/api/*` for the
@@ -111,6 +118,16 @@ file, it belongs in Help instead.
   `src/app/changed.ts` say the local data changed. `revalidate` is Next's word
   and is left to Next — a `revalidateSources` of our own, sitting next to Next's
   `revalidatePath` and meaning something else, is how these got muddled.
+- **A capability the app gains or loses is a capability `MCP-COVERAGE.md` gains
+  or loses, in the same commit.** Every store operation, every cached source
+  read, every derived value the screens compute is a row in that file, marked
+  Open, Closed or Never. Adding one and leaving the file alone is how the
+  registry becomes a list of what used to be true — and a Closed row is a
+  decision to be revisited, so it has to be there to be revisited. If the new
+  capability belongs in `mcp/tools.ts`, put it there in the same commit too, and
+  mark the row Open; if it does not, say so in the row rather than leaving the
+  reason to be re-derived later. Removing a capability removes its tool and its
+  row together.
 - **Biome is the linter and the formatter.** Suppress a rule only at the site, with
   the argument in the suppression comment. Never widen `biome.json` to silence one
   file.
@@ -124,6 +141,32 @@ file, it belongs in Help instead.
 The vault is a folder of plain files and that is the whole store. It is the
 product's central promise: everything is readable and editable without this app,
 and it outlives it. A database would be faster at a scale this app never reaches.
+
+### Projects are one file too, and have no folder
+
+`projects.json` at the root, one record per project, phases and links nested
+inside it. A mature vault has tens of projects, not thousands, so the argument for
+splitting is the same argument as for tasks and loses for the same reason.
+
+No folder per project, which is the decision worth knowing: a project's notes stay
+wherever the notes themselves belong — in a person's folder, or in
+`notes/general/` — and carry `project: <id>` in their front matter. A note about
+Ana that belongs to the platform split is still a note about Ana, and moving it out
+of her folder to file it under a project would be the "two sources of truth for one
+fact" mistake in a new place. That is also why `project` is the one front-matter
+key that names something outside the note: the path genuinely cannot carry it.
+
+Its links live in the record for the same reason — there is no
+`projects/<id>/links.json` to put them in.
+
+**Deleting a project does not delete its work.** Its tasks and notes stay where
+they are and lose the project, which is what the confirmation promises in the most
+words. The references are cleared rather than left dangling, so a new project that
+happens to take the same slug cannot silently adopt somebody else's orphans. It
+spans three files and `tests/unit/projects.test.ts` is what keeps it true.
+
+**Archiving is a flag and nothing else.** Nothing is removed, and restoring is the
+same call inverted — also tested, because the confirmation says so.
 
 ### Tasks and time are one file each, not one per year
 
@@ -271,6 +314,7 @@ $VAULT_PATH/                      its own git repository, separate from this one
 │       └── notes/2026-08-12-1on1.md
 ├── notes/inbox/                  captured, not filed yet
 ├── notes/general/                not about one person
+├── projects.json                 [{ id, title, description, phases[], links[], archived }]
 ├── tasks.json
 ├── time.json
 ├── config.json                   thresholds, dataVersion
@@ -329,6 +373,7 @@ to be hiding.
 | `Table` `THead` `TBody` `TR` `TH` `TD` | data with columns |
 | `Dialog` | the one modal. Two usages: `Confirm`, and `TaskDialog` |
 | `DayStepper` | walks a card through the days its cache can answer for |
+| `Meter` | a proportion of a known total. Two tones, and `success` is the one that means the total was reached |
 | `Banner` `EmptyState` `Pill` `CategoryPill` `Stat` `Icon` `IconTile` `Avatar` `Rail` `Prose` | the rest |
 | `icons.tsx` | the action glyphs — one per verb, see below |
 | `TaskRow` `TaskDialog` `SyncBadge` `Reveal` `Skeleton` | the five that only make sense here |
@@ -339,7 +384,12 @@ to be hiding.
 
 `src/components/ui/icons.tsx` holds one glyph per verb — `AddIcon`, `CheckIcon`,
 `EditIcon`, `RemoveIcon`, `RefreshIcon`, `GoIcon`, `ExternalIcon`, `GuideIcon`,
-`CommitIcon`, `PushIcon`, `EyeIcon`, `PinIcon`, `CalendarIcon`, `JoinIcon`.
+`CommitIcon`, `PushIcon`, `EyeIcon`, `PinIcon`, `CalendarIcon`, `JoinIcon`,
+`ArchiveIcon`, `RestoreIcon`.
+
+`ArchiveIcon` and `RestoreIcon` are the same box with the arrow reversed, and they
+are two glyphs rather than one because archiving and restoring are two verbs. One
+shape doing both jobs would mean neither.
 
 **A button's glyph is chosen by what the action does, never by which screen it is
 on.** Add is the same plus on Tasks, on a person's links and in quick capture, so
@@ -409,8 +459,8 @@ the right one. A `Pill` that toggles something passes every test in the repo.
 
 ### What is left of the screens' own CSS
 
-Nine module files, 590 lines, and not one of them sets a colour, a font, a radius
-or a spacing value:
+Ten module files, and not one of them sets a colour, a font, a radius or a
+spacing value:
 
 | Module | What only it can express |
 | --- | --- |
@@ -422,6 +472,7 @@ or a spacing value:
 | `people/People.module.css` | the roster's auto-filling grid |
 | `people/Person.module.css` | the header's contact column, three field widths |
 | `overview/Overview.module.css` | the meetings card's clock column |
+| `projects/Projects.module.css` | which part of a phase row and a card footer shrinks first |
 | `timebalance/Time.module.css` | the summary dividers, the inline edit form |
 
 CSS across the app went from 3 922 lines to 2 297, and the card shape from
@@ -492,8 +543,9 @@ because recording them has to be a deliberate act; a baseline generated
 automatically gates nothing. The gate does not run in CI at all, for the same reason: the
 baselines belong to the machine somebody actually looks at the screens on.
 
-Thirteen screens are gated, including Changelog in both diff modes and the setup
-wizard. Changelog needs a vault that is its own git repository, so
+Fourteen screens are gated, including Changelog in both diff modes and the setup
+wizard. The archived project list is not among them: it is this screen's own
+state rather than a URL, and the gate can only reach what a URL can. Changelog needs a vault that is its own git repository, so
 `tests/pixel/global-setup.ts` builds a throwaway one in `artifacts/` with a known
 diff, and a second dev server serves it — which is why `next.config.ts` takes its
 build directory from `NEXT_DIST_DIR`, since Next allows one dev server per
@@ -567,7 +619,7 @@ legible and reads as a smudge — use the mark alone at those sizes.
 | `npm run vault:restore` | List and restore a file from `.snapshots/` |
 | `npm run vault:scan` | Check the vault for anything that looks like a credential |
 | `npm run vault:hook` | Install that check as the vault's git pre-commit hook |
-| `npm run vault -- <cmd>` | CLI over the same store: people, tasks, notes, hours, search |
+| `npm run vault -- <cmd>` | CLI over the same store: people, projects, tasks, notes, hours, search |
 | `npm run bamboo:sync` | Roster + photos from BambooHR |
 | `npm run bamboo:comp` | Compensation history |
 | `npm run bamboo:inbox` | Approvals and presence (the 5-minute window) |
@@ -592,6 +644,22 @@ exists in the app.
 an agent gets validation, snapshots and conflict checks rather than hand-editing
 JSON. **Prefer those tools, or `npm run vault`, over writing vault files
 directly.**
+
+`list_projects` is read-only, and that is the one deliberate asymmetry in the
+set. An agent needs to *name* a project to file a task or a note against it —
+`add_task` takes `projectId` and `write_note` takes `project` — but creating a
+project, phasing it out and archiving it are decisions about how the work is
+shaped, and those stay with the person doing the work.
+
+`MCP-COVERAGE.md` is the map of what those tools do and do not reach: every
+capability in the app as a row, marked Open, Closed or Never. Read it before
+concluding an agent cannot do something — the answer is a row rather than a
+search through `tools.ts`. **Keep it true.** A change that adds or removes a
+capability edits that file in the same commit, and `mcp/tools.ts` with it unless
+the row says why not. The tool count is asserted in
+`tests/unit/mcp-server.test.ts`, so a tool added without a test fails the build;
+nothing yet fails the build for a row left behind, which is why this is written
+down here.
 
 ## Layout
 

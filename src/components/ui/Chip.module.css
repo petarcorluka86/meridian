@@ -46,9 +46,15 @@
 }
 
 /* A segmented control is one choice, so it reads as one object: a sunken track
-   with the selected item lifted out of it. */
+   with the selected item lifted out of it.
+   `width` because `inline-flex` is not enough to stop it: as a flex item in a
+   `Stack` it still stretches to the column, and a control the width of the page
+   reads as a toolbar rather than as a choice between two things. It has to be
+   the width and not `align-self`, which also gives up the vertical centring the
+   track relies on inside a `PageHeader` row. */
 .track {
   display: inline-flex;
+  width: fit-content;
   gap: var(--space-1);
   padding: var(--space-1);
   background: var(--surface-muted);

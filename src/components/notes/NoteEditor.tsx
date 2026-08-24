@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { moveNoteAction, saveNoteAction, setMetaAction } from '@/app/notes/actions';
 import type { NoteCategory } from '@/lib/vault/schemas';
+import { NAV_GLYPH } from '@/components/NavIcons';
 import {
   Banner,
   Button,
@@ -48,6 +49,14 @@ const CalendarIcon = () => (
   </Icon>
 );
 
+/* The sidebar's Projects mark, so a note's project is recognisable as the same
+   thing the nav points at rather than a fourth shape in this row. */
+const ProjectIcon = () => (
+  <Icon tone="muted" size="lg">
+    {NAV_GLYPH.projects}
+  </Icon>
+);
+
 export type EditorNote = {
   path: string;
   title: string;
@@ -55,14 +64,19 @@ export type EditorNote = {
   html: string;
   date: string;
   personSlug: string | null;
+  project: string | null;
   category: NoteCategory;
   draft: boolean;
   pinned: boolean;
 };
 
-type Props = { note: EditorNote; people: { slug: string; name: string }[] };
+type Props = {
+  note: EditorNote;
+  people: { slug: string; name: string }[];
+  projects: { id: string; title: string }[];
+};
 
-export function NoteEditor({ note, people }: Props) {
+export function NoteEditor({ note, people, projects }: Props) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(note.title);
@@ -179,6 +193,20 @@ export function NoteEditor({ note, people }: Props) {
                 ariaLabel="Category"
                 disabled={pending}
                 options={CATEGORIES.map((c) => ({ value: c.value, label: c.label }))}
+              />
+              <ProjectIcon />
+              <Select
+                size="sm"
+                value={note.project ?? ''}
+                onChange={(value) =>
+                  run(() => setMetaAction(note.path, { project: value || null }), 'Saved')
+                }
+                ariaLabel="Project"
+                disabled={pending}
+                options={[
+                  { value: '', label: 'No project' },
+                  ...projects.map((p) => ({ value: p.id, label: p.title })),
+                ]}
               />
               <CalendarIcon />
               <DateInput

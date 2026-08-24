@@ -17,6 +17,7 @@ export async function captureTaskAction(input: {
   priority: 'urgent' | 'important' | 'normal';
   dueDate: string | null;
   personSlug: string | null;
+  projectId: string | null;
 }): Promise<CaptureResult> {
   try {
     await addTask(input);
@@ -31,6 +32,7 @@ export async function captureNoteAction(input: {
   title: string;
   category: NoteCategory;
   personSlug: string | null;
+  project: string | null;
   draft: boolean;
 }): Promise<CaptureResult> {
   try {
@@ -39,6 +41,7 @@ export async function captureNoteAction(input: {
       category: input.category,
       // No person means the inbox, until you give it one.
       personSlug: input.personSlug,
+      project: input.project,
       draft: input.draft,
     });
     vaultChanged('/notes');

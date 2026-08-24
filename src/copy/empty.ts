@@ -188,6 +188,52 @@ export const EMPTY = {
     },
   },
 
+  projects: {
+    none: {
+      title: 'No projects yet',
+      body: 'A project is anything that runs longer than a task — a migration, a hiring round, a ritual you are trying to establish. Give it phases and it tells you where it stands.',
+      tone: 'info',
+    },
+    archived: {
+      title: 'Nothing archived',
+      body: 'Finished or parked projects land here when you archive them — out of the way, still readable, and restorable any time.',
+      tone: 'neutral',
+    },
+    /*
+     * Not `none`. "No projects yet" over a vault that holds three archived ones
+     * is the same wrong claim as "no tasks" over a tasks.json that will not
+     * parse: it says there is nothing when there is something you cannot see.
+     */
+    allArchived: {
+      title: 'Nothing active right now',
+      body: 'Every project you have is archived. Switch to Archived to read one, or restore it to bring it back here.',
+      tone: 'success',
+    },
+  },
+
+  project: {
+    phases: {
+      title: 'No phases yet',
+      body: 'Phases are the checkpoints this project has to pass — not tasks, just how you know where it stands. Add the first one below.',
+      tone: 'info',
+    },
+    tasks: {
+      title: 'No tasks on this project yet',
+      body: 'Pick the project in the task form and it shows up here, with its chip on the task wherever you meet it.',
+      tone: 'info',
+    },
+    notes: {
+      title: 'No notes on this project yet',
+      body: 'Decisions, retros, the reason a phase slipped — tag a note with this project and it lands here, wherever the note itself lives.',
+      tone: 'info',
+    },
+    links: {
+      title: 'No links yet',
+      body: 'The design doc, the tracking board, the dashboard you keep reopening — put them here so the project carries them.',
+      tone: 'info',
+    },
+  },
+
   notes: {
     none: {
       title: 'No notes yet',
@@ -196,7 +242,7 @@ export const EMPTY = {
     },
     filtered: {
       title: 'No notes match these filters',
-      body: 'Widen the person or category filter, or turn off Drafts only.',
+      body: 'Widen the person, project or category filter, or turn off Drafts only.',
       tone: 'neutral',
     },
     inbox: {

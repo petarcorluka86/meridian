@@ -42,9 +42,11 @@ const RANK = { urgent: 0, important: 1, normal: 2 } as const;
 export function TasksCard({
   open,
   people,
+  projects,
 }: {
   open: TaskView[];
   people: readonly { slug: string; name: string }[];
+  projects: readonly { id: string; title: string }[];
 }) {
   const [prio, setPrio] = useState<Prio>('all');
 
@@ -88,7 +90,7 @@ export function TasksCard({
         })}
       </CardToolbar>
       {shown.map((task) => (
-        <TaskRow key={task.id} task={task} people={people} />
+        <TaskRow key={task.id} task={task} people={people} projects={projects} />
       ))}
       {shown.length === 0 ? (
         // Nothing open at all reads differently from a filter that matched nothing.

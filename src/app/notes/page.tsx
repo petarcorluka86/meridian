@@ -23,22 +23,36 @@ import styles from '@/components/notes/Notes.module.css';
 export default async function NotesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ note?: string; person?: string; cat?: string; drafts?: string }>;
+  searchParams: Promise<{
+    note?: string;
+    person?: string;
+    project?: string;
+    cat?: string;
+    drafts?: string;
+  }>;
 }) {
   const params = await searchParams;
   const person = params.person ?? 'all';
+  const project = params.project ?? 'all';
   const category = params.cat ?? 'all';
   const draftsOnly = params.drafts === '1';
 
   const vault = getVault();
   const people = vault.people.map((p) => ({ slug: p.slug, name: p.displayName }));
+  const projects = vault.projects.map((p) => ({ id: p.id, title: p.title }));
   const nameOf = (slug: string) => vault.peopleBySlug.get(slug)?.displayName ?? slug;
+  const projectTitleOf = (id: string) => vault.projectsById.get(id)?.title ?? null;
 
   const filtered = vault.notes
     .filter((n) => {
       if (person === 'inbox') return n.location === 'inbox';
       if (person === 'general') return n.personSlug === null;
       if (person !== 'all') return n.personSlug === person;
+      return true;
+    })
+    .filter((n) => {
+      if (project === 'none') return n.project === null;
+      if (project !== 'all') return n.project === project;
       return true;
     })
     .filter((n) => category === 'all' || n.category === category)
@@ -62,6 +76,7 @@ export default async function NotesPage({
     const p = new URLSearchParams();
     p.set('note', path);
     if (person !== 'all') p.set('person', person);
+    if (project !== 'all') p.set('project', project);
     if (category !== 'all') p.set('cat', category);
     if (draftsOnly) p.set('drafts', '1');
     return `/notes?${p}`;
@@ -77,6 +92,7 @@ export default async function NotesPage({
           html: renderMarkdown(body),
           date: selected.date ?? '',
           personSlug: selected.personSlug,
+          project: selected.project,
           category: selected.category,
           draft: selected.draft,
           pinned: selected.pinned,
@@ -92,7 +108,9 @@ export default async function NotesPage({
             <PageHeader title="Notes" subtitle={subtitle} level="title" />
             <NoteFilters
               people={people}
+              projects={projects}
               person={person}
+              project={project}
               category={category}
               draftsOnly={draftsOnly}
             />
@@ -122,6 +140,9 @@ export default async function NotesPage({
                   {note.pinned ? <Pill tone="info">Pinned</Pill> : null}
                   <Text level="small" tone="muted">
                     {note.date ? shortDate(note.date) : 'no date'} · {where}
+                    {note.project && projectTitleOf(note.project)
+                      ? ` · ${projectTitleOf(note.project)}`
+                      : ''}
                   </Text>
                 </Row>
               </Stack>
@@ -150,7 +171,7 @@ export default async function NotesPage({
       </div>
 
       {editorNote ? (
-        <NoteEditor note={editorNote} people={people} />
+        <NoteEditor note={editorNote} people={people} projects={projects} />
       ) : (
         <div className={`scroll ${styles.editorCol}`}>
           <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.notes.unselected} standalone />

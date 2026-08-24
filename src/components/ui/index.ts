@@ -30,6 +30,7 @@ export { SyncBadge } from './SyncBadge';
 export { Icon, type IconTone } from './Icon';
 export {
   AddIcon,
+  ArchiveIcon,
   CalendarIcon,
   CheckIcon,
   CommitIcon,
@@ -45,6 +46,7 @@ export {
   PushIcon,
   RefreshIcon,
   RemoveIcon,
+  RestoreIcon,
 } from './icons';
 export { IconTile } from './IconTile';
 export { Checkbox, DateInput, Field, type Option, Select, Textarea, TextInput } from './Input';
@@ -58,6 +60,7 @@ export {
   Spacer,
   Stack,
 } from './Layout';
+export { Meter, type MeterTone } from './Meter';
 export { NavItem, NavList } from './NavList';
 export { CategoryPill, Pill, type PillTone } from './Pill';
 export { Prose } from './Prose';

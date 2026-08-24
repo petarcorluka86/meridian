@@ -50,6 +50,45 @@ export const PlanEntry = z.object({
 export const PlanEntries = z.array(PlanEntry);
 export type PlanEntry = z.infer<typeof PlanEntry>;
 
+/**
+ * A checkpoint the project has to pass. Not a task: a phase is how you know
+ * where the project stands, and it is ticked off by hand rather than by
+ * finishing anything in particular.
+ */
+export const ProjectPhase = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  note: z.string().default(''),
+  done: z.boolean().default(false),
+});
+export type ProjectPhase = z.infer<typeof ProjectPhase>;
+
+/**
+ * Work that runs longer than a task. One record per project in `projects.json`,
+ * the same way tasks and time are one file each — a mature vault has tens of
+ * projects, not thousands, and splitting them would buy nothing.
+ *
+ * Links live inside the record rather than in a `projects/<id>/links.json`,
+ * because a project has no folder: its notes stay in the person folder or in
+ * `notes/general/` and carry the project in their front matter. One file is the
+ * whole store for a project.
+ *
+ * Archiving is a flag, never a delete. Nothing is removed and it always comes
+ * back.
+ */
+export const ProjectEntry = z.object({
+  id: Slug,
+  title: z.string().min(1),
+  description: z.string().default(''),
+  phases: z.array(ProjectPhase).default([]),
+  links: z.array(LinkEntry).default([]),
+  archived: z.boolean().default(false),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export const ProjectEntries = z.array(ProjectEntry);
+export type ProjectEntry = z.infer<typeof ProjectEntry>;
+
 export const TaskPriority = z.enum(['urgent', 'important', 'normal']);
 export const TaskEntry = z.object({
   id: z.string().min(1),
@@ -60,6 +99,8 @@ export const TaskEntry = z.object({
   status: z.enum(['todo', 'done']).default('todo'),
   kind: z.enum(['task', 'waiting']).default('task'),
   personSlug: Slug.nullable().default(null),
+  /** A task belongs to a project the same way it belongs to a person: both, or neither. */
+  projectId: Slug.nullable().default(null),
   completedAt: z.string().nullable().default(null),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -100,10 +141,17 @@ export const NOTE_CATEGORIES = [
 ] as const;
 export type NoteCategory = (typeof NOTE_CATEGORIES)[number];
 
-/** Front matter only. Who a note is about comes from its folder, never from here. */
+/**
+ * Front matter only. Who a note is about comes from its folder, never from here.
+ *
+ * A project does not: a note about Ana that belongs to the platform split still
+ * lives in Ana's folder, so `project` is a fact the path cannot carry and is the
+ * one key here that names something outside the note.
+ */
 export const NoteFrontmatter = z.object({
   category: z.enum(NOTE_CATEGORIES).catch('generic'),
   draft: z.coerce.boolean().catch(false),
   pinned: z.coerce.boolean().catch(false),
+  project: Slug.nullable().catch(null),
 });
 export type NoteFrontmatter = z.infer<typeof NoteFrontmatter>;

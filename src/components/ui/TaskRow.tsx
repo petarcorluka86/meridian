@@ -10,7 +10,7 @@ import { EditIcon } from './icons';
 import { Checkbox } from './Input';
 import { Pill, type PillTone } from './Pill';
 import { Rail, type Priority } from './Rail';
-import { TaskDialog, type TaskPerson } from './TaskDialog';
+import { TaskDialog, type TaskPerson, type TaskProject } from './TaskDialog';
 import { Text } from './Text';
 import { TextLink } from './TextLink';
 import styles from './TaskRow.module.css';
@@ -32,6 +32,9 @@ export type TaskView = {
   personSlug: string | null;
   /** Resolved on the server — a client component cannot read the vault. */
   personPhoto: string | null;
+  projectId: string | null;
+  /** Resolved on the server too. Null when the task names a project the vault has not got. */
+  projectName: string | null;
   kind: 'task' | 'waiting';
 };
 
@@ -52,15 +55,27 @@ const DUE_TONE: Record<TaskView['dueTone'], PillTone> = {
  * needs the roster for its Who field, so a screen that renders rows passes
  * `people`; without it the pencil is not drawn, because an edit dialog that
  * cannot say who a task belongs to would silently drop that field.
+ *
+ * `projects` works the same way and for the same reason, except that the dialog
+ * still opens without it: the Project field is simply not drawn, and the task
+ * keeps whichever project it already had. A select offering only "No project"
+ * would be a field that clears data by looking finished.
+ *
+ * `showProject` is off where the project is already the context — a project's own
+ * page, where every row on it is the same chip.
  */
 export function TaskRow({
   task,
   people,
+  projects,
   showDue = true,
+  showProject = true,
 }: {
   task: TaskView;
   people?: readonly TaskPerson[];
+  projects?: readonly TaskProject[];
   showDue?: boolean;
+  showProject?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -86,6 +101,13 @@ export function TaskRow({
         </Text>
       </span>
       {task.kind === 'waiting' ? <Pill tone="warning">waiting</Pill> : null}
+      {showProject && task.projectName && task.projectId ? (
+        <TextLink href={`/projects/${task.projectId}`}>
+          <Text level="small" tone="inherit">
+            {task.projectName}
+          </Text>
+        </TextLink>
+      ) : null}
       {task.personName && task.personSlug ? (
         <TextLink href={`/people/${task.personSlug}`}>
           <Text level="small" tone="inherit">
@@ -117,7 +139,12 @@ export function TaskRow({
         />
       ) : null}
       {editing && people ? (
-        <TaskDialog task={task} people={people} onClose={() => setEditing(false)} />
+        <TaskDialog
+          task={task}
+          people={people}
+          projects={projects}
+          onClose={() => setEditing(false)}
+        />
       ) : null}
     </CardRow>
   );

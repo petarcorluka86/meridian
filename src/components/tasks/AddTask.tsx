@@ -13,6 +13,7 @@ import { Divider, Spacer } from '@/components/ui/Layout';
 import { Text } from '@/components/ui/Text';
 
 type Person = { slug: string; name: string };
+type Project = { id: string; title: string };
 type Priority = 'normal' | 'important' | 'urgent';
 
 const PRIORITIES: { value: Priority; label: string }[] = [
@@ -46,13 +47,14 @@ const PlusIcon = () => (
   </svg>
 );
 
-export function AddTask({ people }: { people: Person[] }) {
+export function AddTask({ people, projects }: { people: Person[]; projects: Project[] }) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState<Priority>('normal');
   const [due, setDue] = useState('none');
   const [customDate, setCustomDate] = useState(today());
   const [person, setPerson] = useState('');
+  const [project, setProject] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -70,6 +72,7 @@ export function AddTask({ people }: { people: Person[] }) {
         priority,
         dueDate: dueDate(),
         personSlug: person || null,
+        projectId: project || null,
       });
       if (result.ok) {
         setTitle('');
@@ -122,6 +125,15 @@ export function AddTask({ people }: { people: Person[] }) {
           value={person}
           onChange={setPerson}
           ariaLabel="Person"
+        />
+        <Select
+          options={[
+            { value: '', label: 'No project' },
+            ...projects.map((p) => ({ value: p.id, label: p.title })),
+          ]}
+          value={project}
+          onChange={setProject}
+          ariaLabel="Project"
         />
         <Spacer />
         <Button variant="primary" onClick={submit} pending={pending} icon={<AddIcon />}>

@@ -43,14 +43,26 @@ function titleSlugOf(note: Note): string {
   return withoutDate || slugifyTitle(note.title);
 }
 
+/**
+ * The four keys, in this order, and nothing else. `project` is last and is
+ * dropped when there is none — `serializeFrontmatter` omits an empty value — so a
+ * note that belongs to no project keeps the front matter it always had, byte for
+ * byte.
+ */
 function noteFile(note: {
   category: NoteCategory;
   draft: boolean;
   pinned: boolean;
+  project: string | null;
   body: string;
 }): string {
   return serializeFrontmatter(
-    { category: note.category, draft: note.draft, pinned: note.pinned },
+    {
+      category: note.category,
+      draft: note.draft,
+      pinned: note.pinned,
+      project: note.project ?? '',
+    },
     note.body,
   );
 }
@@ -85,7 +97,12 @@ export async function saveNoteBody(path: string, title: string, body: string): P
 
 export async function setNoteMeta(
   path: string,
-  patch: Partial<{ category: NoteCategory; draft: boolean; pinned: boolean }>,
+  patch: Partial<{
+    category: NoteCategory;
+    draft: boolean;
+    pinned: boolean;
+    project: string | null;
+  }>,
 ): Promise<void> {
   await rewrite(path, (_note, raw) => {
     const { data, body } = parseFrontmatter(raw);
@@ -95,6 +112,14 @@ export async function setNoteMeta(
 }
 
 export type MoveResult = { path: string; moved: boolean };
+
+/**
+ * Which project a note belongs to. A separate call from `setNoteMeta` only so
+ * that deleting a project has one obvious thing to call for each of its notes.
+ */
+export async function setNoteProject(path: string, project: string | null): Promise<void> {
+  await setNoteMeta(path, { project });
+}
 
 /**
  * Changing the date renames the file; changing the person moves it between
@@ -141,6 +166,7 @@ export async function createNote(input: {
   body?: string;
   category?: NoteCategory;
   personSlug?: string | null;
+  project?: string | null;
   draft?: boolean;
   date?: string;
 }): Promise<string> {
@@ -168,6 +194,7 @@ export async function createNote(input: {
       category: input.category ?? 'generic',
       draft: input.draft ?? false,
       pinned: false,
+      project: input.project ?? null,
       body,
     }),
   );

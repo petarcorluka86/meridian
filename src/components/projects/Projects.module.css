@@ -1,0 +1,21 @@
+/*
+ * Two rules the primitives cannot express, both about what shrinks first.
+ *
+ * A phase's label and its description are one block that has to give way to the
+ * number on its left and the pencil on its right; a footer field has to take the
+ * leftover width without collapsing when the button beside it grows.
+ */
+.phase {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.grow {
+  flex: 1 1 120px;
+  min-width: 90px;
+}
+
+.narrow {
+  flex: 0 1 140px;
+  min-width: 0;
+}

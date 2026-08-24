@@ -23,8 +23,14 @@ type Shared = {
 
 /**
  * Every button in the app. Three levels and two sizes, and that is the whole
- * set: one primary per form, neutral for everything beside it, danger only
- * inside a confirm dialog, ghost for an action that must not compete.
+ * set: one primary per form, neutral for everything beside it, ghost for an
+ * action that must not compete, and danger for the irreversible one — the
+ * confirm dialog's own button, and the button that opens it where that button
+ * would otherwise be indistinguishable from Edit.
+ *
+ * A danger button carries no glyph. `RemoveIcon` is always the danger tone,
+ * which is what the fill is already made of, and a dark-red trash on a red fill
+ * is a smudge.
  *
  * Changing the accent, the radius or the control height in `tokens.css` changes
  * every button on every screen, because no screen declares one.

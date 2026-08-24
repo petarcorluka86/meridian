@@ -42,8 +42,13 @@ export default async function TasksPage({
   const now = today();
 
   const people = vault.people.map((p) => ({ slug: p.slug, name: p.displayName }));
+  const projects = vault.projects.map((p) => ({ id: p.id, title: p.title }));
   const nameOf = (slug: string | null) =>
     slug ? (vault.peopleBySlug.get(slug)?.displayName ?? slug) : null;
+  // Null rather than the raw id when the vault has no such project: a chip
+  // showing a slug nobody recognises is worse than no chip.
+  const projectTitleOf = (id: string | null) =>
+    id ? (vault.projectsById.get(id)?.title ?? null) : null;
 
   // "Open" means open work of your own. A task you are waiting on someone else
   // for is counted and filtered separately.
@@ -78,6 +83,8 @@ export default async function TasksPage({
       personName: nameOf(t.personSlug),
       personSlug: t.personSlug,
       personPhoto: t.personSlug ? photoPath(t.personSlug) : null,
+      projectId: t.projectId,
+      projectName: projectTitleOf(t.projectId),
       kind: t.kind,
     }));
 
@@ -127,7 +134,7 @@ export default async function TasksPage({
     <Page width="narrow">
       <PageHeader title="Tasks" subtitle={`${open.length} open · ${doneCount} done`} />
       <Stack gap={4}>
-        <AddTask people={people} />
+        <AddTask people={people} projects={projects} />
 
         <Card>
           <CardToolbar>
@@ -149,7 +156,7 @@ export default async function TasksPage({
             <div key={group.key}>
               <CardGroup label={group.label} tone={group.tone} count={group.rows.length} />
               {group.rows.map((task) => (
-                <TaskRow key={task.id} task={task} people={people} />
+                <TaskRow key={task.id} task={task} people={people} projects={projects} />
               ))}
             </div>
           ))}

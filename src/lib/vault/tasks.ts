@@ -41,6 +41,7 @@ export type NewTask = {
   priority?: TaskEntry['priority'];
   dueDate?: string | null;
   personSlug?: string | null;
+  projectId?: string | null;
   kind?: TaskEntry['kind'];
 };
 
@@ -59,6 +60,7 @@ export async function addTask(input: NewTask): Promise<void> {
       status: 'todo',
       kind: input.kind ?? 'task',
       personSlug: input.personSlug || null,
+      projectId: input.projectId || null,
       completedAt: null,
       createdAt: now,
       updatedAt: now,
@@ -96,6 +98,7 @@ export type TaskPatch = {
   priority: TaskEntry['priority'];
   dueDate: string | null;
   personSlug: string | null;
+  projectId: string | null;
   kind: TaskEntry['kind'];
 };
 
@@ -117,6 +120,7 @@ export async function updateTask(id: string, patch: TaskPatch): Promise<void> {
             priority: patch.priority,
             dueDate: patch.dueDate,
             personSlug: patch.personSlug || null,
+            projectId: patch.projectId || null,
             kind: patch.kind,
             updatedAt: stamp(),
           }
