@@ -56,22 +56,38 @@ describe('the server an agent actually talks to', () => {
 
     // The count is asserted here, where a test maintains it, rather than written
     // into a Markdown file where nothing does.
-    expect(tools).toHaveLength(16);
+    expect(tools).toHaveLength(32);
     expect(tools.map((t) => t.name).sort()).toEqual([
       'add_link',
       'add_task',
       'commit',
       'complete_task',
+      'delete_hours',
+      'delete_task',
+      'list_notes',
       'list_people',
       'list_projects',
+      'list_tasks',
       'log_hours',
       'move_note',
       'plan_rise',
+      'read_compensation',
+      'read_day',
+      'read_egress',
+      'read_hours',
       'read_note',
       'read_person',
+      'read_project',
+      'read_sources',
+      'remove_link',
+      'remove_plan',
       'search',
+      'update_hours',
+      'update_task',
       'vault_diff',
+      'vault_health',
       'vault_problems',
+      'vault_status',
       'write_about',
       'write_note',
     ]);
@@ -79,6 +95,28 @@ describe('the server an agent actually talks to', () => {
       expect(tool.description, tool.name).toBeTruthy();
       expect(tool.inputSchema, tool.name).toBeTruthy();
     }
+  });
+
+  it('carries the annotations to the client, which is where they are used', async () => {
+    const client = await connected();
+    const { tools } = await client.listTools();
+    const byName = new Map(tools.map((t) => [t.name, t.annotations]));
+
+    // A client decides what it may run unattended from these. The list in
+    // tools.ts is only worth keeping if it survives the trip.
+    expect(byName.get('list_people')).toMatchObject({ readOnlyHint: true });
+    expect(byName.get('delete_task')).toMatchObject({ destructiveHint: true });
+    for (const tool of tools) expect(tool.annotations, tool.name).toBeDefined();
+  });
+
+  it('tells the client what the vault is before it asks anything', async () => {
+    const client = await connected();
+    const instructions = client.getInstructions() ?? '';
+
+    // The two rules no single tool description can carry.
+    expect(instructions).toContain('BambooHR');
+    expect(instructions).toMatch(/read-only|reads a cache/i);
+    expect(instructions).toContain('move_note');
   });
 
   it('runs a tool and returns what the store holds', async () => {

@@ -1,4 +1,5 @@
 import { now as clockNow } from '@/lib/clock';
+import { meetingState } from '@/lib/sources/day';
 import { getVault } from '@/lib/vault/index';
 import { loadConfig } from '@/lib/env';
 import { readBamboo } from '@/lib/sources/bamboohr';
@@ -51,17 +52,13 @@ export default async function OverviewPage() {
 
   /*
    * Where a meeting sits relative to now. Decided here rather than in the card
-   * for the same reason the clock is: the visitor's machine must not be what
-   * says a meeting is running. The cost is that it is only as current as the
-   * last render — the shell re-renders when a source refetches, so this lags by
-   * up to CALENDAR_MAX_AGE.
+   * because the visitor's machine must not be what says a meeting is running,
+   * and in `sources/day.ts` rather than here because `read_day` has to answer it
+   * the same way. The cost is that it is only as current as the last render —
+   * the shell re-renders when a source refetches, so this lags by up to
+   * CALENDAR_MAX_AGE.
    */
   const instant = clockNow();
-  const stateOf = (start: string, end: string): MeetingView['state'] => {
-    if (Date.parse(end) <= instant) return 'past';
-    if (Date.parse(start) <= instant) return 'now';
-    return 'upcoming';
-  };
 
   /*
    * Only what happens at a time. An all-day entry on a work calendar is almost
@@ -82,7 +79,7 @@ export default async function OverviewPage() {
       duration: durationOf(e.start, e.end),
       summary: e.summary,
       conference: e.conference,
-      state: stateOf(e.start, e.end),
+      state: meetingState(e.start, e.end, instant),
     }));
 
   const photoOf = (slug: string | null) => (slug ? photoPath(slug) : null);

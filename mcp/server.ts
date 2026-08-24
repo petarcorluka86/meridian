@@ -9,11 +9,31 @@
 import { McpServer, type ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTools, type Tooling } from './tools.js';
 
+/**
+ * What the client is told before it asks anything.
+ *
+ * Not a summary of the tools — they describe themselves. This is what none of
+ * them can say on its own: what the vault is, and the two rules an agent would
+ * otherwise have to break once to discover.
+ */
+const INSTRUCTIONS = `Meridian is a manager's hub over a folder of plain files — the vault. People, notes, tasks, hours and projects are files on disk; meetings, absences, approvals, pull requests and pay are cached copies of what BambooHR, Google Calendar and GitHub said when they were last asked.
+
+Two things hold everywhere:
+
+Nothing here writes to BambooHR, Google or GitHub, and nothing here reads from them either. Every source tool reads a cache and says how old it is. There is no way to refresh one from this server and that is deliberate — if the numbers are stale, say how old they are and carry on. Refreshing is somebody pressing the badge in the app.
+
+A note's person comes from the folder it is in, and its project from its front matter. Use move_note to change who a note is about; editing a path by hand is not a supported way to do it.
+
+Projects are read-only through this server. list_projects and read_project name them so a task or a note can point at one; creating, phasing and archiving a project happen in the app.`;
+
 export function createServer(): McpServer {
-  const server = new McpServer({ name: 'meridian-vault', version: '0.1.0' });
+  const server = new McpServer(
+    { name: 'meridian-vault', version: '0.1.0' },
+    { instructions: INSTRUCTIONS },
+  );
 
   registerTools({
-    tool: (name, description, inputSchema, handler) => {
+    tool: (name, description, inputSchema, handler, annotations) => {
       // The one assertion left, and it is on the argument type alone.
       //
       // This used to be `registerTools(server as unknown as Tooling)`, which
@@ -35,7 +55,7 @@ export function createServer(): McpServer {
       // the SDK, and that a bad argument is refused rather than handed on.
       server.registerTool(
         name,
-        { description, inputSchema },
+        { description, inputSchema, ...(annotations ? { annotations } : {}) },
         handler as unknown as ToolCallback<typeof inputSchema>,
       );
     },

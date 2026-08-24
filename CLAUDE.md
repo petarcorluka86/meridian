@@ -128,6 +128,14 @@ file, it belongs in Help instead.
   mark the row Open; if it does not, say so in the row rather than leaving the
   reason to be re-derived later. Removing a capability removes its tool and its
   row together.
+- **An agent may not make this app go to the network.** Every sync is a `GET`, so
+  this is not the read-only rule above — that one is about writes and this one is
+  about requests at all. What it settles is who spends the quota and when.
+  Everything under `mcp/` reads `.cache/` and says how old the answer is; nothing
+  under `mcp/` may name a sync, the layers under one, or `fetch`.
+  `tests/unit/readonly.test.ts` fails the build on all three, because adding
+  `syncCalendar` to a tool is one import that type-checks, leaves every other test
+  green, and quietly hands an agent BambooHR.
 - **Biome is the linter and the formatter.** Suppress a rule only at the site, with
   the argument in the suppression comment. Never widen `biome.json` to silence one
   file.
@@ -644,6 +652,12 @@ exists in the app.
 an agent gets validation, snapshots and conflict checks rather than hand-editing
 JSON. **Prefer those tools, or `npm run vault`, over writing vault files
 directly.**
+
+The tools read the vault and the caches in front of it, and write the vault only.
+`read_day` is the Overview — meetings, approvals, presence, what is late, reviews
+waiting, the balance, what is unsaved — and like every other source tool it reads
+`.cache/` and names its own age. Nothing there can refresh itself; see the rule
+above.
 
 `list_projects` is read-only, and that is the one deliberate asymmetry in the
 set. An agent needs to *name* a project to file a task or a note against it —

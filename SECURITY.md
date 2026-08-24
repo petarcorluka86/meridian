@@ -33,6 +33,7 @@ Anything that breaks one of these:
 | --- | --- |
 | No request to BambooHR, Google or GitHub uses a method other than `GET`, apart from the OAuth token endpoint by exact URL | `src/lib/net-guard.ts`, `tests/unit/readonly.test.ts`, the `pre-commit` hook |
 | No outbound request reaches a host outside the allow-list, on any hop of a redirect | `src/lib/net-guard.ts` |
+| Nothing reachable over MCP makes an outbound request at all — an agent reads caches and cannot refresh them | `tests/unit/readonly.test.ts` |
 | The app is not reachable from another machine, and not drivable by a web page in the browser | binds `127.0.0.1`; the `Host` and cross-origin checks in `src/proxy.ts` |
 | No path escapes the vault, by traversal or through a symlink | `safeVaultPath()` in `src/lib/vault/paths.ts` |
 | A file served from the vault cannot execute against the app's own origin | `src/app/vault-file/route.ts` serves four image extensions and nothing else |

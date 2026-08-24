@@ -274,3 +274,48 @@ describe('the allow-list survives a redirect', () => {
     );
   });
 });
+
+/**
+ * The MCP server reads caches and never fills them.
+ *
+ * Every sync is a GET, so this is not the read-only rule — it is a separate
+ * decision, and it is the user's: an agent may not make this app go to the
+ * network. It can see that a cache is four hours old and say so; it cannot spend
+ * somebody's API quota to make it younger. Refreshing is a person pressing a
+ * badge, or the shell's own minute timer.
+ *
+ * Enforced here because the alternative is remembering. Adding `syncCalendar` to
+ * a tool is one import, it type-checks, every other test stays green, and the
+ * only thing that changes is that an agent can now reach BambooHR.
+ */
+describe('the MCP server never goes to the network', () => {
+  const OUTBOUND = [
+    // The syncs themselves.
+    /\bsync[A-Z]\w*/,
+    // The Server Actions that call them.
+    /\bsyncSourceAction\b/,
+    /\brefreshSourcesAction\b/,
+    // The layers underneath, in case a tool ever reaches past the syncs.
+    /\bbambooGet\b/,
+    /\bcachePhoto\b/,
+    /\baccessToken\b/,
+    /\bfetch\s*\(/,
+  ];
+
+  /** Prose may name a sync; code may not. */
+  const withoutComments = (source: string) =>
+    source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+
+  it('reaches nothing that would make a request', () => {
+    const offenders = everything
+      .filter(({ file }) => file.startsWith('mcp/'))
+      .flatMap(({ file, source }) => {
+        const code = withoutComments(source);
+        return OUTBOUND.filter((pattern) => pattern.test(code)).map(
+          (pattern) => `${file}: ${pattern}`,
+        );
+      });
+
+    expect(offenders).toEqual([]);
+  });
+});
