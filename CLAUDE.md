@@ -520,7 +520,7 @@ including into the pixel baselines. That is what the guard exists to prevent, an
 | File | Use |
 | --- | --- |
 | `brand/meridian-mark.svg` | The mark alone. Vector, inherits `currentColor`. **Use this in the UI.** |
-| `brand/meridian-icon.svg` | The app icon: the mark in white on a filled rounded tile. The source for every raster icon. |
+| `brand/meridian-icon.svg` | The app icon: the mark in ink on a filled white tile. The source for every raster icon. |
 | `brand/meridian-logo-512.png` | Full logo with the wordmark, for anything print-sized or external. |
 | `brand/favicon.ico` | Multi-size, for browsers that still ask for it. |
 
@@ -531,14 +531,20 @@ square is **broken** where the diagonal crosses it; that break is the mark.
 **The icon is a filled tile, the mark is not.** In the interface the mark is
 three strokes in `currentColor` on whatever it sits on. As an icon that failed:
 at 16px, three hairlines on a transparent ground are gone. So
-`brand/meridian-icon.svg` puts the same paths in white on a solid rounded tile —
-and places them with an SVG `transform` rather than by rewriting the numbers, so
+`brand/meridian-icon.svg` puts the same paths on a solid rounded tile — and
+places them with an SVG `transform` rather than by rewriting the numbers, so
 "one geometry" stays provable rather than asserted.
+
+**The tile is white and the strokes are the ink**, which is a chosen trade: on a
+light tab bar or a light dock the tile's edge is invisible and the mark alone
+carries the shape. The tile was near-black first, for exactly that edge. Putting
+it back is a one-line change to the `rect` fill and the `stroke`, in that one
+file.
 
 `public/icon.svg` is that file; `favicon.ico` (16/32/48), `icon-96`, `icon-192`,
 `icon-512` and `apple-touch-icon` are rasterised from it. There is no script for
-that — it has happened twice — so if it happens again, render the SVG at each size
-and pack the three small ones into an ICO with PNG payloads.
+that — it has happened three times — so if it happens again, render the SVG at
+each size and pack the three small ones into an ICO with PNG payloads.
 
 **The wordmark needs room.** Below roughly 120 px the word MERIDIAN stops being
 legible and reads as a smudge — use the mark alone at those sizes.
