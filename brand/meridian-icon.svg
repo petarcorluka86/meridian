@@ -1,20 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <title>Meridian</title>
   <!--
-    A filled tile with the mark in white. The stroked mark on its own vanished at
+    A filled tile with the mark on it. The stroked mark on its own vanished at
     16px: three hairlines on transparent, at the size where a favicon actually
-    lives. A solid tile gives it something to be white against.
+    lives. A solid tile gives it something to be drawn against.
+
+    The tile is white, so on a light tab bar its edge is invisible and the mark
+    alone carries the shape. That is the chosen trade — a hairline border would
+    hold the square but is not the mark.
 
     The paths are the canonical mark from brand/meridian-mark.svg, unchanged, in
     its own 30-unit box — placed by a transform rather than by rewriting the
     numbers, so the favicon, the sidebar and the setup screen are provably one
     geometry rather than three near-misses.
   -->
-  <rect width="32" height="32" rx="7.5" fill="#1a1a18" />
+  <rect width="32" height="32" rx="7.5" fill="#ffffff" />
   <g
     transform="translate(16 16) scale(0.909) translate(-15 -15)"
     fill="none"
-    stroke="#ffffff"
+    stroke="#1a1a18"
     stroke-width="2.6"
     stroke-linecap="round"
     stroke-linejoin="round"
