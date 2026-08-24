@@ -30,6 +30,24 @@ so far. A migration that fails blocks the app rather than guessing.
   as a fill. The same blue does both jobs on paper; on a dark ground a blue dark
   enough to carry white text cannot be read as text, so the two part company
   there and stay identical here.
+- **Connections, on the Settings screen** — whether each of the three sources is
+  set up, how old its answer is, and the badge that goes and looks again. A
+  source that is not set up names the keys it is waiting for rather than only
+  saying it is off.
+- **Reset**, and it is the only thing in the app a snapshot cannot undo. Emptying
+  the vault takes its Git history and its snapshots with it, because both live
+  inside the folder, and the confirmation says so instead of pointing at
+  `vault:restore`. A full reset removes `.env` as well and reopens at the setup
+  wizard. Guarded against the three ways it could take something else: the
+  fixture vault, a `VAULT_PATH` left at `/`, and one left at `~`.
+- **The write gate now covers deleting** — `tests/unit/paths.test.ts` names the
+  five files allowed to remove something from disk, the way it already named the
+  eight allowed to write. Nothing checked deletions before, which was survivable
+  only while the sole deletion in the app was a snapshot being pruned.
+- **No test can read the developer's own `.env`** — `tests/setup.ts` points
+  `MERIDIAN_ENV_PATH` at a path that cannot exist. A test that clears
+  `VAULT_PATH` used to fall through to the real vault, which is how the reset's
+  own test emptied one.
 - **The pixel gate covers both schemes** — sixteen screens each, thirty-two
   images, the scheme pinned per Playwright project and the stored theme pinned to
   `system` so nothing about the machine decides what gets recorded.

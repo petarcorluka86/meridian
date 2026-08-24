@@ -80,12 +80,20 @@ file, it belongs in Help instead.
 ## Rules
 
 - **Never introduce a database.** The vault filesystem is the only store.
+- **No test may read the developer's own `.env`.** `tests/setup.ts` points
+  `MERIDIAN_ENV_PATH` at a path that cannot exist, for every test. Without it a
+  test that clears `process.env.VAULT_PATH` — to check what the app does with no
+  vault — falls through to the real one, and every assertion after that is about
+  somebody's actual folder. That emptied a real vault once, in the test for the
+  reset itself.
 - **Every write to a vault record goes through `src/lib/vault/write.ts`** —
   snapshot, mtime conflict check, atomic rename. Seven other files write to disk
   and are right to: credentials, the disposable caches, the append-only egress
   log, the scaffold that runs before there is a vault to write through, and the
   format version. They are named in `tests/unit/paths.test.ts`, and an eighth
-  has to be added there deliberately.
+  has to be added there deliberately. **Removing a file is the same rule from the
+  other side** and is listed separately in that file: five may delete, and the
+  reset is the only one whose deletion is not something it wrote itself.
 - **Every path goes through `safeVaultPath()`** in `src/lib/vault/paths.ts`.
 - **A note's person comes from its folder**, never from front matter. Front matter
   carries `category`, `draft`, `pinned`, `project` and nothing that repeats the
@@ -346,10 +354,24 @@ committed.
 Thresholds (`contactGapDays`, `timeBalanceLimitHours`, `uncommittedChangesDays`)
 live in `config.json` inside the vault. Credentials and paths live in `.env` in
 the app folder. Neither has a screen, and the Settings screen is not the
-beginning of one: it holds the theme and nothing else, because the theme is the
-one setting that is about this display rather than about the team or about a
-credential. Anything that belongs in a file stays in the file. `VAULT_PATH`
-defaults to `~/meridian/vault`.
+beginning of one. It holds three things, and what they have in common is that
+none of them is a value to type: the theme, which is about this display rather
+than about the team; whether the three sources are actually answering, which is a
+state rather than a setting; and the two destructive actions, which have to live
+somewhere a person can find them on purpose. A field over `config.json` or over a
+credential still does not belong there. `VAULT_PATH` defaults to
+`~/meridian/vault`.
+
+**Emptying the vault is the one thing a snapshot cannot undo**, and
+`src/lib/vault/reset.ts` is the whole of it: `.snapshots/` and `.git` both live
+inside the vault, so they go with it, and the confirmation says exactly that
+rather than mentioning `vault:restore` the way every other deletion does. The
+guards there matter more than the six lines that do the work — the fixture vault,
+a `VAULT_PATH` left at `/`, and a `VAULT_PATH` left at `~` are each a way for
+`rm -rf` to take something it must not. A full reset also removes `.env`, through
+`removeEnv()`, which unsets the keys in `process.env` as well: Next preloads that
+file at boot, so a deleted `VAULT_PATH` still reading as set is how the app would
+come back looking configured with nothing behind it.
 
 ---
 

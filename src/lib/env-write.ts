@@ -76,6 +76,34 @@ export function writeEnv(envPath: string, edits: EnvEdit): void {
   resetConfig();
 }
 
+/**
+ * Deletes .env, which only the full reset does.
+ *
+ * The file is not the only copy of itself: Next loads it into process.env at
+ * boot and `loadConfig` prefers process.env, so a deleted VAULT_PATH would still
+ * read as set and the app would look configured with nothing behind it. The keys
+ * are read out of the file before it goes, and unset in this process too — which
+ * is what makes the next render the setup wizard rather than a broken vault.
+ */
+export function removeEnv(envPath: string): void {
+  let source = '';
+  try {
+    source = fs.readFileSync(envPath, 'utf8');
+  } catch {
+    source = '';
+  }
+
+  fs.rmSync(envPath, { force: true });
+
+  for (const line of source.split('\n')) {
+    const match = KEY.exec(line);
+    // A commented-out key was never in the environment to begin with.
+    if (match && !match[2] && match[3]) delete process.env[match[3]];
+  }
+
+  resetConfig();
+}
+
 /** True when the file is readable only by its owner. */
 export function envIsPrivate(envPath: string): boolean {
   try {
