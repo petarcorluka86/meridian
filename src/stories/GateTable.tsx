@@ -35,6 +35,11 @@ const ROWS: { rule: string; gate: string | null; verdict: string }[] = [
     verdict: 'Every box-shadow is var(--shadow-lift) or var(--shadow-dialog)',
   },
   {
+    rule: 'Every colour answers for both schemes',
+    gate: 'tests/unit/design-system.test.ts',
+    verdict: 'A token with one value renders in the wrong scheme and fails nothing else',
+  },
+  {
     rule: 'Only Card declares the card',
     gate: 'tests/unit/design-system.test.ts',
     verdict: 'Surface plus a border plus a card radius may appear in one file',

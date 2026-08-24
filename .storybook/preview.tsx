@@ -15,7 +15,7 @@ const preview: Preview = {
     docs: { toc: true },
     backgrounds: {
       options: {
-        desk: { name: 'Desk — the paper ground', value: 'var(--desk)' },
+        desk: { name: 'Desk — the ground', value: 'var(--bg)' },
         surface: { name: 'Surface — a card', value: 'var(--surface)' },
         sunken: { name: 'Sunken — a card header', value: 'var(--surface-sunken)' },
       },
@@ -63,13 +63,39 @@ const preview: Preview = {
       },
     },
   },
-  initialGlobals: { backgrounds: { value: 'desk' } },
+  /**
+   * The design system has two schemes, so its own view of itself has to be able
+   * to show either. The toolbar sets exactly what the app's root layout sets —
+   * `data-theme`, or nothing at all for system — and `tokens.css` does the rest,
+   * which is the point: there is no Storybook-only palette to drift.
+   */
+  globalTypes: {
+    theme: {
+      description: 'Colour scheme',
+      toolbar: {
+        title: 'Theme',
+        icon: 'contrast',
+        items: [
+          { value: 'system', title: 'System' },
+          { value: 'light', title: 'Light' },
+          { value: 'dark', title: 'Dark' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+  },
+  initialGlobals: { backgrounds: { value: 'desk' }, theme: 'light' },
   decorators: [
-    (Story) => (
-      <div style={{ fontFamily: 'var(--sans)', color: 'var(--text-body)' }}>
-        <Story />
-      </div>
-    ),
+    (Story, { globals }) => {
+      if (globals.theme === 'system') delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = globals.theme;
+
+      return (
+        <div style={{ fontFamily: 'var(--sans)', color: 'var(--fg)' }}>
+          <Story />
+        </div>
+      );
+    },
   ],
 };
 

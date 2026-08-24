@@ -12,6 +12,28 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ### Added
 
+- **A dark scheme**, and a Settings screen with the switch on it: Light, Dark or
+  System. Meridian opens in Light until told otherwise — it is a light app that
+  has a dark scheme, and which one it opens in is a choice made on that screen
+  rather than one the Mac makes at sunset. System hands the decision back and
+  changes with the Mac; Light and Dark ignore it.
+  The choice lives in `MERIDIAN_THEME` in `.env` — the app's own setting, not the
+  team's, so it never travels with the vault — and the server renders it onto the
+  document, so the first paint is already the right scheme rather than a flash of
+  the wrong one.
+- **One set of tokens, two schemes.** Every colour in `tokens.css` is a
+  `light-dark()` pair and `color-scheme` picks the half, which also hands
+  scrollbars, date pickers and the rest of the browser's own furniture to the
+  right one. There is no second palette to keep in step, and the design-system
+  gate now fails the build on a colour that answers for only one scheme.
+- **`--accent-ink` and `--accent-ink-hover`** — the accent as words rather than
+  as a fill. The same blue does both jobs on paper; on a dark ground a blue dark
+  enough to carry white text cannot be read as text, so the two part company
+  there and stay identical here.
+- **The pixel gate covers both schemes** — sixteen screens each, thirty-two
+  images, the scheme pinned per Playwright project and the stored theme pinned to
+  `system` so nothing about the machine decides what gets recorded.
+
 - **Projects** — work that runs longer than a task. A title, a description and
   phases: the checkpoints it has to pass, ticked off by hand and independent of
   tasks. A project with phases shows how far it has got as a bar and a fraction;

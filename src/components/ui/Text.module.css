@@ -72,7 +72,7 @@
   color: inherit;
 }
 .text[data-tone="accent"] {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 .text[data-tone="danger"] {
   color: var(--danger);

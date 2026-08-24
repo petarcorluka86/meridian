@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import path from 'node:path';
 import { expect, type Page, test } from '@playwright/test';
 
 /**
@@ -29,6 +28,7 @@ const SCREENS = [
   { name: 'project', url: '/projects/platform-split' },
   { name: 'timebalance', url: '/timebalance' },
   { name: 'vault', url: '/vault' },
+  { name: 'settings', url: '/settings' },
   { name: 'help', url: '/help' },
 ];
 
@@ -40,23 +40,24 @@ const SCREENS = [
 const OTHER = 'http://127.0.0.1:3312';
 
 /**
- * Baselines are per-platform: font rendering differs enough between macOS, Linux
- * and Windows that one machine's image is not another's. Rather than fail a
- * fresh clone on a platform nobody has recorded yet, the gate says so and skips.
+ * Baselines are per-scheme and per-platform: the app has a light and a dark of
+ * every screen, and font rendering differs enough between macOS, Linux and
+ * Windows that one machine's image is not another's. Rather than fail a fresh
+ * clone on a platform nobody has recorded yet, the gate says so and skips.
  * Recording them is one command, and it has to be a deliberate act — a baseline
  * generated automatically would gate nothing.
+ *
+ * The path comes from Playwright rather than being rebuilt here: the template in
+ * the config is the one place that decides what a baseline is called.
  */
-function baselineFor(name: string): string {
-  return path.join(import.meta.dirname, 'baseline', `${name}-${process.platform}.png`);
-}
-
 function skipWithoutBaseline(name: string): void {
   // Not while recording — that is the run whose whole job is to create the file
   // this would skip for being absent.
   if (test.info().config.updateSnapshots !== 'none') return;
+  const info = test.info();
   test.skip(
-    !fs.existsSync(baselineFor(name)),
-    `No ${process.platform} baseline for "${name}". Run: npm run pixel:accept`,
+    !fs.existsSync(info.snapshotPath(`${name}.png`)),
+    `No ${info.project.name} ${process.platform} baseline for "${name}". Run: npm run pixel:accept`,
   );
 }
 

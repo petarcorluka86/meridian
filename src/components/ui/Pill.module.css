@@ -41,7 +41,7 @@
   background: var(--info-bg);
 }
 .pill[data-tone="accent"] {
-  color: var(--accent);
+  color: var(--accent-ink);
   background: var(--accent-bg);
 }
 

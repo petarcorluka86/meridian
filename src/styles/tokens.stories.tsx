@@ -26,6 +26,8 @@ const ACCENT = [
   '--accent-hover',
   '--accent-border',
   '--accent-bg',
+  '--accent-ink',
+  '--accent-ink-hover',
   '--accent-fg',
   '--accent-ring',
 ];
@@ -112,7 +114,7 @@ export const Colour: StoryObj = {
         </Section>
         <Section
           title="Accent"
-          note="One blue, and it means interactive. Nothing decorative is this colour."
+          note="One blue, and it means interactive. Nothing decorative is this colour. Two of it in the dark: a blue dark enough to carry white text cannot be read as text itself, so the fill and the ink part company on a dark ground and are the same colour on paper."
         >
           <Swatches tokens={tokens} names={ACCENT} />
         </Section>

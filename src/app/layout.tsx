@@ -27,15 +27,31 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  /*
-   * The paper ground, so a standalone window does not flash white around it.
-   * The one place a colour is written out twice: this is a manifest value read
-   * by the browser chrome before any stylesheet exists, so it cannot be a token.
-   * It is `--bg`, and it has to be changed in both places.
-   */
-  themeColor: '#f2f0ec',
-};
+/*
+ * `--bg`, both halves of it, written out a second time.
+ *
+ * This is a manifest value the browser chrome reads before any stylesheet
+ * exists, so it cannot be a token — and it is the only place in the app where a
+ * colour is duplicated. Change `--bg` in tokens.css and change these.
+ */
+export const GROUND = { light: '#f2f0ec', dark: '#161310' } as const;
+
+/**
+ * Dynamic because the theme is: a stored choice names one colour, and `system`
+ * hands the question back to the browser as two media-scoped ones — the same
+ * shape as `color-scheme: light dark` in tokens.css, said in the one place that
+ * cannot read a token.
+ */
+export async function generateViewport(): Promise<Viewport> {
+  const { theme } = loadConfig();
+  if (theme === 'light' || theme === 'dark') return { themeColor: GROUND[theme] };
+  return {
+    themeColor: [
+      { media: '(prefers-color-scheme: light)', color: GROUND.light },
+      { media: '(prefers-color-scheme: dark)', color: GROUND.dark },
+    ],
+  };
+}
 
 function RedirectToSetup(): never {
   redirect('/setup');
@@ -43,6 +59,7 @@ function RedirectToSetup(): never {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const health = vaultHealth();
+  const { theme, envPath } = loadConfig();
   const path = (await headers()).get('x-meridian-path') ?? '/';
   // Help still renders, so the page explaining the fix is always reachable.
   // The wizard replaces the bare panel for an unset vault: it can actually fix
@@ -57,13 +74,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const blocked = blocksEditing(health) && !path.startsWith('/help');
 
   return (
-    <html lang="en">
+    /*
+     * The attribute is the whole theme mechanism, and it is absent for `system`
+     * — which is what makes system the default rather than a third palette.
+     * Rendered here, on the server, so the first paint is already right; a
+     * scheme decided in the browser shows the wrong one first, on every load.
+     */
+    <html lang="en" data-theme={theme === 'system' ? undefined : theme}>
       <body>
         <div className={styles.shell}>
           <Sidebar />
           <div className={`scroll ${styles.main}`}>
             {blocked ? (
-              <SetupPanel health={health} envPath={loadConfig().envPath} />
+              <SetupPanel health={health} envPath={envPath} />
             ) : needsSetup ? (
               <RedirectToSetup />
             ) : (

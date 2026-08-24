@@ -31,12 +31,12 @@ body {
 /* A bare anchor still has to look like a link. Anything that should look like a
    control is `ButtonLink`, `ChipLink` or `CardRowLink`. */
 a {
-  color: var(--accent);
+  color: var(--accent-ink);
   text-decoration: none;
   font-weight: 500;
 }
 a:hover {
-  color: var(--accent-hover);
+  color: var(--accent-ink-hover);
 }
 
 input,

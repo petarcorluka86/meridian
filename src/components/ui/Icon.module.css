@@ -15,7 +15,7 @@
   color: var(--fg-strong);
 }
 .icon[data-tone="accent"] {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 .icon[data-tone="danger"] {
   color: var(--danger);

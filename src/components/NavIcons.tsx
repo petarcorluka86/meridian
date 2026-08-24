@@ -70,6 +70,18 @@ export const NAV_GLYPH = {
       <path d="M9.5 6h3A2 2 0 0114.5 8v2" />
     </>
   ),
+  /*
+   * Two faders. Every other shape in this set is a rectangle, a circle or a
+   * page, and a cog would be a fourth kind of detail at 20px — this reads as
+   * "things you set" at the size it is actually drawn.
+   */
+  settings: (
+    <>
+      <path d="M4 8h9M18.5 8H20M4 16h4.5M14 16h6" />
+      <circle cx="15.5" cy="8" r="2.2" />
+      <circle cx="11" cy="16" r="2.2" />
+    </>
+  ),
   /** The folded-corner page. Carried by Help, Vault rows and diff headers. */
   help: (
     <>
@@ -88,6 +100,7 @@ export const ProjectsIcon = () => <Icon size="lg">{NAV_GLYPH.projects}</Icon>;
 export const TimebalanceIcon = () => <Icon size="lg">{NAV_GLYPH.timebalance}</Icon>;
 export const VaultIcon = () => <Icon size="lg">{NAV_GLYPH.vault}</Icon>;
 export const ChangelogIcon = () => <Icon size="lg">{NAV_GLYPH.changelog}</Icon>;
+export const SettingsIcon = () => <Icon size="lg">{NAV_GLYPH.settings}</Icon>;
 export const HelpIcon = () => <Icon size="lg">{NAV_GLYPH.help}</Icon>;
 
 /**

@@ -19,7 +19,9 @@ import { describe, expect, it } from 'vitest';
  *   5. every shadow is a `--shadow-*` token
  *
  * Plus one structural rule: nothing outside the primitives may re-declare the
- * card, which is the duplication this system exists to end.
+ * card, which is the duplication this system exists to end. And one rule about
+ * `tokens.css` itself, since it is the file the other five point at: every
+ * colour in it answers for both schemes.
  *
  * `NOT_YET_MIGRATED` is empty: every screen is built out of the primitives, and
  * there is no longer an alias layer to fall back to.
@@ -232,6 +234,56 @@ describe('the design system is where the values live', () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+});
+
+/**
+ * The app paints in two schemes out of one set of tokens, which works only while
+ * every colour carries both halves. A token with a single value does not fail
+ * anywhere — it renders, in the wrong scheme, on whichever screens happen to use
+ * it, and the light one usually looks fine to whoever added it.
+ *
+ * `color-scheme` is the other half of the mechanism and is checked too: without
+ * the declaration on `:root` every `light-dark()` in the file quietly resolves
+ * light, and the whole dark scheme disappears with one deleted line.
+ */
+describe('every colour answers for both schemes', () => {
+  const tokens = fs.readFileSync(path.join(SRC, 'styles/tokens.css'), 'utf8');
+
+  const COLOUR = /oklch\([^)]*\)|#[0-9a-fA-F]{3,8}\b|\brgba?\([^)]*\)/g;
+
+  /**
+   * The one colour that is the same in both: fully transparent is not a shade of
+   * anything. A second entry here needs the same kind of reason.
+   */
+  const SCHEME_FREE = ['--clear'];
+
+  const declarations = [...withoutUrls(tokens).matchAll(/^\s*(--[a-z0-9-]+):\s*([^;]+);/gm)].map(
+    ([, name, value]) => ({ name: name!, value: value!.trim() }),
+  );
+
+  it('reads the file it is about', () => {
+    expect(declarations.length).toBeGreaterThan(70);
+  });
+
+  it('pairs every colour token', () => {
+    const offenders: string[] = [];
+    for (const { name, value } of declarations) {
+      if (SCHEME_FREE.includes(name)) continue;
+      const literals = value.match(COLOUR);
+      if (!literals) continue;
+      const paired = value.split('light-dark(').length - 1;
+      if (paired !== 1 || literals.length !== 2) {
+        offenders.push(`${name}: ${value}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('keeps the switch that chooses between them', () => {
+    expect(tokens).toMatch(/:root\s*\{[\s\S]*?color-scheme:\s*light dark;/);
+    expect(tokens).toMatch(/:root\[data-theme="light"\]\s*\{\s*color-scheme:\s*light;/);
+    expect(tokens).toMatch(/:root\[data-theme="dark"\]\s*\{\s*color-scheme:\s*dark;/);
   });
 });
 

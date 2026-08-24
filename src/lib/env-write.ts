@@ -64,6 +64,13 @@ export function writeEnv(envPath: string, edits: EnvEdit): void {
   fs.renameSync(tmp, envPath);
   fs.chmodSync(envPath, 0o600);
 
+  // The file is not the only copy. Next loads .env into process.env at boot, and
+  // `loadConfig` prefers process.env over the file — so a key written here is
+  // still the boot value on the next read unless the process's own environment
+  // is corrected too. Without this the theme changes on disk and not on screen,
+  // and a credential retyped in the wizard is re-checked as the old one.
+  for (const [name, value] of Object.entries(edits)) process.env[name] = value;
+
   // loadConfig() memoises, and the wizard needs the next step to see what the
   // previous one just wrote.
   resetConfig();
