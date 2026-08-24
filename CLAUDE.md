@@ -199,7 +199,7 @@ is about — which is exactly what editing a note's person does in the UI.
 Colour, type, space, shape and elevation are decided once in
 `src/styles/tokens.css`, and applied by the primitives in `src/components/ui/`. A
 screen imports from `@/components/ui` and writes CSS only for layout no primitive
-covers — nine modules, 590 lines, none of which sets a value.
+covers — ten modules, 502 lines, none of which sets a value.
 
 That is the whole point: recolour the accent or round the corners differently and
 every button, chip, card and dialog on every screen follows, because there is
@@ -393,7 +393,7 @@ to be hiding.
 `src/components/ui/icons.tsx` holds one glyph per verb — `AddIcon`, `CheckIcon`,
 `EditIcon`, `RemoveIcon`, `RefreshIcon`, `GoIcon`, `ExternalIcon`, `GuideIcon`,
 `CommitIcon`, `PushIcon`, `EyeIcon`, `PinIcon`, `CalendarIcon`, `JoinIcon`,
-`ArchiveIcon`, `RestoreIcon`.
+`ArchiveIcon`, `RestoreIcon`, `PrevIcon`, `NextIcon`.
 
 `ArchiveIcon` and `RestoreIcon` are the same box with the arrow reversed, and they
 are two glyphs rather than one because archiving and restoring are two verbs. One
@@ -483,8 +483,8 @@ spacing value:
 | `projects/Projects.module.css` | which part of a phase row and a card footer shrinks first |
 | `timebalance/Time.module.css` | the summary dividers, the inline edit form |
 
-CSS across the app went from 3 922 lines to 2 297, and the card shape from
-twenty-one declarations to one.
+The migration took CSS across the app from 3 922 lines to 2 297, and the card
+shape from twenty-one declarations to one.
 
 ## Storybook
 
@@ -699,8 +699,9 @@ waiting, the balance, what is unsaved — and like every other source tool it re
 `.cache/` and names its own age. Nothing there can refresh itself; see the rule
 above.
 
-`list_projects` is read-only, and that is the one deliberate asymmetry in the
-set. An agent needs to *name* a project to file a task or a note against it —
+`list_projects` and `read_project` are read-only, and that is the one deliberate
+asymmetry in the set. An agent needs to *name* a project to file a task or a note
+against it —
 `add_task` takes `projectId` and `write_note` takes `project` — but creating a
 project, phasing it out and archiving it are decisions about how the work is
 shaped, and those stay with the person doing the work.

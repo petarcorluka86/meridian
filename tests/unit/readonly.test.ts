@@ -122,7 +122,7 @@ describe('outbound requests are read-only', () => {
   const CONTACTED = [
     'api.bamboohr.com',
     'api.github.com',
-    // The OAuth token endpoint, reached only by the sidecar script.
+    // The OAuth token endpoint, POSTed to by exact URL and nothing else.
     'oauth2.googleapis.com',
     'www.googleapis.com',
     // A read-only iCal feed, when one is configured.

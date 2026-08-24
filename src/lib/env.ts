@@ -86,7 +86,8 @@ export type Config = {
   } | null;
   /**
    * Either a secret-address iCal feed (one GET, no OAuth) or Google OAuth, whose
-   * token refresh runs in a script rather than in the server.
+   * token refresh is the one POST this app makes — permitted by exact URL, see
+   * TOKEN_ENDPOINT in lib/sources/calendar.ts.
    */
   calendar:
     | { kind: 'ical'; icalUrl: string; maxAge: number }
