@@ -5,8 +5,9 @@ import { CACHE_DIR, vaultRoot } from '@/lib/vault/paths';
 export type EgressRecord = {
   /**
    * Recorded truthfully, because the log is the evidence. The only POST that can
-   * ever appear here is the OAuth token exchange in scripts/calendar-sync.ts,
-   * and it should be visible rather than dressed up as a read.
+   * ever appear here is the OAuth token exchange — `TOKEN_ENDPOINT` in
+   * lib/sources/calendar.ts — and it should be visible rather than dressed up as
+   * a read.
    */
   method: 'GET' | 'POST';
   host: string;

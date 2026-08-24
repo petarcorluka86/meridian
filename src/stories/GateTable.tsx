@@ -15,7 +15,7 @@ const ROWS: { rule: string; gate: string | null; verdict: string }[] = [
     verdict: 'No oklch, hex or rgb anywhere but tokens.css',
   },
   {
-    rule: 'Type comes from the ten levels',
+    rule: 'Type comes from the eleven levels',
     gate: 'tests/unit/design-system.test.ts',
     verdict: 'Every font is a whole --type-* token; no loose size, weight or tracking',
   },
@@ -67,7 +67,7 @@ const ROWS: { rule: string; gate: string | null; verdict: string }[] = [
   {
     rule: 'The screens have not moved',
     gate: 'npm run pixel',
-    verdict: 'Thirteen screens at 1440×900, zero differing pixels',
+    verdict: 'Fourteen screens at 1440×900, zero differing pixels',
   },
   {
     rule: 'Every screen is built from the primitives',

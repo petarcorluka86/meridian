@@ -191,6 +191,7 @@ function Guide() {
         'Pull requests waiting on you — reviews you are blocking.',
         'Meetings — your calendar for the day. What is running now is marked; what is over is struck through.',
         'Working from home and Out — who is where.',
+        'Meetings, Working from home and Out each step through the days the calendar cache reaches — back a couple, forward three weeks.',
         'Your hours — your overtime balance.',
         'Unsaved changes — edits not yet committed to the vault.',
       ],
@@ -230,7 +231,7 @@ function Guide() {
       'Notes',
       '',
       [
-        'Filter by person, by category, or show only drafts.',
+        'Filter by person, by project, by category, or show only drafts.',
         'Pin a note to hold it at the top of the list.',
         'Changing the date renames the file; changing the person moves it into that person’s folder.',
         'Anything captured without a person lands in the inbox until you give it one.',
@@ -254,7 +255,8 @@ function Guide() {
       [
         'Time you owe or are owed, outside BambooHR.',
         'Every entry is a date, plus or minus hours, and a reason. The total is always the truth of where you stand.',
-        'Total, this week and this month sit at the top; the range filters narrow the log below.',
+        'Total, this week and this month sit at the top; the range filters narrow the log below, and a custom range takes two dates.',
+        'The pencil on a row edits the date, the hours and the reason; deleting is in the same row, behind a confirmation.',
       ],
     ],
     [
@@ -314,7 +316,9 @@ function VaultSection({ vaultPath }: { vaultPath: string }) {
 ├── time.json                       hours owed and owing
 ├── config.json                     your thresholds and defaults
 ├── .cache/                         live data, revalidated each load
-│   ├── bamboohr.json               people, absences, compensation
+│   ├── bamboohr.json               people, absences, approvals, compensation
+│   ├── calendar.json               your meetings
+│   ├── github.json                 pull requests waiting on your review
 │   ├── photos/                     employee photos, served locally
 │   └── egress.log                  every outbound request the app made
 ├── .snapshots/                     pre-write backups, git-ignored
@@ -488,7 +492,9 @@ function GitSection() {
             plus/minus count per file.
           </li>
           <li>
-            A commit message is optional; without one the app writes a summary of what changed.
+            A commit message is optional; without one the app writes a dated one —{' '}
+            <Code>data: update YYYY-MM-DD</Code> — and the diff above it is the record of what
+            changed.
           </li>
           <li>
             <strong>Push only appears once there is a commit</strong>, and asks for confirmation
@@ -536,8 +542,8 @@ function SyncSection() {
             unless it is a read, and unless its destination is one of the hosts above — enforced by
             the app itself, not only by the code that calls it. The single exception in the whole
             system is the OAuth token exchange the calendar needs, which is authentication rather
-            than a write, and which runs in a separate script so that this rule stays literally true
-            of the app.
+            than a write: it is permitted by its exact address and nothing else, a redirect cannot
+            carry it anywhere, and it appears in the log below as the POST it is.
           </Text>
         </CardBody>
         <div className={styles.note}>
@@ -592,8 +598,8 @@ function SyncSection() {
         )}
         <div className={styles.note}>
           <Text level="small" tone="muted">
-            The privacy claim is only worth something if you can check it. This is the whole log,
-            most recent first.
+            The privacy claim is only worth something if you can check it. These are the most recent
+            requests, newest first; the file itself holds every one ever made.
           </Text>
         </div>
       </Card>
@@ -676,6 +682,13 @@ async function SetupSection({ vaultPath }: { vaultPath: string }) {
               There is no settings screen — the file is the setting.
             </li>
             <li>
+              <strong>To open it like an app instead of a browser tab</strong>, run{' '}
+              <Code>./desktop/build-app.sh</Code> once. It puts <Code>Meridian.app</Code> in{' '}
+              <Code>~/Applications</Code> — drag it to the Dock, and opening it starts the server if
+              it is not already running. The app is this folder, so a <Code>git pull</Code> is a new
+              version and there is nothing to reinstall.
+            </li>
+            <li>
               Run <Code>git init</Code> in the vault if you want history, and set a remote only if
               you want off-machine backup.
             </li>
@@ -698,7 +711,8 @@ BAMBOOHR_INBOX_MAX_AGE=300       # approvals and absences
 # Calendar (read only) — either an iCal secret address:
 # CALENDAR_ICAL_ADDRESS=https://calendar.google.com/calendar/ical/.../private-.../basic.ics
 # or Google OAuth. Reading a Google calendar needs one POST — the token refresh,
-# which is authentication, not a write. It is the only one Meridian ever makes.
+# which is authentication, not a write. It is permitted by its exact address, and
+# it is the only one Meridian ever makes.
 GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=xxxxxxxxxxxxxxxx
 GOOGLE_CALENDAR_ID=you@yourcompany.com
@@ -709,6 +723,7 @@ CALENDAR_MAX_AGE=300
 GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
 GITHUB_LOGIN=your-handle
 GITHUB_REPOS=platform/core,web/dashboard
+GITHUB_MAX_AGE=300
 `}</pre>
         <div className={styles.note}>
           <Text level="small" tone="muted">

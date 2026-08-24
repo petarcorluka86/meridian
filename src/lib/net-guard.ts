@@ -25,8 +25,8 @@ const ALLOWED_HOSTS = new Set([
   'calendar.google.com',
   // Calendar events, read with a bearer token. GET only.
   'www.googleapis.com',
-  // The OAuth token endpoint. Reachable only by a caller that opts in through
-  // allowPostTo — the server does not, and must not.
+  // The OAuth token endpoint. A POST to it needs a caller that opts in through
+  // allowPostTo, and only that one exact URL is ever permitted.
   'oauth2.googleapis.com',
   // Pull requests awaiting review. Read-only; no exception needed.
   'api.github.com',

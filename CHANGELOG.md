@@ -30,13 +30,39 @@ so far. A migration that fails blocks the app rather than guessing.
   total. Two tones, and `success` is the one that means the total was reached.
 - **`projects.json`** — one new file at the vault root, phases and links nested
   in each record. No folder per project.
+- **The Mac app** — `./desktop/build-app.sh` writes `~/Applications/Meridian.app`:
+  a `WKWebView` window that starts the dev server if nothing is listening on
+  3210 and leaves one you were already running alive on quit. The repo is the
+  app, so a pull is a new version and there is nothing to package.
+- **The MCP server reaches the rest of the app** — thirty-two tools, covering
+  the whole task and note surface, projects and their phases, hours, pay, the
+  Overview, the caches behind it, the vault's own health and its git state.
+  Every cached answer says how old it is, and nothing under `mcp/` may make a
+  request: an agent may not make this app go to the network, and
+  `tests/unit/readonly.test.ts` fails the build on a sync named there.
+- **`MCP-COVERAGE.md`** — every capability in the app as a row, marked Open,
+  Closed or Never, so what an agent cannot reach is a decision written down
+  rather than a gap to be rediscovered.
+- **A task is finishable anywhere** — the tick box works on Tasks, on the
+  Overview and on a person's page, and the pencil opens the same dialog
+  everywhere, including deleting behind a second press.
+- **Every empty state has a tile, a title and a reason**, spread in whole from
+  `src/copy/` so the same emptiness cannot be green on one screen and grey on
+  the next.
 
 ### Changed
 
 - The vault CLI gained `projects`, and `task-add` / `note-add` / `notes` take
-  `--project`. The MCP server gained a read-only `list_projects`; `add_task` and
-  `write_note` take the project, but creating and archiving one stays with the
-  person doing the work.
+  `--project`. Projects stay read-only over MCP — `list_projects` and
+  `read_project` name one so a task or a note can be filed against it, but
+  creating, phasing and archiving stay with the person doing the work.
+- **Meetings say where they are in the day** — what is running now is marked,
+  what is over is struck through, and the state is worked out on the server so
+  the visitor's clock cannot disagree with it. Meetings, Working from home and
+  Out each step through the days the calendar cache can answer for.
+- **The app icon is the mark in ink on a filled white tile.** Three hairlines on
+  a transparent ground disappear at Dock and tab sizes.
+- Fields no longer draw a focus ring.
 
 ## [0.1.0] - 2026-08-21
 
