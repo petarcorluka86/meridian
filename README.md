@@ -33,6 +33,7 @@ the pre-commit checks run for you too.
 | | |
 | --- | --- |
 | Working on the code? | [`CLAUDE.md`](CLAUDE.md) — architecture, decisions, conventions, commands |
+| Pointing an agent at it? | [`MCP-COVERAGE.md`](MCP-COVERAGE.md) — every capability, and whether the MCP server reaches it |
 | Sending a change? | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Found a hole? | [`SECURITY.md`](SECURITY.md) — do not open an issue |
 | Taking part? | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) |
