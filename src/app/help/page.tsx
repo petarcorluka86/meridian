@@ -259,6 +259,10 @@ function Guide() {
       [
         'Theme: Light, Dark or System. Meridian opens in Light until you say otherwise; System follows the appearance your Mac is set to and changes with it, including when the Mac switches itself at sunset.',
         'The choice is kept in Meridian’s own .env, not in the vault — it is about this screen, not about your team, so it does not travel when you push.',
+        'Connections shows whether BambooHR, Google Calendar and GitHub are set up and how old each answer is. The badge is the button: pressing it goes and looks again. A source that is not set up names the keys it is waiting for.',
+        'Reset is the only thing in Meridian that cannot be undone. Emptying the vault deletes your notes, tasks, hours, plans and projects from the folder — and its Git history and its snapshots with them, because both live inside that folder. There is no commit and no snapshot to go back to.',
+        'A full reset does that and removes .env too: the vault path and every key. Meridian reopens at the setup wizard, as freshly installed. Nothing is ever removed from BambooHR, the calendar or GitHub — this app cannot write to them at all.',
+        'Both ask first, and the confirmation names what goes. If you want a way back, commit and push the vault before you press either.',
         'Everything else configurable lives in a file rather than on a screen: thresholds in the vault’s config.json, keys in .env.',
       ],
     ],

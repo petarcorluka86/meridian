@@ -249,6 +249,7 @@ Nothing here is stored. Each is recomputed, and each is a question an agent asks
 | Point the app at a different vault | `checkVaultAction()` | — | **Never** — same reason. |
 | Install the vault's credential hook | `npm run vault:hook` | — | **Never** — writing an executable into somebody's repository is not a side effect. |
 | Any write to BambooHR, Google or GitHub | — | — | **Never** — the rule at the top of `CLAUDE.md`. |
+| Empty the vault, or reset the app completely | `lib/vault/reset.ts` | — | **Never** — the one deletion no snapshot can undo. It exists behind a confirmation that names what goes; a tool call is not that. |
 
 ---
 
@@ -273,7 +274,7 @@ every other test green, and quietly hands an agent BambooHR.
 
 ## Where it stands
 
-Counted by row: **93 Open**, **9 Closed**, **28 Never** — 130 capabilities, against thirty-two tools.
+Counted by row: **93 Open**, **9 Closed**, **29 Never** — 131 capabilities, against thirty-two tools.
 
 Reading is effectively finished: the Overview, the caches behind it, pay, the
 whole task and note surface, the vault's own health and its git state are all

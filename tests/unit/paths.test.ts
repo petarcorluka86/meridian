@@ -56,6 +56,11 @@ describe('what the watcher ignores', () => {
  *
  * So the exceptions are named. A new one has to be added here deliberately,
  * which is the point.
+ *
+ * Removing a file counts, and is listed separately below. It used not to be
+ * checked at all, which was survivable while the only deletes in the app were a
+ * snapshot being pruned and a probe file being tidied away — and stopped being
+ * survivable when the app gained the ability to empty the whole vault.
  */
 describe('who is allowed to write to disk', () => {
   const ALLOWED = new Set([
@@ -77,9 +82,28 @@ describe('who is allowed to write to disk', () => {
     'lib/vault/migrate.ts',
   ]);
 
+  /**
+   * Deleting, which is the same rule from the other side. Two of these delete a
+   * file they wrote a moment earlier; one prunes its own snapshots; one is the
+   * reset, and it is the reason this check exists.
+   */
+  const ALLOWED_TO_REMOVE = new Set([
+    // Prunes its own snapshots — twenty per file, nothing past thirty days.
+    'lib/vault/write.ts',
+    // Its own temp file, and the write probe it just made.
+    'lib/env-write.ts',
+    'lib/vault/health.ts',
+    // The vault-path probe the wizard writes before there is a vault.
+    'app/setup/actions.ts',
+    // Emptying the vault: the one delete in the app that a snapshot cannot
+    // undo, because it takes the snapshots with it. Guarded in that file.
+    'lib/vault/reset.ts',
+  ]);
+
   it('is exactly the list above', () => {
     const root = path.resolve(import.meta.dirname, '../../src');
     const found = new Set<string>();
+    const removes = new Set<string>();
 
     const walk = (dir: string) => {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -90,13 +114,18 @@ describe('who is allowed to write to disk', () => {
         }
         if (!/\.tsx?$/.test(entry.name)) continue;
         const source = fs.readFileSync(full, 'utf8');
+        const rel = path.relative(root, full).split(path.sep).join('/');
         if (/fs\.(write|append)FileSync|fs\.promises\.(write|append)File/.test(source)) {
-          found.add(path.relative(root, full).split(path.sep).join('/'));
+          found.add(rel);
+        }
+        if (/fs\.(rmSync|unlinkSync|rmdirSync)|fs\.promises\.(rm|unlink|rmdir)/.test(source)) {
+          removes.add(rel);
         }
       }
     };
     walk(root);
 
     expect([...found].sort()).toEqual([...ALLOWED].sort());
+    expect([...removes].sort()).toEqual([...ALLOWED_TO_REMOVE].sort());
   });
 });
