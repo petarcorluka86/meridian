@@ -46,13 +46,12 @@ select {
   font-family: inherit;
 }
 
-/* One focus ring, from one token. A control that hides it is a control somebody
-   cannot reach with a keyboard. */
+/* Fields draw no focus ring, by decision. Buttons and links keep theirs — a
+   control that hides it is a control somebody cannot reach with a keyboard. */
 input:focus,
 textarea:focus,
 select:focus {
-  outline: var(--ring);
-  outline-offset: 1px;
+  outline: none;
 }
 
 button:focus {
