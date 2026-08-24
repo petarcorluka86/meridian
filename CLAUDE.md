@@ -154,7 +154,7 @@ That is the whole point: recolour the accent or round the corners differently an
 every button, chip, card and dialog on every screen follows, because there is
 nowhere else for those decisions to be hiding.
 
-The scales are **closed** — ten type levels, seven spacing steps, five radii, two
+The scales are **closed** — eleven type levels, seven spacing steps, five radii, two
 shadows, two control heights, four tones. An eleventh of anything is an edit to
 `tokens.css` and to a primitive, deliberately. Before this existed there were 64
 distinct `font` shorthands at 19 sizes, 17 gap values, the card shape written out
@@ -301,7 +301,7 @@ src/components/ui/        the primitives, and the only place a value is applied
 src/components/ui/index.ts  the barrel a screen imports from
 ```
 
-**81 tokens.** Ten type levels, seven spacing steps, five radii, two shadows, two
+**82 tokens.** Eleven type levels, seven spacing steps, five radii, two shadows, two
 control heights, four tones × three roles, one icon colour, a six-entry category
 palette. The scales are closed: an eleventh of anything is an edit to
 `tokens.css` and to a primitive, deliberately.
@@ -318,7 +318,7 @@ to be hiding.
 
 | | |
 | --- | --- |
-| `Text` `Code` `CodeBlock` | the ten type levels and ten tones. The only way to set a size |
+| `Text` `Code` `CodeBlock` | the eleven type levels and ten tones. The only way to set a size |
 | `Stack` `Row` `Spacer` `Divider` `Page` `PageHeader` `Columns` | space, in steps |
 | `Button` `ButtonLink` | primary · neutral · danger · ghost, two sizes, `icon` for square |
 | `Chip` `ChipLink` `Segmented` `Segment` `Toggle` | filters, view switches, live settings |

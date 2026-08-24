@@ -50,6 +50,20 @@ export default async function OverviewPage() {
   };
 
   /*
+   * Where a meeting sits relative to now. Decided here rather than in the card
+   * for the same reason the clock is: the visitor's machine must not be what
+   * says a meeting is running. The cost is that it is only as current as the
+   * last render — the shell re-renders when a source refetches, so this lags by
+   * up to CALENDAR_MAX_AGE.
+   */
+  const instant = clockNow();
+  const stateOf = (start: string, end: string): MeetingView['state'] => {
+    if (Date.parse(end) <= instant) return 'past';
+    if (Date.parse(start) <= instant) return 'now';
+    return 'upcoming';
+  };
+
+  /*
    * Only what happens at a time. An all-day entry on a work calendar is almost
    * never something you attend: it is a status. Google's working-location feature
    * exports one every day named after the place ("Office", "Home"), which arrived
@@ -64,10 +78,11 @@ export default async function OverviewPage() {
     .map((e) => ({
       uid: e.uid + e.start,
       day: e.start.slice(0, 10),
-      clock: `${hhmm(e.start)} – ${hhmm(e.end)}`,
+      clock: hhmm(e.start),
       duration: durationOf(e.start, e.end),
       summary: e.summary,
       conference: e.conference,
+      state: stateOf(e.start, e.end),
     }));
 
   const photoOf = (slug: string | null) => (slug ? photoPath(slug) : null);

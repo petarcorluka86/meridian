@@ -6,6 +6,7 @@ export type TextLevel =
   | 'heading'
   | 'subheading'
   | 'body'
+  | 'bodyStrong'
   | 'small'
   | 'label'
   | 'micro'
@@ -36,6 +37,8 @@ type Props = {
   nowrap?: boolean;
   /** Tabular figures, so a column of amounts lines up on the decimal. */
   numeric?: boolean;
+  /** Struck through. For a thing that happened and is over, not a thing removed. */
+  strike?: boolean;
   id?: string;
   title?: string;
 };
@@ -45,7 +48,7 @@ type Props = {
  * size: `tests/unit/design-system.test.ts` fails on a `font` or `font-size`
  * declared outside this file.
  *
- * Nine levels, and adding a tenth is an edit to the scale in `tokens.css` and to
+ * Ten levels, and adding an eleventh is an edit to the scale in `tokens.css` and to
  * this component — which is the point. A one-off size at a call site is what
  * turned nineteen sizes into sixty-four rules.
  */
@@ -57,6 +60,7 @@ export function Text({
   truncate,
   nowrap,
   numeric,
+  strike,
   id,
   title,
 }: Props) {
@@ -70,6 +74,7 @@ export function Text({
       data-truncate={truncate || undefined}
       data-nowrap={nowrap || undefined}
       data-numeric={numeric || undefined}
+      data-strike={strike || undefined}
     >
       {children}
     </Tag>

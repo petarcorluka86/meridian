@@ -1,5 +1,5 @@
 /*
- * The eight type levels, and the only place in the app a `font` is declared.
+ * The ten type levels, and the only place in the app a `font` is declared.
  * A level pairs its shorthand with its tracking, so the two cannot come apart.
  */
 .text {
@@ -26,6 +26,9 @@
 }
 .text[data-level="body"] {
   font: var(--type-body);
+}
+.text[data-level="bodyStrong"] {
+  font: var(--type-body-strong);
 }
 .text[data-level="small"] {
   font: var(--type-small);
@@ -106,6 +109,12 @@
 
 .text[data-numeric] {
   font-variant-numeric: tabular-nums;
+}
+
+/* Over rather than gone. `line-through` is not a deletion here — nothing was
+   removed — it is a thing that has already happened. */
+.text[data-strike] {
+  text-decoration: line-through;
 }
 
 /*
