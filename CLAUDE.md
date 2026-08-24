@@ -31,9 +31,9 @@
 > 3. The `pre-commit` hook runs that test — after `git config core.hooksPath
 >    .githooks`, which a fresh clone does not have.
 >    `.github/workflows/verify.yml` runs the same test on push, so a clone with a
->    remote is covered whether or not the hook is installed. This repository has
->    no remote, so that workflow has never executed: today the hook is the only
->    one of the three that runs on a change, and it is opt-in per clone.
+>    remote is covered whether or not the hook is installed. This repository does
+>    have a remote, so two of the three run on a change: the hook locally, opt-in
+>    per clone, and the workflow on every push.
 >
 > **Do not weaken, bypass or special-case any of the three.** If an integration
 > appears to need a write, stop and ask the user — that is a product decision,
