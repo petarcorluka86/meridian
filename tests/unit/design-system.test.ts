@@ -158,7 +158,7 @@ describe('the design system is where the values live', () => {
         const value = match[1]!.trim();
         // `font: inherit` is a reset, not a choice: a button or a cell that has
         // to stop imposing its own type on the `Text` inside it.
-        if (value !== 'inherit' && !/^var\(--type-[a-z]+\)$/.test(value)) {
+        if (value !== 'inherit' && !/^var\(--type-[a-z]+(?:-[a-z]+)*\)$/.test(value)) {
           offenders.push(`${file}: font: ${match[1]!.trim()}`);
         }
       }

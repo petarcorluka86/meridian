@@ -1,7 +1,8 @@
 /*
  * One rule: the meetings card's clock column, which has to be a fixed width so
- * every meeting's title starts at the same place.
+ * every meeting's title starts at the same place. Wide enough for the longer of
+ * the two lines it stacks — the duration, "30 min", not the start time.
  */
 .clock {
-  flex: 0 0 106px;
+  flex: 0 0 56px;
 }

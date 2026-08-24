@@ -189,7 +189,7 @@ function Guide() {
         'BambooHR inbox — time-off requests waiting on you.',
         'Tasks — what of yours is due or late.',
         'Pull requests waiting on you — reviews you are blocking.',
-        'Meetings — your calendar for the day.',
+        'Meetings — your calendar for the day. What is running now is marked; what is over is struck through.',
         'Working from home and Out — who is where.',
         'Your hours — your overtime balance.',
         'Unsaved changes — edits not yet committed to the vault.',

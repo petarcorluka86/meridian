@@ -14,6 +14,7 @@ import {
   DayStepper,
   EmptyState,
   JoinIcon,
+  Pill,
   Row,
   SkeletonRows,
   Spacer,
@@ -35,12 +36,15 @@ export type MeetingView = {
   uid: string;
   /** The day it falls on, as the stepper names days. */
   day: string;
-  /** "09:30 – 10:00" */
+  /** When it starts, "09:30". How long it runs is `duration`; the end is the
+      two of them added up, which is not worth a third number. */
   clock: string;
   /** "30 min" */
   duration: string;
   summary: string;
   conference: string | null;
+  /** Where it sits relative to now. Resolved on the server, like the clock. */
+  state: 'past' | 'now' | 'upcoming';
 };
 
 export function MeetingsCard({
@@ -80,35 +84,46 @@ export function MeetingsCard({
           </>
         }
       />
-      {shown.map((meeting) => (
-        <CardRow key={meeting.uid}>
-          <span className={styles.clock}>
-            <Stack gap={0}>
-              <Text level="label" tone="strong" numeric>
-                {meeting.clock}
-              </Text>
-              <Text level="mono" tone="faint">
-                {meeting.duration}
-              </Text>
-            </Stack>
-          </span>
-          <Text level="body">{meeting.summary}</Text>
-          <Spacer />
-          {meeting.conference ? (
-            // Join is a video call before it is a link out, so the verb replaces
-            // the external arrow rather than sitting beside it.
-            <ButtonLink
-              external
-              variant="primary"
-              size="sm"
-              href={meeting.conference}
-              icon={<JoinIcon />}
-            >
-              Join
-            </ButtonLink>
-          ) : null}
-        </CardRow>
-      ))}
+      {shown.map((meeting) => {
+        // The time is what you scan this card for — "what is next, and have I
+        // got twenty minutes" — so it carries the weight and the name stays
+        // plain. A meeting that is over is still worth seeing, but it is not
+        // what the eye should land on: it steps back a tone, its name is struck
+        // through, and its Join stops being the loud one.
+        const past = meeting.state === 'past';
+        return (
+          <CardRow key={meeting.uid}>
+            <span className={styles.clock}>
+              <Stack gap={0}>
+                <Text level="bodyStrong" tone={past ? 'faint' : 'strong'} numeric>
+                  {meeting.clock}
+                </Text>
+                <Text level="mono" tone="faint">
+                  {meeting.duration}
+                </Text>
+              </Stack>
+            </span>
+            <Text level="body" tone={past ? 'faint' : 'strong'} strike={past}>
+              {meeting.summary}
+            </Text>
+            {meeting.state === 'now' ? <Pill tone="accent">Now</Pill> : null}
+            <Spacer />
+            {meeting.conference ? (
+              // Join is a video call before it is a link out, so the verb replaces
+              // the external arrow rather than sitting beside it.
+              <ButtonLink
+                external
+                variant={past ? 'neutral' : 'primary'}
+                size="sm"
+                href={meeting.conference}
+                icon={<JoinIcon />}
+              >
+                Join
+              </ButtonLink>
+            ) : null}
+          </CardRow>
+        );
+      })}
       {shown.length === 0 ? (
         connected && freshness.state === 'missing' ? (
           // Never answered yet: a skeleton, not "no meetings", which would be a
