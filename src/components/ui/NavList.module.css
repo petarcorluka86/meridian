@@ -57,8 +57,16 @@
   color: var(--fg-strong);
 }
 
-/* Takes the leftover width so a trailing count or path sits at the end. */
+/*
+ * Takes the leftover width so a trailing count or path sits at the end, and
+ * gives up the end of a long label rather than running under it. The clipping
+ * has to be here: `truncate` on the `Text` inside is an inline box, and an
+ * inline box does not clip, so a long file name ran to the edge of the column
+ * and was cut without an ellipsis.
+ */
 .label {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

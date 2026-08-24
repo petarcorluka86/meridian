@@ -33,6 +33,12 @@
   transform: rotate(90deg);
 }
 
+/* A failure from the row above it: the reveal is the one control in this column
+   that can fail, and the message has nowhere else to go. */
+.treeMessage {
+  padding: 0 var(--space-3) var(--space-2);
+}
+
 .previewCol {
   flex: 1;
   min-width: 0;

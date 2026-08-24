@@ -31,6 +31,7 @@ export function NavItem({
   selected,
   indent = 0,
   expanded,
+  title,
 }: {
   label: React.ReactNode;
   icon?: React.ReactNode;
@@ -42,6 +43,8 @@ export function NavItem({
   indent?: number;
   /** For a row that opens and closes rather than navigating. */
   expanded?: boolean;
+  /** On the row, not the label: a truncated path is hoverable to its edges. */
+  title?: string;
 }) {
   const body = (
     <>
@@ -61,6 +64,7 @@ export function NavItem({
 
   const shared = {
     className: styles.item,
+    title,
     'data-selected': selected || undefined,
     style: indent
       ? ({ '--indent': `calc(${indent} * var(--space-4))` } as React.CSSProperties)
