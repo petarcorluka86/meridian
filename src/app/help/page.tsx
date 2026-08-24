@@ -261,7 +261,7 @@ function Guide() {
       'Vault and Changelog',
       '',
       [
-        'Vault browses the folder as it is on disk and shows any file’s contents.',
+        'Vault browses the folder as it is on disk and shows any file’s contents. Pressing the path at the top shows the vault in the Finder.',
         'Changelog shows what changed since the last commit, side by side or unified, then commits locally. Push asks for confirmation, because the vault holds private notes and pay amounts.',
       ],
     ],

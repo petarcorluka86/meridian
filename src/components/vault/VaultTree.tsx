@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { revealVaultAction } from '@/app/vault/actions';
 import type { TreeNode } from '@/lib/vault/tree';
-import { NavItem, NavList, Spacer, Text } from '@/components/ui';
+import { ExternalIcon, NavItem, NavList, Text } from '@/components/ui';
 import styles from './Vault.module.css';
 import { Chevron, FileIcon, FolderIcon, NoteIcon } from './FileIcons';
 
@@ -13,6 +14,14 @@ export function VaultTree({ tree, selected, vaultPath }: Props) {
   const router = useRouter();
   // Top level opens by default; deeper folders stay shut until asked for.
   const [closed, setClosed] = useState<Record<string, boolean>>({});
+  const [revealFailed, setRevealFailed] = useState<string | null>(null);
+  const [revealing, startReveal] = useTransition();
+
+  const reveal = () =>
+    startReveal(async () => {
+      const result = await revealVaultAction();
+      setRevealFailed(result.ok ? null : result.message);
+    });
 
   const rows: React.ReactNode[] = [];
 
@@ -65,11 +74,28 @@ export function VaultTree({ tree, selected, vaultPath }: Props) {
         <Text level="micro" tone="muted">
           VAULT
         </Text>
-        <Spacer />
-        <Text level="mono" tone="faint" truncate title={vaultPath}>
-          {vaultPath}
-        </Text>
       </div>
+      <NavList label="Vault folder">
+        <NavItem
+          onClick={reveal}
+          title={`${vaultPath} — press to show it in the Finder`}
+          icon={<FolderIcon />}
+          label={
+            <Text level="mono" tone="faint" truncate>
+              {vaultPath}
+            </Text>
+          }
+        >
+          <ExternalIcon />
+        </NavItem>
+      </NavList>
+      {revealFailed && !revealing ? (
+        <div className={styles.treeMessage}>
+          <Text level="micro" tone="danger">
+            {revealFailed}
+          </Text>
+        </div>
+      ) : null}
       <NavList label="Vault files">{rows}</NavList>
     </div>
   );

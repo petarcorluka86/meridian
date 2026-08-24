@@ -164,6 +164,7 @@ Substring, case-insensitive, not fuzzy. Every list is capped by `limit`, and
 | Preview any vault file | `readPreview()` | — | **Closed** |
 | Restore a file from `.snapshots/` | `npm run vault:restore` | — | **Closed** — the undo for a tool that went wrong, and the only one an agent cannot reach. |
 | Data version and pending migrations | `DATA_VERSION`, `migrateVault()` | — | **Never** — a migration is a decision made once, in the app. |
+| Show the vault in the desktop file manager | `revealVaultAction()` | — | **Never** — it opens a window on somebody's screen, which is theirs to do. |
 
 ## Git
 
@@ -270,7 +271,7 @@ every other test green, and quietly hands an agent BambooHR.
 
 ## Where it stands
 
-Counted by row: **93 Open**, **8 Closed**, **26 Never** — 127 capabilities, against thirty-two tools.
+Counted by row: **93 Open**, **8 Closed**, **27 Never** — 128 capabilities, against thirty-two tools.
 
 Reading is effectively finished: the Overview, the caches behind it, pay, the
 whole task and note surface, the vault's own health and its git state are all

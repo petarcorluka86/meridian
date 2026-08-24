@@ -288,7 +288,7 @@ mismatch and a reader would call a lie.
 | Data leaving on a push | Behind a confirmation naming what the vault holds. No remote configured means nothing can leave. |
 | Shoulder-surfing | Money and plans blur behind a per-card Reveal with a visible 30-second countdown that expires on its own. No setting turns it off. |
 | Unaudited outbound traffic | Every outbound request appends to `.cache/egress.log`, readable from Help. |
-| Shell injection via git | `execFile` with argument arrays. No shell string interpolation. |
+| Shell injection through a spawned process | `execFile` with argument arrays, never a shell string: every git call, and the one `open` that shows the vault in the Finder — which takes no argument from its caller at all. |
 | Telemetry | None. No version check, no analytics, no external resource in the UI. |
 
 **Credentials into the vault** are refused on the app's own Save path, in
