@@ -133,7 +133,7 @@ describe('the design system is where the values live', () => {
     );
   });
 
-  it('writes no colour outside tokens.css and legacy.css', () => {
+  it('writes no colour outside tokens.css', () => {
     const offenders: string[] = [];
     for (const { file, source } of migrated) {
       for (const match of withoutUrls(source).matchAll(
