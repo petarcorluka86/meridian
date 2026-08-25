@@ -101,6 +101,11 @@ async function changelog(page: Page, name: string, url: string) {
  * From the second server, whose sources are all unset — so what is recorded is
  * the form somebody actually fills in. On the first server every key is pinned,
  * and each of these would render its already-connected state instead.
+ *
+ * The whole window rather than `[data-screen]`, for these and for the wizard
+ * below: setup is the one place with **no sidebar**, and the content is centred
+ * in the space that leaves. Measuring the page frame alone would hold neither —
+ * the frame looks identical whether or not there is a nav beside it.
  */
 for (const step of ['bamboo', 'calendar', 'github']) {
   test(`connect ${step}`, async ({ page }) => {
@@ -108,9 +113,7 @@ for (const step of ['bamboo', 'calendar', 'github']) {
     await page.goto(`${OTHER}/setup?only=${step}`);
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(300);
-    await expect(page.locator('[data-screen]')).toHaveScreenshot(`connect-${step}.png`, {
-      maxDiffPixels: 0,
-    });
+    await expect(page).toHaveScreenshot(`connect-${step}.png`, { maxDiffPixels: 0 });
   });
 }
 
@@ -126,14 +129,13 @@ test('changelog-unified', async ({ page }) => {
 });
 
 test('setup wizard', async ({ page }) => {
-  // The screen a new user sees first, and until now the only one with no gate.
+  // The screen a new user sees first, and the whole window because the sidebar
+  // being absent is the point of it.
   skipWithoutBaseline('setup');
   await page.goto('/setup');
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(300);
-  await expect(page.locator('[data-screen]')).toHaveScreenshot('setup.png', {
-    maxDiffPixels: 0,
-  });
+  await expect(page).toHaveScreenshot('setup.png', { maxDiffPixels: 0 });
 });
 
 test('sidebar', async ({ page }) => {

@@ -43,6 +43,32 @@
   overflow-y: auto;
 }
 
+/*
+ * The setup wizard, with no sidebar beside it: the column becomes the whole
+ * window, so the content is centred in it rather than left against an edge that
+ * is no longer there.
+ *
+ * `safe center` rather than plain centring, and `align-items` rather than
+ * `justify-content`: a wizard step taller than the window must overflow
+ * downwards and stay scrollable. Plain `center` overflows in both directions and
+ * puts the top of a long card above the top of the screen, where it cannot be
+ * reached.
+ */
+.main[data-solo] {
+  display: flex;
+  flex-direction: column;
+  /* Vertical only. Centring horizontally with `align-items` would shrink the
+     page to its content and undo its own max-width; the rule below does that
+     half properly. `safe` so a step taller than the window overflows downwards
+     and stays reachable rather than off the top. */
+  justify-content: safe center;
+}
+
+.main[data-solo] > * {
+  width: 100%;
+  margin-inline: auto;
+}
+
 /* The vault-problem banner, which shares a screen's gutter without being one —
    the page below brings its own top space. */
 .aboveScreen {

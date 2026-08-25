@@ -83,8 +83,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" data-theme={theme === 'system' ? undefined : theme}>
       <body>
         <div className={styles.shell}>
-          <Sidebar />
-          <div className={`scroll ${styles.main}`}>
+          {/*
+           * No sidebar during setup. On a first run every link in it goes
+           * somewhere that has no vault to read yet, and the wizard is the only
+           * thing to do — a nav that cannot be used is furniture in the way of
+           * the one screen that matters. The same holds for one connection
+           * reopened from Settings, which carries its own way back.
+           */}
+          {onSetup ? null : <Sidebar />}
+          <div className={`scroll ${styles.main}`} data-solo={onSetup || undefined}>
             {blocked ? (
               <SetupPanel health={health} envPath={envPath} />
             ) : needsSetup ? (
