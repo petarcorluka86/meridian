@@ -165,6 +165,17 @@ so far. A migration that fails blocks the app rather than guessing.
   `src/copy/` so the same emptiness cannot be green on one screen and grey on
   the next.
 
+### Fixed
+
+- **Clicking the header of the People detailed table opened somebody's profile**,
+  and that person's row was highlighted from the moment the screen opened. The
+  row-wide link is one anchor stretched over its row, and it was anchored to the
+  `<tr>` — where `position: relative` is undefined per spec. An engine that
+  ignores it resolved the overlay against something card-sized, so the last row's
+  invisible anchor covered the whole table, header included. It is anchored to
+  the cell it lives in now, which is a block container everywhere, and the
+  row-wide hit area is unchanged.
+
 ### Changed
 
 - The vault CLI gained `projects`, and `task-add` / `note-add` / `notes` take
