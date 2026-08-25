@@ -2,8 +2,14 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { moveNoteAction, saveNoteAction, setMetaAction } from '@/app/notes/actions';
+import {
+  deleteNoteAction,
+  moveNoteAction,
+  saveNoteAction,
+  setMetaAction,
+} from '@/app/notes/actions';
 import type { NoteCategory } from '@/lib/vault/schemas';
+import { Confirm } from '@/components/Confirm';
 import { NAV_GLYPH } from '@/components/NavIcons';
 import {
   Banner,
@@ -15,6 +21,7 @@ import {
   CheckIcon,
   DateInput,
   EditIcon,
+  RemoveIcon,
   Icon,
   PinIcon,
   Prose,
@@ -83,6 +90,7 @@ export function NoteEditor({ note, people, projects }: Props) {
   const [body, setBody] = useState(note.body);
   const [saveState, setSaveState] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const [pending, startTransition] = useTransition();
 
   // Selecting a different note in the list re-renders this component in place.
@@ -93,6 +101,7 @@ export function NoteEditor({ note, people, projects }: Props) {
     setBody(note.body);
     setError(null);
     setSaveState('');
+    setConfirming(false);
   }, [note.path, note.title, note.body]);
 
   const run = (
@@ -123,6 +132,60 @@ export function NoteEditor({ note, people, projects }: Props) {
       return result;
     }, 'Saved');
 
+  /**
+   * The keys somebody editing a Markdown file already has in their hands.
+   *
+   * Tab indents rather than leaving the field, which is the one thing here that
+   * costs something: a keyboard user cannot leave the textarea with Tab any
+   * more. Shift+Tab still does, and Escape leaves editing altogether — without
+   * both of those this would be a trap rather than an editor.
+   */
+  const editorKeys = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault();
+      save();
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setEditing(false);
+      return;
+    }
+    if (event.key !== 'Tab' || event.shiftKey) return;
+
+    event.preventDefault();
+    const field = event.currentTarget;
+
+    // `insertText` rather than setting the value ourselves: it leaves the caret
+    // where the browser would leave it and keeps the native undo stack, so ⌘Z
+    // still walks back through what was typed. Writing the string by hand
+    // restores the caret a frame late — fast enough for a person, wrong for
+    // anything typed immediately after — and throws the undo history away.
+    if (document.execCommand('insertText', false, '  ')) return;
+
+    const from = field.selectionStart;
+    const to = field.selectionEnd;
+    setBody(`${body.slice(0, from)}  ${body.slice(to)}`);
+    requestAnimationFrame(() => field.setSelectionRange(from + 2, from + 2));
+  };
+
+  /**
+   * Deleting cannot go through `run`: that one keeps the selection on the note
+   * it just wrote, and this note is gone. The list picks the next one.
+   */
+  const remove = () =>
+    startTransition(async () => {
+      const result = await deleteNoteAction(note.path);
+      if (result.ok) {
+        setConfirming(false);
+        router.replace('/notes', { scroll: false });
+        router.refresh();
+      } else {
+        setConfirming(false);
+        setError(result.message ?? 'Could not delete it.');
+      }
+    });
+
   return (
     <div className={`scroll ${styles.editorCol}`}>
       <div className={styles.column}>
@@ -137,6 +200,18 @@ export function NoteEditor({ note, people, projects }: Props) {
                 {saveState}
               </Text>
             ) : null}
+            {/* Farthest from Save and Edit, which are the two things somebody is
+                aiming at when this row is busy. It asks before it deletes, so a
+                misclick costs a dismissed dialog rather than a note. */}
+            {editing ? null : (
+              <Button
+                iconOnly
+                onClick={() => setConfirming(true)}
+                icon={<RemoveIcon />}
+                disabled={pending}
+                ariaLabel={`Delete “${note.title}”`}
+              />
+            )}
             <Toggle
               checked={note.draft}
               onChange={(checked) =>
@@ -155,6 +230,9 @@ export function NoteEditor({ note, people, projects }: Props) {
             </Button>
             {editing ? (
               <>
+                <Text level="small" tone="faint" nowrap>
+                  Markdown · ⌘S saves · Esc cancels
+                </Text>
                 <Button onClick={() => setEditing(false)}>Cancel</Button>
                 <Button variant="primary" onClick={save} pending={pending} icon={<CheckIcon />}>
                   Save
@@ -228,11 +306,26 @@ export function NoteEditor({ note, people, projects }: Props) {
                   heading
                   value={title}
                   onChange={setTitle}
+                  onKeyDown={(event) => {
+                    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+                      event.preventDefault();
+                      save();
+                    }
+                    if (event.key === 'Escape') setEditing(false);
+                  }}
                   placeholder="Note title"
                   ariaLabel="Note title"
                 />
               </CardRow>
-              <Textarea mono bare value={body} onChange={setBody} ariaLabel="Note body" />
+              <Textarea
+                mono
+                bare
+                fill
+                value={body}
+                onChange={setBody}
+                onKeyDown={editorKeys}
+                ariaLabel="Note body"
+              />
             </Card>
           ) : (
             <Card>
@@ -256,6 +349,16 @@ export function NoteEditor({ note, people, projects }: Props) {
           {error ? <Banner tone="danger" description={error} /> : null}
         </Stack>
       </div>
+
+      <Confirm
+        open={confirming}
+        title="Delete this note?"
+        body={`“${note.title}” is removed from ${note.path}. A snapshot is taken first, so npm run vault:restore can bring it back — nothing in the app can.`}
+        action="Delete note"
+        pending={pending}
+        onCancel={() => setConfirming(false)}
+        onConfirm={remove}
+      />
     </div>
   );
 }

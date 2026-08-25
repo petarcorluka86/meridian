@@ -46,7 +46,7 @@ export default function globalSetup(): void {
   fs.writeFileSync(note, lines.filter((line) => !line.startsWith('- BambooHR')).join('\n'));
 
   fs.writeFileSync(
-    path.join(VAULT, 'notes/inbox/2026-08-19-uncommitted.md'),
+    path.join(VAULT, 'notes/general/2026-08-19-uncommitted.md'),
     '---\ncategory: idea\ndraft: false\npinned: false\n---\n\n# A thought not yet saved\n\nThis file exists only so the gate has an untracked change to draw.\n',
   );
 }

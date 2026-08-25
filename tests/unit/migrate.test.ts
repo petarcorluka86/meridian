@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { type Migration, migrateVault } from '@/lib/vault/migrate';
+import { DATA_VERSION, MIGRATIONS, type Migration, migrateVault } from '@/lib/vault/migrate';
 
 /**
  * The vault outlives the app, so the format carries a version. Until now nothing
@@ -43,10 +43,12 @@ describe('a vault at the current format', () => {
   it('keeps a version it cannot make sense of out of the way', () => {
     // A config with no version, or a broken one, is treated as current rather
     // than migrated from zero — repairing it is the doctor's job, not this one's.
+    // `DATA_VERSION` rather than a literal, because "current" is whatever this
+    // build writes: with a number here, this test broke the day the format moved.
     fs.writeFileSync(path.join(vault, 'config.json'), '{ "thresholds": {} }');
-    expect(migrateVault(vault, [], 1).state).toBe('current');
+    expect(migrateVault(vault, [], DATA_VERSION).state).toBe('current');
     fs.writeFileSync(path.join(vault, 'config.json'), 'not json');
-    expect(migrateVault(vault, [], 1).state).toBe('current');
+    expect(migrateVault(vault, [], DATA_VERSION).state).toBe('current');
   });
 });
 
@@ -133,5 +135,70 @@ describe('a vault older than the app', () => {
     // Step 2 ran and is recorded, so a restart does not redo it.
     expect(config().dataVersion).toBe(2);
     expect(fs.existsSync(path.join(vault, 'second'))).toBe(true);
+  });
+});
+
+describe('the step that removed the inbox', () => {
+  let vault: string;
+
+  beforeEach(() => {
+    vault = fs.mkdtempSync(path.join(os.tmpdir(), 'meridian-inbox-migration-'));
+    fs.mkdirSync(path.join(vault, 'notes/inbox'), { recursive: true });
+  });
+
+  afterEach(() => {
+    fs.rmSync(vault, { recursive: true, force: true });
+  });
+
+  const step = () => MIGRATIONS.find((m) => m.to === 2)!;
+
+  it('moves every note into general and takes the folder with it', () => {
+    fs.writeFileSync(path.join(vault, 'notes/inbox/2026-08-18-misao.md'), '# Misao\n');
+    fs.writeFileSync(path.join(vault, 'notes/inbox/2026-08-19-druga.md'), '# Druga\n');
+
+    step().run(vault);
+
+    expect(fs.readdirSync(path.join(vault, 'notes/general')).sort()).toEqual([
+      '2026-08-18-misao.md',
+      '2026-08-19-druga.md',
+    ]);
+    expect(fs.existsSync(path.join(vault, 'notes/inbox'))).toBe(false);
+  });
+
+  it('keeps both when the same filename already exists in general', () => {
+    fs.mkdirSync(path.join(vault, 'notes/general'), { recursive: true });
+    fs.writeFileSync(
+      path.join(vault, 'notes/general/2026-08-18-misao.md'),
+      '# The one in general\n',
+    );
+    fs.writeFileSync(
+      path.join(vault, 'notes/inbox/2026-08-18-misao.md'),
+      '# The one from the inbox\n',
+    );
+
+    step().run(vault);
+
+    // Neither is overwritten. The renamed one is ugly on purpose: it is visible,
+    // and nothing somebody wrote is gone.
+    expect(
+      fs.readFileSync(path.join(vault, 'notes/general/2026-08-18-misao.md'), 'utf8'),
+    ).toContain('The one in general');
+    expect(
+      fs.readFileSync(path.join(vault, 'notes/general/2026-08-18-misao-inbox.md'), 'utf8'),
+    ).toContain('The one from the inbox');
+  });
+
+  it('leaves a folder holding something it does not understand', () => {
+    fs.writeFileSync(path.join(vault, 'notes/inbox/notes.txt'), 'not a note\n');
+
+    step().run(vault);
+
+    // Not this step's to judge, and not this step's to delete.
+    expect(fs.existsSync(path.join(vault, 'notes/inbox/notes.txt'))).toBe(true);
+  });
+
+  it('is a no-op on a vault that never had an inbox', () => {
+    fs.rmSync(path.join(vault, 'notes/inbox'), { recursive: true });
+    expect(() => step().run(vault)).not.toThrow();
   });
 });

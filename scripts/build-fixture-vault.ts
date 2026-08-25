@@ -6,6 +6,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DATA_VERSION } from '../src/lib/vault/migrate.js';
+import { VAULT_README } from '../src/lib/vault/readme.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/fixtures/vault');
 fs.rmSync(root, { recursive: true, force: true });
@@ -106,8 +108,9 @@ write(
     '# 1:1 — on-call docs and the staff question\n\nHe rewrote the on-call handover doc without being asked. That is the kind of thing the staff conversation needs as evidence.\n\nHe wants a date for the conversation, not a promise. Give him one this month.\n',
   ),
 );
+write('README.md', VAULT_README);
 write(
-  'notes/inbox/2026-08-18-misao.md',
+  'notes/general/2026-08-18-misao.md',
   note(
     'idea',
     true,
@@ -394,7 +397,10 @@ json(
 
 json('config.json', {
   thresholds: { contactGapDays: 14, timeBalanceLimitHours: 20, uncommittedChangesDays: 3 },
-  dataVersion: 1,
+  // The version this build writes, not a number typed here: a fixture claiming
+  // an older format is migrated on every start, which writes into committed
+  // test data.
+  dataVersion: DATA_VERSION,
 });
 write('.gitignore', '.cache/\n.snapshots/\n.DS_Store\n');
 

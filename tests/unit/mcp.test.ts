@@ -121,6 +121,7 @@ describe('what the server offers', () => {
     'delete_task',
     'write_note',
     'move_note',
+    'delete_note',
     'log_hours',
     'update_hours',
     'delete_hours',
@@ -136,7 +137,7 @@ describe('what the server offers', () => {
     'vault_problems',
   ];
 
-  it('offers exactly these thirty-two tools', async () => {
+  it('offers exactly these thirty-three tools', async () => {
     // Agents refer to tools by name, so renaming one is a breaking change and
     // should have to be made here on purpose.
     expect([...(await tools()).keys()]).toEqual(EXPECTED);

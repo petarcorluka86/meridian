@@ -10,7 +10,46 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ## [Unreleased]
 
+### Removed
+
+- **The notes inbox.** `notes/inbox/` held anything captured without a person
+  until it was filed, and the filing was the flaw: the only way out of that
+  folder was to name somebody, so a note genuinely about nobody sat in a queue
+  that could never be emptied. A note with no person now lives in
+  `notes/general/` from the start, and giving it a person still moves the file
+  into their folder. The Inbox filter and the Inbox label are gone with it.
+
+### Changed
+
+- **The vault format is at version 2**, and this is its first migration: notes
+  in `notes/inbox/` are moved into `notes/general/` when the app opens a vault
+  written before the change. Leaving them would have kept them on disk and hidden
+  them from the Notes screen at the same time. A filename that already exists in
+  `notes/general/` keeps both files — the moved one gains `-inbox` before its
+  extension rather than overwriting anything.
+
 ### Added
+
+- **A project's Tasks and Notes cards can start one.** Both carry the button the
+  Phases and Links cards already had, and what it makes is already attached to
+  the project — the one field the form does not ask for, because the project is
+  the page. A task takes a title and nothing else; priority, a date and who it is
+  for are one press away in the row's own dialog. A note opens as soon as it
+  exists, since a note is a thing you write.
+
+- **New note is on the Notes screen**, at the top of the list, always — not only
+  when the vault is empty. It lands on whoever the list is filtered to.
+- **Editing a note is editing the file.** The writing surface is as tall as the
+  window, Tab indents instead of leaving the field, ⌘S saves and Escape cancels.
+  Tab is inserted through the browser's own `insertText`, so the caret lands
+  where it should and ⌘Z still walks back through what was typed — setting the
+  value from state does neither.
+- **A note can be deleted**, from the note's own toolbar and behind a
+  confirmation that names the file. A snapshot is taken first, so
+  `npm run vault:restore` can bring it back and nothing in the app can — the
+  same promise every other deletion here makes. `delete_note` is the MCP tool for
+  it, which takes the registry to thirty-three tools and closes the last row that
+  was Closed because the app could not do it either.
 
 - **A dark scheme**, and a Settings screen with the switch on it: Light, Dark or
   System. Meridian opens in Light until told otherwise — it is a light app that

@@ -118,6 +118,23 @@ export function moveFile(fromRel: string, toRel: string): void {
 }
 
 /**
+ * Delete a file, having copied it aside first.
+ *
+ * The snapshot is not a formality here: it is the whole difference between "gone
+ * from the app" and "gone". `npm run vault:restore` brings the file back, which
+ * is what the confirmation in the interface says and what makes deleting
+ * something a decision rather than a risk. The only thing in Meridian that
+ * really destroys is emptying the vault, and that takes the snapshots with it.
+ */
+export function removeFile(relPath: string): void {
+  const abs = safeVaultPath(relPath);
+  if (!fs.existsSync(abs)) return;
+
+  snapshot(relPath, abs);
+  fs.rmSync(abs, { force: true });
+}
+
+/**
  * The read-modify-write loop: read with its mtime, transform, write, and retry
  * if the file moved underneath us in between.
  *

@@ -225,10 +225,13 @@ function Guide() {
       'Notes',
       '',
       [
+        'New note starts one from here; it lands on whoever the list is filtered to, or in notes/general/ if that is nobody.',
+        'Editing a note is editing the Markdown file: a monospace surface as tall as the window, Tab indents, ⌘S saves, Escape cancels. What you write is what is on disk, minus the front matter Meridian keeps at the top.',
         'Filter by person, by project, by category, or show only drafts.',
         'Pin a note to hold it at the top of the list.',
         'Changing the date renames the file; changing the person moves it into that person’s folder.',
-        'Anything captured without a person lands in the inbox until you give it one.',
+        'A note with no person lives in notes/general/. Give it one and the file moves into that person’s folder.',
+        'The bin deletes a note, after asking. A snapshot is taken first, so npm run vault:restore in the app folder can bring it back — nothing in the app can.',
       ],
     ],
     [
@@ -238,7 +241,7 @@ function Guide() {
         'A project is a title, a description, and phases — the checkpoints it has to pass. Phases are not tasks: you tick them off yourself, and they are how you know where the project stands.',
         'A project with phases shows how far it has got, as a bar and as a fraction. One without them shows neither, because there is nothing to be a fraction of.',
         'Tasks and notes belong to a project the same way they belong to a person, and can belong to both. Pick the project anywhere you can pick a person — quick capture, the task form, the task dialog, a note’s own row.',
-        'Each project has its own page with its phases, its tasks, its notes and its links.',
+        'Each project has its own page with its phases, its tasks, its notes and its links. Tasks and Notes both have a button that starts one already attached to the project — a note started there opens straight away, so you can write it.',
         'Archive a project and it moves to the Archived list. Nothing is deleted, its tasks stay where they are, and it comes back whenever you want it.',
         'Deleting one is different, and the confirmation says exactly what happens: the project and its phases go, its tasks and notes stay where they are and lose the project.',
       ],
@@ -316,7 +319,6 @@ function VaultSection({ vaultPath }: { vaultPath: string }) {
 │   │       └── 2026-07-30-feedback-marko.md
 │   └── marko-maric/ …
 ├── notes/
-│   ├── inbox/                      captured, not filed yet
 │   └── general/                    not about one person
 ├── projects.json                   longer-running work, with its phases and links
 ├── tasks.json                      your tasks
