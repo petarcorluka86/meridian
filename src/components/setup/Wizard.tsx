@@ -3,7 +3,18 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { BrandMark } from '@/components/NavIcons';
-import { Banner, ButtonLink, Code, Page, Pill, PrevIcon, Row, Stack, Text } from '@/components/ui';
+import {
+  Banner,
+  ButtonLink,
+  Code,
+  Page,
+  PrevIcon,
+  Row,
+  Stack,
+  type Step,
+  Stepper,
+  Text,
+} from '@/components/ui';
 import { BambooStep } from './BambooStep';
 import { CalendarStep } from './CalendarStep';
 import { DoneStep } from './DoneStep';
@@ -15,11 +26,12 @@ type StepId = 'vault' | 'bamboo' | 'calendar' | 'github' | 'done';
 /** The three a Settings row can send you back into, one at a time. */
 export type Only = 'bamboo' | 'calendar' | 'github';
 
+/** The numbers are the stepper's, drawn in its discs, so the labels are words. */
 const STEPS: Array<{ id: StepId; label: string }> = [
-  { id: 'vault', label: '1 · Your folder' },
-  { id: 'bamboo', label: '2 · BambooHR' },
-  { id: 'calendar', label: '3 · Calendar' },
-  { id: 'github', label: '4 · GitHub' },
+  { id: 'vault', label: 'Your folder' },
+  { id: 'bamboo', label: 'BambooHR' },
+  { id: 'calendar', label: 'Calendar' },
+  { id: 'github', label: 'GitHub' },
   { id: 'done', label: 'Done' },
 ];
 
@@ -87,17 +99,15 @@ export function Wizard({ initial, only }: { initial: WizardState; only?: Only })
         </Stack>
 
         {only ? null : (
-          <Row gap={2}>
-            {STEPS.map((s) => (
-              <Pill
-                key={s.id}
-                size="md"
-                tone={s.id === step ? 'info' : done.has(s.id) ? 'success' : 'neutral'}
-              >
-                {done.has(s.id) && s.id !== step ? `✓ ${s.label}` : s.label}
-              </Pill>
-            ))}
-          </Row>
+          <Stepper
+            label="Setting Meridian up"
+            steps={STEPS.map<Step>((s) => ({
+              label: s.label,
+              // Current wins over done: coming back to a step you have already
+              // finished should show you standing on it, not behind it.
+              state: s.id === step ? 'current' : done.has(s.id) ? 'done' : 'upcoming',
+            }))}
+          />
         )}
 
         {step === 'vault' ? (

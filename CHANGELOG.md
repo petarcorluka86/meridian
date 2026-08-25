@@ -42,8 +42,24 @@ so far. A migration that fails blocks the app rather than guessing.
 - **Connecting a source is one screen, reached from two places.** Settings →
   Connect opens `/setup?only=<source>` — that one step of the wizard, with the
   same checks and the same copy, returning to Settings when it is made.
+- **`Stepper`** — the design system's one new primitive, and the wizard's
+  progress drawn rather than described: a tick on a filled disc for a finished
+  step, a coloured line up to it, a dashed hairline for everything ahead. The row
+  of pills it replaced read "✓ 1 · Your folder" — a sentence to parse, and one
+  that gave a finished step and the current one the same weight.
 - **Setup has no sidebar**, and sits in the middle of the window. On a first run
   every link in that nav points at a vault that does not exist yet.
+- **The wizard ends in a first fetch.** Everything connected is pulled in once,
+  one source at a time, before the app opens — so the first Overview has your
+  team on it instead of three empty cards filling in one by one. A source that
+  fails says so and stops the wait rather than trapping you in it.
+
+### Fixed
+
+- **The sidebar came back only after a hard reload** once the wizard was
+  finished. Whether to draw it was decided in the root layout, which is rendered
+  once per document and kept across every client navigation after it; it is now
+  decided from the pathname, in the shell itself.
 - **Connections, on the Settings screen** — whether each of the three sources is
   set up, how old its answer is, and the badge that goes and looks again. A
   source that is not set up names the keys it is waiting for rather than only

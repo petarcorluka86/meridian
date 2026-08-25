@@ -68,6 +68,7 @@ export { type Priority, Rail } from './Rail';
 export { Blurred, RevealButton, useReveal } from './Reveal';
 export { SkeletonRows } from './Skeleton';
 export { Stat } from './Stat';
+export { type Step, Stepper, type StepState } from './Stepper';
 export { Table, TBody, TD, TH, THead, TR } from './Table';
 export { type TaskView, TaskRow } from './TaskRow';
 export { Code, CodeBlock, Text, type TextLevel, type Tone } from './Text';

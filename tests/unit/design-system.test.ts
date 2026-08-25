@@ -298,7 +298,19 @@ describe('every colour answers for both schemes', () => {
  */
 describe('every variant a primitive offers exists in its stylesheet', () => {
   /** `size` becomes `data-size`, and so on. Booleans are not enumerations. */
-  const ENUMERATED = ['size', 'variant', 'tone', 'level', 'align', 'justify', 'priority', 'width'];
+  const ENUMERATED = [
+    'size',
+    'variant',
+    'tone',
+    'level',
+    'align',
+    'justify',
+    'priority',
+    'width',
+    // `Stepper`'s three, which are a promise like any other: a state with no
+    // rule renders as an unstyled disc rather than as anything.
+    'state',
+  ];
 
   const primitives = all.filter(({ file }) => file.startsWith(PRIMITIVES) && file.endsWith('.tsx'));
 

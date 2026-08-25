@@ -53,6 +53,7 @@ const preview: Preview = {
             'Category chip',
             'Day stepper',
             'Sync badge',
+            'Stepper',
             'Skeleton',
             'Reveal',
             'Task row',
