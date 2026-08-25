@@ -34,7 +34,10 @@ so far. A migration that fails blocks the app rather than guessing.
   set up, how old its answer is, and the badge that goes and looks again. A
   source that is not set up names the keys it is waiting for rather than only
   saying it is off.
-- **Reset**, and it is the only thing in the app a snapshot cannot undo. Emptying
+- **Reset**, and it is the only thing in the app a snapshot cannot undo. The
+  confirmation counts what is actually there — "6 notes, 9 tasks, 5 projects,
+  6 people and 10 hour entries" — and says whether a copy exists on a remote,
+  because that is the one thing worth knowing before pressing it. Emptying
   the vault takes its Git history and its snapshots with it, because both live
   inside the folder, and the confirmation says so instead of pointing at
   `vault:restore`. A full reset removes `.env` as well and reopens at the setup
