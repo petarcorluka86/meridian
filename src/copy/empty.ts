@@ -219,12 +219,12 @@ export const EMPTY = {
     },
     tasks: {
       title: 'No tasks on this project yet',
-      body: 'Pick the project in the task form and it shows up here, with its chip on the task wherever you meet it.',
+      body: 'Add one above and it starts here, with this project’s chip on it wherever you meet it. Picking the project in the task form does the same thing from anywhere else.',
       tone: 'info',
     },
     notes: {
       title: 'No notes on this project yet',
-      body: 'Decisions, retros, the reason a phase slipped — tag a note with this project and it lands here, wherever the note itself lives.',
+      body: 'Decisions, retros, the reason a phase slipped. Start one above, or tag any note with this project — it lands here either way, wherever the note itself lives.',
       tone: 'info',
     },
     links: {

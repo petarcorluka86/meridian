@@ -1,31 +1,13 @@
 import { notFound } from 'next/navigation';
 import { getVault } from '@/lib/vault/index';
 import { progressOf } from '@/lib/vault/projects';
-import { dueLabel, dueTone, shortDate, today } from '@/lib/dates';
+import { dueLabel, dueTone, today } from '@/lib/dates';
 import { PhasesCard } from '@/components/projects/PhasesCard';
 import { ProjectHeader } from '@/components/projects/ProjectHeader';
 import { ProjectLinksCard } from '@/components/projects/ProjectLinksCard';
-import { NAV_GLYPH } from '@/components/NavIcons';
-import { EMPTY } from '@/copy/empty';
-import {
-  Card,
-  CardHeader,
-  CardRow,
-  CategoryPill,
-  categoryOf,
-  Columns,
-  EmptyState,
-  ButtonLink,
-  Page,
-  Pill,
-  Row,
-  Spacer,
-  Stack,
-  TaskRow,
-  type TaskView,
-  Text,
-  TextLink,
-} from '@/components/ui';
+import { ProjectNotesCard } from '@/components/projects/ProjectNotesCard';
+import { ProjectTasksCard } from '@/components/projects/ProjectTasksCard';
+import { Columns, ButtonLink, Page, Row, Stack, type TaskView } from '@/components/ui';
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -92,49 +74,27 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             <>
               <PhasesCard id={project.id} phases={project.phases} progress={progress} />
 
-              <Card>
-                <CardHeader title="Tasks" count={openTasks || undefined} />
-                {tasks.map((task) => (
-                  // The project is the page, so every row would carry the same
-                  // chip. It is the one place the chip is noise.
-                  <TaskRow
-                    key={task.id}
-                    task={task}
-                    people={people}
-                    projects={projects}
-                    showProject={false}
-                  />
-                ))}
-                {tasks.length === 0 ? (
-                  <EmptyState glyph={NAV_GLYPH.tasks} {...EMPTY.project.tasks} />
-                ) : null}
-              </Card>
+              <ProjectTasksCard
+                id={project.id}
+                tasks={tasks}
+                people={people}
+                projects={projects}
+                openTasks={openTasks}
+              />
             </>
           }
           side={
             <>
-              <Card>
-                <CardHeader title="Notes" count={notes.length || undefined} />
-                {notes.map((note) => (
-                  <CardRow key={note.path}>
-                    <Text level="mono" tone="muted">
-                      {note.date ? shortDate(note.date) : '—'}
-                    </Text>
-                    <TextLink href={`/notes?note=${encodeURIComponent(note.path)}`} truncate>
-                      {note.title}
-                    </TextLink>
-                    <Spacer />
-                    {note.draft ? <Pill tone="warning">Draft</Pill> : null}
-                    <CategoryPill
-                      category={note.category}
-                      label={categoryOf(note.category).label}
-                    />
-                  </CardRow>
-                ))}
-                {notes.length === 0 ? (
-                  <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.project.notes} />
-                ) : null}
-              </Card>
+              <ProjectNotesCard
+                id={project.id}
+                notes={notes.map((note) => ({
+                  path: note.path,
+                  title: note.title,
+                  date: note.date,
+                  draft: note.draft,
+                  category: note.category,
+                }))}
+              />
 
               <ProjectLinksCard
                 id={project.id}
