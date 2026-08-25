@@ -49,10 +49,13 @@ so far. A migration that fails blocks the app rather than guessing.
   that gave a finished step and the current one the same weight.
 - **Setup has no sidebar**, and sits in the middle of the window. On a first run
   every link in that nav points at a vault that does not exist yet.
-- **The wizard ends in a first fetch.** Everything connected is pulled in once,
-  one source at a time, before the app opens — so the first Overview has your
-  team on it instead of three empty cards filling in one by one. A source that
-  fails says so and stops the wait rather than trapping you in it.
+- **The wizard ends in a first fetch**, on a screen of its own: "Meridian is
+  setting up…", the whole window, everything connected pulled in once and one
+  source at a time before the app opens — so the first Overview has your team on
+  it instead of three empty cards filling in one by one. The bar is a proportion
+  rather than a spinner, because the number of sources is known. A clean run
+  walks straight into the app; a source that fails says so and stops the wait
+  rather than trapping you in it.
 
 ### Fixed
 

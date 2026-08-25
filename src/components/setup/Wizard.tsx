@@ -18,6 +18,7 @@ import {
 import { BambooStep } from './BambooStep';
 import { CalendarStep } from './CalendarStep';
 import { DoneStep } from './DoneStep';
+import { type Settled, SettingUp } from './SettingUp';
 import { GithubStep } from './GithubStep';
 import { VaultStep } from './VaultStep';
 
@@ -63,6 +64,7 @@ export function Wizard({ initial, only }: { initial: WizardState; only?: Only })
     ]),
   );
   const [pending, startTransition] = useTransition();
+  const [settled, setSettled] = useState<Settled | null>(null);
 
   const advance = (from: StepId, to: StepId) => {
     setDone((d) => new Set(d).add(from));
@@ -72,6 +74,13 @@ export function Wizard({ initial, only }: { initial: WizardState; only?: Only })
     if (only) router.push('/settings');
     else setStep(to);
   };
+
+  /*
+   * The wait takes the whole window. Everything below — a stepper of finished
+   * steps, the card, the banner about where credentials go — would be furniture
+   * around a progress bar, and there is nothing to do here but wait.
+   */
+  if (step === 'done' && settled === null) return <SettingUp onStop={setSettled} />;
 
   return (
     <Page width="narrow">
@@ -141,7 +150,7 @@ export function Wizard({ initial, only }: { initial: WizardState; only?: Only })
             onSkip={only ? undefined : () => advance('github', 'done')}
           />
         ) : null}
-        {step === 'done' ? <DoneStep /> : null}
+        {step === 'done' ? <DoneStep failures={settled?.failures ?? []} /> : null}
 
         <Banner
           tone="warning"
