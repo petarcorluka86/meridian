@@ -39,7 +39,6 @@ export async function captureNoteAction(input: {
     const path = await createNote({
       title: input.title,
       category: input.category,
-      // No person means the inbox, until you give it one.
       personSlug: input.personSlug,
       project: input.project,
       draft: input.draft,

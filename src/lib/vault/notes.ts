@@ -5,7 +5,14 @@ import { safeVaultPath } from './paths';
 import { moveFile, mutateTextFile, removeFile, withLock, writeTextAtomic } from './write';
 import fs from 'node:fs';
 
-export type NoteLocation = 'person' | 'inbox' | 'general';
+/**
+ * Two, since there is nowhere else a note can be. It used to be three: a note
+ * captured without a person landed in `notes/inbox/` and waited to be filed.
+ * The waiting was the problem — the only way out of that folder was to name a
+ * person, so a note that was about nobody in particular stayed in a queue that
+ * could never be emptied.
+ */
+export type NoteLocation = 'person' | 'general';
 
 /** "1:1 — staff track" → "1-1-staff-track", capped so a filename stays readable. */
 export function slugifyTitle(title: string): string {
@@ -33,7 +40,7 @@ export function notePath(opts: {
 }): string {
   const file = `${opts.date}-${opts.titleSlug}.md`;
   if (opts.personSlug) return `people/${opts.personSlug}/notes/${file}`;
-  return opts.location === 'inbox' ? `notes/inbox/${file}` : `notes/general/${file}`;
+  return `notes/general/${file}`;
 }
 
 /** The slug part of an existing filename, so renaming by date keeps the title. */
@@ -140,12 +147,7 @@ export async function moveNote(
     throw new Error(`No person with the slug ${personSlug} in people/entries.json.`);
   }
 
-  // Filing a captured note gives it a person, which takes it out of the inbox.
-  const location: NoteLocation = personSlug
-    ? 'person'
-    : note.location === 'inbox'
-      ? 'inbox'
-      : 'general';
+  const location: NoteLocation = personSlug ? 'person' : 'general';
 
   const next = notePath({ date, titleSlug: titleSlugOf(note), personSlug, location });
   if (next === path) return { path, moved: false };
@@ -193,12 +195,9 @@ export async function createNote(input: {
 
   const date = input.date ?? new Date().toISOString().slice(0, 10);
   const personSlug = input.personSlug || null;
-  // Anything captured without a person lands in the inbox until you give it one.
-  const location: NoteLocation = personSlug
-    ? 'person'
-    : input.personSlug === null
-      ? 'inbox'
-      : 'general';
+  // A note about nobody is a note about nobody, not a note waiting to be about
+  // somebody. It goes to notes/general/ and stays there unless it is given one.
+  const location: NoteLocation = personSlug ? 'person' : 'general';
 
   let path = notePath({ date, titleSlug: slugifyTitle(title), personSlug, location });
   for (let i = 2; fs.existsSync(safeVaultPath(path)); i++) {

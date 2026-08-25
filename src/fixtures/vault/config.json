@@ -4,5 +4,5 @@
     "timeBalanceLimitHours": 20,
     "uncommittedChangesDays": 3
   },
-  "dataVersion": 1
+  "dataVersion": 2
 }

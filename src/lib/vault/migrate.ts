@@ -20,7 +20,7 @@ import path from 'node:path';
  */
 
 /** What this build of the app writes and understands. */
-export const DATA_VERSION = 1;
+export const DATA_VERSION = 2;
 
 export type Migration = {
   /** The version the vault is at once this has run. */
@@ -31,11 +31,43 @@ export type Migration = {
 };
 
 /**
- * Empty, because version 1 is the first format there has been. It is here, with
- * its runner tested, so that the day a format change is needed there is a
- * numbered place to put it rather than a decision to make under pressure.
+ * The format changes there have been, in order.
+ *
+ * Step 2 is the first: `notes/inbox/` is gone as a concept, and a vault written
+ * before that has notes sitting in a folder this app no longer looks in. Moving
+ * them is not optional tidying — leaving them would make them vanish from the
+ * Notes screen while still being on disk, which is the worst of both.
+ *
+ * A name collision in `notes/general/` is possible and is not resolved by
+ * overwriting: the file keeps its name with `-inbox` before the extension, which
+ * is ugly and visible and does not lose anything.
  */
-export const MIGRATIONS: Migration[] = [];
+export const MIGRATIONS: Migration[] = [
+  {
+    to: 2,
+    what: 'move notes/inbox into notes/general',
+    run: (vaultPath) => {
+      const from = path.join(vaultPath, 'notes/inbox');
+      if (!fs.existsSync(from)) return;
+
+      const to = path.join(vaultPath, 'notes/general');
+      fs.mkdirSync(to, { recursive: true });
+
+      for (const name of fs.readdirSync(from)) {
+        if (!name.endsWith('.md')) continue;
+        let target = path.join(to, name);
+        if (fs.existsSync(target)) {
+          target = path.join(to, name.replace(/\.md$/, '-inbox.md'));
+        }
+        fs.renameSync(path.join(from, name), target);
+      }
+
+      // Only if it is empty, and only then. Anything else in there is somebody
+      // else's and is not this step's to judge.
+      if (fs.readdirSync(from).length === 0) fs.rmdirSync(from);
+    },
+  },
+];
 
 export type MigrationOutcome =
   | { state: 'current' }

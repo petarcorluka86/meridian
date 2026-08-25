@@ -10,6 +10,24 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ## [Unreleased]
 
+### Removed
+
+- **The notes inbox.** `notes/inbox/` held anything captured without a person
+  until it was filed, and the filing was the flaw: the only way out of that
+  folder was to name somebody, so a note genuinely about nobody sat in a queue
+  that could never be emptied. A note with no person now lives in
+  `notes/general/` from the start, and giving it a person still moves the file
+  into their folder. The Inbox filter and the Inbox label are gone with it.
+
+### Changed
+
+- **The vault format is at version 2**, and this is its first migration: notes
+  in `notes/inbox/` are moved into `notes/general/` when the app opens a vault
+  written before the change. Leaving them would have kept them on disk and hidden
+  them from the Notes screen at the same time. A filename that already exists in
+  `notes/general/` keeps both files — the moved one gains `-inbox` before its
+  extension rather than overwriting anything.
+
 ### Added
 
 - **New note is on the Notes screen**, at the top of the list, always — not only

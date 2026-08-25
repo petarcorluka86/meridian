@@ -60,7 +60,7 @@ function ensureScaffold(vaultPath: string): void {
   const gitignore = path.join(vaultPath, '.gitignore');
   if (!fs.existsSync(gitignore)) fs.writeFileSync(gitignore, GITIGNORE);
 
-  for (const dir of ['people', 'notes/inbox', 'notes/general']) {
+  for (const dir of ['people', 'notes/general']) {
     fs.mkdirSync(path.join(/* turbopackIgnore: true */ vaultPath, dir), { recursive: true });
   }
 

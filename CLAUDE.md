@@ -399,7 +399,6 @@ $VAULT_PATH/                      its own git repository, separate from this one
 │       ├── links.json            [{ label, url }]
 │       ├── plans.json            [{ id, amount, month, year, promotion }]
 │       └── notes/2026-08-12-1on1.md
-├── notes/inbox/                  captured, not filed yet
 ├── notes/general/                not about one person
 ├── projects.json                 [{ id, title, description, phases[], links[], archived }]
 ├── tasks.json
@@ -409,6 +408,20 @@ $VAULT_PATH/                      its own git repository, separate from this one
 ├── .snapshots/                   git-ignored, 20 per file, pruned past 30 days
 └── .gitignore                    written before anything else can land in it
 ```
+
+**A note lives in one of two places, and there used to be three.**
+`notes/inbox/` held anything captured without a person, until somebody filed it.
+The filing was the flaw: the only way out of that folder was to name a person, so
+a note that was genuinely about nobody — a meeting record, an idea for the team —
+sat in a queue that could never be emptied. A note with no person is now a note
+about nobody, in `notes/general/`, and giving it a person still moves the file
+into their folder.
+
+That change is the vault's first format migration: `DATA_VERSION` is 2, and step
+2 in `src/lib/vault/migrate.ts` moves `notes/inbox/*` into `notes/general/` on
+the way in. Without it those files would still be on disk and invisible to the
+app, which is the worst of both. A name collision keeps both files, the moved one
+gaining `-inbox` before its extension — ugly, visible, and losing nothing.
 
 `people/<slug>/` and the `slug` in `entries.json` must match. A mismatch is
 reported as a vault problem naming both, never silently repaired — repairing it

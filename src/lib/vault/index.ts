@@ -31,7 +31,7 @@ export type Note = {
   date: string | null;
   /** From the folder, never from front matter. */
   personSlug: string | null;
-  location: 'person' | 'inbox' | 'general';
+  location: 'person' | 'general';
   category: NoteCategory;
   draft: boolean;
   pinned: boolean;
@@ -203,8 +203,6 @@ function readNote(root: string, rel: string, problems: VaultProblem[]): Note | n
   if (segments[0] === 'people' && segments[1] && !segments[1].startsWith('_')) {
     personSlug = segments[1];
     location = 'person';
-  } else if (segments[0] === 'notes' && segments[1] === 'inbox') {
-    location = 'inbox';
   }
 
   return {
@@ -223,9 +221,13 @@ function readNote(root: string, rel: string, problems: VaultProblem[]): Note | n
 }
 
 /**
- * A note lives in one of exactly three places. Anything else that happens to be
+ * A note lives in one of exactly two places. Anything else that happens to be
  * Markdown — the vault's own README, an about.md, a stray file someone dropped
  * in — is not a note and must not appear in the Notes list.
+ *
+ * `notes/inbox/` was a third until the concept went. A vault written before that
+ * is migrated on the way in, so nothing is left behind in a folder this no
+ * longer recognises — see `migrate.ts`.
  */
 export function isNotePathForTests(rel: string): boolean {
   return isNotePath(rel);
@@ -234,9 +236,7 @@ export function isNotePathForTests(rel: string): boolean {
 function isNotePath(rel: string): boolean {
   if (!rel.endsWith('.md')) return false;
   const segments = rel.split('/');
-  if (segments[0] === 'notes' && (segments[1] === 'inbox' || segments[1] === 'general')) {
-    return segments.length === 3;
-  }
+  if (segments[0] === 'notes' && segments[1] === 'general') return segments.length === 3;
   if (segments[0] === 'people' && segments[2] === 'notes') return segments.length === 4;
   return false;
 }

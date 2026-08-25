@@ -58,7 +58,7 @@ const WHEN = [
 
 /**
  * One field at the top of Overview. Task is the default; a note captured without
- * a person lands in the inbox, and the field says so under it.
+ * a person is a note about nobody, and the field says where it lands.
  */
 export function QuickCapture({ people, projects }: { people: Person[]; projects: Project[] }) {
   const router = useRouter();
@@ -192,7 +192,7 @@ export function QuickCapture({ people, projects }: { people: Person[]; projects:
         {mode === 'note' && !person ? (
           <CardRow>
             <Text level="small" tone="muted">
-              Lands in <Code>notes/inbox/</Code> until you give it a person.
+              Lands in <Code>notes/general/</Code>. Give it a person and it moves to their folder.
             </Text>
           </CardRow>
         ) : null}
