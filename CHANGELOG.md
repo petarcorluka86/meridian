@@ -30,6 +30,13 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ### Added
 
+- **A project's Tasks and Notes cards can start one.** Both carry the button the
+  Phases and Links cards already had, and what it makes is already attached to
+  the project — the one field the form does not ask for, because the project is
+  the page. A task takes a title and nothing else; priority, a date and who it is
+  for are one press away in the row's own dialog. A note opens as soon as it
+  exists, since a note is a thing you write.
+
 - **New note is on the Notes screen**, at the top of the list, always — not only
   when the vault is empty. It lands on whoever the list is filtered to.
 - **Editing a note is editing the file.** The writing surface is as tall as the
