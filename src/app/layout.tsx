@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { headers } from 'next/headers';
 import '@/styles/global.css';
 import styles from '@/components/Shell.module.css';
-import { Sidebar } from '@/components/Sidebar';
+import { Shell } from '@/components/Shell';
 import { SetupPanel } from '@/components/setup/SetupPanel';
 import { VaultProblems } from '@/components/VaultProblems';
 import { RefreshSources } from '@/components/overview/RefreshSources';
@@ -83,15 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" data-theme={theme === 'system' ? undefined : theme}>
       <body>
         <div className={styles.shell}>
-          {/*
-           * No sidebar during setup. On a first run every link in it goes
-           * somewhere that has no vault to read yet, and the wizard is the only
-           * thing to do — a nav that cannot be used is furniture in the way of
-           * the one screen that matters. The same holds for one connection
-           * reopened from Settings, which carries its own way back.
-           */}
-          {onSetup ? null : <Sidebar />}
-          <div className={`scroll ${styles.main}`} data-solo={onSetup || undefined}>
+          <Shell>
             {blocked ? (
               <SetupPanel health={health} envPath={envPath} />
             ) : needsSetup ? (
@@ -102,7 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 {children}
               </>
             )}
-          </div>
+          </Shell>
           {health.state === 'ok' ? <RefreshSources /> : null}
         </div>
       </body>

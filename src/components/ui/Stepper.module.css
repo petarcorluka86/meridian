@@ -1,0 +1,85 @@
+/*
+ * A row of discs joined by a line, with the label under each.
+ *
+ * The connector is the previous step's business: `.step + .step::before` draws
+ * the segment arriving at this disc, so colouring it by whether the *previous*
+ * step is done is one selector rather than a second element per gap. It is
+ * positioned on the disc's centre line, which is why the offset is half a
+ * control height rather than a number.
+ */
+.stepper {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.step + .step::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--control-sm) / 2);
+  right: 50%;
+  left: -50%;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+/* The trail behind you, coloured up to the disc it arrives at. */
+.step[data-state="done"] + .step::before {
+  background: var(--success-border);
+}
+
+.disc {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  flex: 0 0 var(--control-sm);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  color: var(--fg-faint);
+}
+
+.disc[data-state="done"] {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+/* A selection is a state, and the accent means action — the same reason a
+   selected chip inverts rather than turning blue. */
+.disc[data-state="current"] {
+  border-color: var(--selected);
+  background: var(--selected);
+  color: var(--selected-fg);
+}
+
+.disc[data-state="upcoming"] {
+  border-style: dashed;
+}
+
+/* The same sentence the discs say in colour, for a screen reader. */
+.said {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

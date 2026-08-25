@@ -339,6 +339,24 @@ pixel gate records the whole window for these screens rather than `[data-screen]
 — the page frame looks identical whether or not there is a nav beside it, so
 measuring the frame alone would hold neither half of this.
 
+That decision lives in `src/components/Shell.tsx`, a client component reading
+`usePathname()`, and **not** in the root layout — which is where it was first
+written, from the `x-meridian-path` header. A root layout is rendered once per
+document and kept across every client navigation after it, so the wizard's own
+"Open Meridian" left you in the app with no sidebar until a hard reload. The
+header is still right for `needsSetup` and `blocked`, which only decide anything
+on a full load.
+
+**The wizard ends in a wait, not a full stop.** `DoneStep` asks the server what
+ended up connected — several things changed on the way there, and it is the only
+thing that knows — then fetches each source once, in turn, before the app opens.
+The first Overview then has the team, the meetings and the reviews on it rather
+than three empty cards filling in one at a time. One source at a time rather than
+all at once: these credentials are being used for the first time, and a failure
+should name itself instead of arriving in a pile of three. A failure ends the
+wait rather than trapping anybody in it — it is said plainly and the way in stays
+open, because every card carries a badge that retries its own source.
+
 **Google Calendar is a set of credentials, typed and checked — not a sign-in
 flow.** The secret iCal address is gone: a company Workspace usually has those
 switched off, and a URL that is itself an unexpirable, unscopable credential is
@@ -510,10 +528,11 @@ arithmetic — the surfaces, the two blues and the tone tints are the design's, 
 | `Table` `THead` `TBody` `TR` `TH` `TD` | data with columns |
 | `Dialog` | the one modal. Two usages: `Confirm`, and `TaskDialog` |
 | `DayStepper` | walks a card through the days its cache can answer for |
+| `Stepper` | where you are in a sequence you cannot leave the middle of. The wizard's, and nothing else's |
 | `Meter` | a proportion of a known total. Two tones, and `success` is the one that means the total was reached |
 | `Banner` `EmptyState` `Pill` `CategoryPill` `Stat` `Icon` `IconTile` `Avatar` `Rail` `Prose` | the rest |
 | `icons.tsx` | the action glyphs — one per verb, see below |
-| `TaskRow` `TaskDialog` `SyncBadge` `Reveal` `Skeleton` | the five that only make sense here |
+| `TaskRow` `TaskDialog` `SyncBadge` `Reveal` `Skeleton` `Stepper` | the six that only make sense here |
 
 `Page` carries `data-screen`, which is what the pixel gate measures.
 
