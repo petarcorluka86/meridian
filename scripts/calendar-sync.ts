@@ -16,7 +16,7 @@ import { syncCalendar } from '../src/lib/sources/calendar.js';
 
 if (!loadConfig().calendar) {
   console.error(
-    'Calendar is not connected. Set either CALENDAR_ICAL_ADDRESS or the GOOGLE_ keys in .env.',
+    'Calendar is not connected. Connect it from Settings — it signs in to Google and writes the GOOGLE_ keys itself.',
   );
   process.exit(2);
 }

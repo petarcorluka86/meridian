@@ -30,6 +30,18 @@ so far. A migration that fails blocks the app rather than guessing.
   as a fill. The same blue does both jobs on paper; on a dark ground a blue dark
   enough to carry white text cannot be read as text, so the two part company
   there and stay identical here.
+- **The calendar is Google credentials, checked before they are saved.** The
+  secret iCal address is gone: a company Workspace usually has those switched
+  off, and a URL that is itself an unexpirable, unscopable credential is the
+  wrong shape for an account somebody else administers. In its place, four values
+  from your own Google Cloud project — client id, client secret, refresh token,
+  calendar id — checked together against Google and written only if that account
+  can actually read the calendar you named. A wrong id is named back with the
+  ones that would have worked. The hand-written iCal parser went with the old
+  path, and `Config.calendar` is one shape again instead of two.
+- **Connecting a source is one screen, reached from two places.** Settings →
+  Connect opens `/setup?only=<source>` — that one step of the wizard, with the
+  same checks and the same copy, returning to Settings when it is made.
 - **Connections, on the Settings screen** — whether each of the three sources is
   set up, how old its answer is, and the badge that goes and looks again. A
   source that is not set up names the keys it is waiting for rather than only

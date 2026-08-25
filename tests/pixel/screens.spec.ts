@@ -93,6 +93,27 @@ async function changelog(page: Page, name: string, url: string) {
   });
 }
 
+/**
+ * The connection screens: the wizard reopened one step at a time, which is what
+ * Settings → Connect reaches. Recorded because they are where somebody types a
+ * credential, and a screen nobody looks at is one that can quietly break.
+ *
+ * From the second server, whose sources are all unset — so what is recorded is
+ * the form somebody actually fills in. On the first server every key is pinned,
+ * and each of these would render its already-connected state instead.
+ */
+for (const step of ['bamboo', 'calendar', 'github']) {
+  test(`connect ${step}`, async ({ page }) => {
+    skipWithoutBaseline(`connect-${step}`);
+    await page.goto(`${OTHER}/setup?only=${step}`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(300);
+    await expect(page.locator('[data-screen]')).toHaveScreenshot(`connect-${step}.png`, {
+      maxDiffPixels: 0,
+    });
+  });
+}
+
 test('changelog', async ({ page }) => {
   skipWithoutBaseline('changelog');
   await changelog(page, 'changelog', `${OTHER}/changelog`);

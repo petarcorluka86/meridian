@@ -246,6 +246,7 @@ Nothing here is stored. Each is recomputed, and each is a question an agent asks
 | Which theme the app is painted in | `Config.theme` | — | **Closed** — one line to expose, and no reason yet: nothing an agent reports back changes with the colour scheme. |
 | Set the theme | `setThemeAction()` | — | **Never** — it is a preference about somebody's own screen, and they are looking at it. |
 | Test a credential against a source | `setup/actions.ts` | — | **Never** — a credential check is a live request made while somebody is watching it. |
+| Which calendars a Google account can read | `listCalendars()` | — | **Never** — it exists to check credentials being typed in, and an agent has no business holding those. |
 | Point the app at a different vault | `checkVaultAction()` | — | **Never** — same reason. |
 | Install the vault's credential hook | `npm run vault:hook` | — | **Never** — writing an executable into somebody's repository is not a side effect. |
 | Any write to BambooHR, Google or GitHub | — | — | **Never** — the rule at the top of `CLAUDE.md`. |
@@ -274,7 +275,7 @@ every other test green, and quietly hands an agent BambooHR.
 
 ## Where it stands
 
-Counted by row: **93 Open**, **9 Closed**, **29 Never** — 131 capabilities, against thirty-two tools.
+Counted by row: **93 Open**, **9 Closed**, **30 Never** — 132 capabilities, against thirty-two tools.
 
 Reading is effectively finished: the Overview, the caches behind it, pay, the
 whole task and note surface, the vault's own health and its git state are all

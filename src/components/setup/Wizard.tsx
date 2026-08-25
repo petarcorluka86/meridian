@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { BrandMark } from '@/components/NavIcons';
-import { Banner, Code, Page, Pill, Row, Stack, Text } from '@/components/ui';
+import { Banner, ButtonLink, Code, Page, Pill, PrevIcon, Row, Stack, Text } from '@/components/ui';
 import { BambooStep } from './BambooStep';
 import { CalendarStep } from './CalendarStep';
 import { DoneStep } from './DoneStep';
@@ -11,6 +11,9 @@ import { GithubStep } from './GithubStep';
 import { VaultStep } from './VaultStep';
 
 type StepId = 'vault' | 'bamboo' | 'calendar' | 'github' | 'done';
+
+/** The three a Settings row can send you back into, one at a time. */
+export type Only = 'bamboo' | 'calendar' | 'github';
 
 const STEPS: Array<{ id: StepId; label: string }> = [
   { id: 'vault', label: '1 · Your folder' },
@@ -27,9 +30,18 @@ export type WizardState = {
   github: boolean;
 };
 
-export function Wizard({ initial }: { initial: WizardState }) {
+/**
+ * The first run, and every connection made after it.
+ *
+ * `only` is what makes the second case possible: Settings links to
+ * `/setup?only=github` and gets exactly the step it asked for — the same
+ * component, the same checks, the same copy — with the progress pills gone and
+ * the way back named. One connection screen, reached from two places, rather
+ * than a wizard and a second thing that drifts from it.
+ */
+export function Wizard({ initial, only }: { initial: WizardState; only?: Only }) {
   const router = useRouter();
-  const [step, setStep] = useState<StepId>(initial.vault ? 'bamboo' : 'vault');
+  const [step, setStep] = useState<StepId>(only ?? (initial.vault ? 'bamboo' : 'vault'));
   const [done, setDone] = useState<Set<StepId>>(
     new Set<StepId>([
       ...(initial.vault ? (['vault'] as StepId[]) : []),
@@ -42,8 +54,11 @@ export function Wizard({ initial }: { initial: WizardState }) {
 
   const advance = (from: StepId, to: StepId) => {
     setDone((d) => new Set(d).add(from));
-    setStep(to);
     router.refresh();
+    // One connection, reached from Settings, goes back to Settings when it is
+    // made. Nothing else here is the next thing that person wanted to do.
+    if (only) router.push('/settings');
+    else setStep(to);
   };
 
   return (
@@ -55,25 +70,35 @@ export function Wizard({ initial }: { initial: WizardState }) {
                 than not showing it. Same geometry the sidebar draws. */}
           <BrandMark size={60} />
           <Text as="h1" level="title">
-            Let&rsquo;s set Meridian up
+            {only ? 'Connect it' : "Let's set Meridian up"}
           </Text>
           <Text level="body" tone="muted">
-            Four steps, and only the first is required. Everything you type here is checked before
-            it is saved, and stays on this machine.
+            {only
+              ? 'One connection, checked before it is saved. Everything you type stays on this machine.'
+              : 'Four steps, and only the first is required. Everything you type here is checked before it is saved, and stays on this machine.'}
           </Text>
+          {only ? (
+            <Row>
+              <ButtonLink href="/settings" variant="ghost" size="sm" icon={<PrevIcon />}>
+                Back to Settings
+              </ButtonLink>
+            </Row>
+          ) : null}
         </Stack>
 
-        <Row gap={2}>
-          {STEPS.map((s) => (
-            <Pill
-              key={s.id}
-              size="md"
-              tone={s.id === step ? 'info' : done.has(s.id) ? 'success' : 'neutral'}
-            >
-              {done.has(s.id) && s.id !== step ? `✓ ${s.label}` : s.label}
-            </Pill>
-          ))}
-        </Row>
+        {only ? null : (
+          <Row gap={2}>
+            {STEPS.map((s) => (
+              <Pill
+                key={s.id}
+                size="md"
+                tone={s.id === step ? 'info' : done.has(s.id) ? 'success' : 'neutral'}
+              >
+                {done.has(s.id) && s.id !== step ? `✓ ${s.label}` : s.label}
+              </Pill>
+            ))}
+          </Row>
+        )}
 
         {step === 'vault' ? (
           <VaultStep
@@ -87,7 +112,7 @@ export function Wizard({ initial }: { initial: WizardState }) {
             pending={pending}
             run={startTransition}
             onDone={() => advance('bamboo', 'calendar')}
-            onSkip={() => advance('bamboo', 'calendar')}
+            onSkip={only ? undefined : () => advance('bamboo', 'calendar')}
           />
         ) : null}
         {step === 'calendar' ? (
@@ -95,7 +120,7 @@ export function Wizard({ initial }: { initial: WizardState }) {
             pending={pending}
             run={startTransition}
             onDone={() => advance('calendar', 'github')}
-            onSkip={() => advance('calendar', 'github')}
+            onSkip={only ? undefined : () => advance('calendar', 'github')}
           />
         ) : null}
         {step === 'github' ? (
@@ -103,7 +128,7 @@ export function Wizard({ initial }: { initial: WizardState }) {
             pending={pending}
             run={startTransition}
             onDone={() => advance('github', 'done')}
-            onSkip={() => advance('github', 'done')}
+            onSkip={only ? undefined : () => advance('github', 'done')}
           />
         ) : null}
         {step === 'done' ? <DoneStep /> : null}

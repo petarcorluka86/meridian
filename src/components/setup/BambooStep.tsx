@@ -15,7 +15,7 @@ export function BambooStep({
   pending: boolean;
   run: (fn: () => void) => void;
   onDone: () => void;
-  onSkip: () => void;
+  onSkip?: () => void;
 }) {
   const [subdomain, setSubdomain] = useState('');
   const [apiKey, setApiKey] = useState('');

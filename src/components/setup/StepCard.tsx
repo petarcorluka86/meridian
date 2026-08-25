@@ -23,6 +23,7 @@ export function StepCard({
   meta,
   children,
   action,
+  actionIcon,
   onAction,
   pending,
   onSkip,
@@ -32,6 +33,11 @@ export function StepCard({
   meta: string;
   children: React.ReactNode;
   action: string;
+  /**
+   * The glyph is chosen by what the action does, so a step that checks what you
+   * typed keeps the tick and one that hands you to Google does not.
+   */
+  actionIcon?: React.ReactNode;
   onAction: () => void;
   pending?: boolean;
   onSkip?: () => void;
@@ -50,7 +56,12 @@ export function StepCard({
         <Stack gap={4}>{children}</Stack>
       </CardBody>
       <CardFooter>
-        <Button variant="primary" onClick={onAction} pending={pending} icon={<CheckIcon />}>
+        <Button
+          variant="primary"
+          onClick={onAction}
+          pending={pending}
+          icon={actionIcon ?? <CheckIcon />}
+        >
           {action}
         </Button>
         {onSkip ? (

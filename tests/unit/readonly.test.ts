@@ -125,12 +125,17 @@ describe('outbound requests are read-only', () => {
     // The OAuth token endpoint, POSTed to by exact URL and nothing else.
     'oauth2.googleapis.com',
     'www.googleapis.com',
-    // A read-only iCal feed, when one is configured.
-    'calendar.google.com',
   ];
 
-  /** Rendered as links for the user to follow. Never fetched. */
-  const LINKED = ['github.com'];
+  /**
+   * Rendered as links for the user to follow. Never fetched.
+   *
+   * The two Google ones are where somebody goes to make an OAuth client and to
+   * mint a refresh token for it. Which bucket they are in is the point: Meridian
+   * shows the addresses and the person visits them, and the guard would refuse
+   * either if it ever appeared in a `fetch`.
+   */
+  const LINKED = ['github.com', 'console.cloud.google.com', 'developers.google.com'];
 
   /** Appears in source but is never a destination. */
   const NOT_A_DESTINATION = ['www.w3.org', '127.0.0.1', 'localhost'];

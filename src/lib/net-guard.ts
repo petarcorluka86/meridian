@@ -21,9 +21,9 @@
  */
 const ALLOWED_HOSTS = new Set([
   'api.bamboohr.com',
-  // A read-only iCal feed. Still a GET, so the rule below is unchanged.
-  'calendar.google.com',
-  // Calendar events, read with a bearer token. GET only.
+  // Calendar events and the list of calendars, read with a bearer token. GET
+  // only. Nothing else Google runs is here: the pages somebody visits to make an
+  // OAuth client and mint a token are links they follow, never a fetch.
   'www.googleapis.com',
   // The OAuth token endpoint. A POST to it needs a caller that opts in through
   // allowPostTo, and only that one exact URL is ever permitted.

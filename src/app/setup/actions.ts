@@ -6,6 +6,8 @@ import path from 'node:path';
 import { configChanged } from '@/app/changed';
 import { now } from '@/lib/clock';
 import { loadConfig, bambooSubdomainOf } from '@/lib/env';
+import { accessToken } from '@/lib/sources/calendar';
+import { type CalendarChoice, listCalendars } from '@/lib/sources/google-oauth';
 import { fold } from '@/lib/sources/bamboohr/client';
 import { logEgress } from '@/lib/sources/egress';
 import { writeEnv } from '@/lib/env-write';
@@ -266,42 +268,78 @@ export async function checkGithubAction(
   };
 }
 
-export async function checkCalendarIcalAction(url: string): Promise<Check> {
-  const address = url.trim();
-  if (!/^https:\/\/calendar\.google\.com\//i.test(address)) {
-    return { ok: false, problem: 'That is not a Google Calendar address.' };
+/**
+ * The calendar, checked before a single value is written down.
+ *
+ * Four values that are wrong in four different ways, and the check separates
+ * them: the refresh token exchange proves the client and the token fit together,
+ * and the calendar list proves the id is one this account can actually read. A
+ * wrong id is named back with the ones that would have worked, which is the
+ * failure people actually hit.
+ *
+ * Nothing is saved until all four are good, so a half-typed attempt cannot leave
+ * the app looking configured.
+ */
+export async function checkCalendarAction(
+  rawClientId: string,
+  rawClientSecret: string,
+  rawRefreshToken: string,
+  rawCalendarId: string,
+): Promise<Check> {
+  const clientId = rawClientId.trim();
+  const clientSecret = rawClientSecret.trim();
+  const refreshToken = rawRefreshToken.trim();
+  const calendarId = rawCalendarId.trim();
+
+  if (!clientId || !clientSecret || !refreshToken || !calendarId) {
+    return { ok: false, problem: 'All four are needed.' };
   }
-  if (address.includes('/public/')) {
+  if (!clientId.endsWith('.apps.googleusercontent.com')) {
     return {
       ok: false,
-      problem: 'That is the public address, which only works for a shared calendar.',
-      hint: 'Use the Secret address in iCal format, just below it.',
+      problem: 'That does not look like a Google client ID.',
+      hint: 'It ends in .apps.googleusercontent.com',
     };
   }
 
+  let calendars: CalendarChoice[];
   try {
-    const response = await logged(
-      address,
-      { method: 'GET', signal: AbortSignal.timeout(30_000) },
-      'calendar.google.com',
-    );
-    if (!response.ok) return { ok: false, problem: `The address returned ${response.status}.` };
-    const body = await response.text();
-    if (!body.includes('BEGIN:VCALENDAR'))
-      return { ok: false, problem: 'That address did not return a calendar.' };
-
-    writeEnv(loadConfig().envPath, { CALENDAR_ICAL_ADDRESS: address, CALENDAR_MAX_AGE: '300' });
-    configChanged();
-    const events = (body.match(/BEGIN:VEVENT/g) ?? []).length;
-    return { ok: true, detail: `Reading the calendar — ${events} events in the feed.` };
-  } catch {
-    return { ok: false, problem: 'Could not reach that address.' };
+    const token = await accessToken(clientId, clientSecret, refreshToken);
+    calendars = await listCalendars(token);
+  } catch (err) {
+    return { ok: false, problem: (err as Error).message };
   }
+
+  const chosen = calendars.find((calendar) => calendar.id === calendarId);
+  if (!chosen) {
+    const others = calendars.slice(0, 3).map((calendar) => calendar.id);
+    return {
+      ok: false,
+      problem: `That account cannot read ${calendarId}.`,
+      hint: others.length
+        ? `It can read ${others.join(', ')}${calendars.length > others.length ? ', and others' : ''}.`
+        : 'It can read no calendars at all.',
+    };
+  }
+
+  writeEnv(loadConfig().envPath, {
+    GOOGLE_CLIENT_ID: clientId,
+    GOOGLE_CLIENT_SECRET: clientSecret,
+    GOOGLE_REFRESH_TOKEN: refreshToken,
+    GOOGLE_CALENDAR_ID: calendarId,
+    CALENDAR_MAX_AGE: '300',
+  });
+  configChanged();
+
+  return {
+    ok: true,
+    detail: `Reading ${chosen.summary}${chosen.primary ? ', your own calendar' : ''}.`,
+  };
 }
 
 export async function skipStepAction(): Promise<Check> {
   configChanged();
-  return { ok: true, detail: 'Skipped. You can add it later from Help.' };
+  return { ok: true, detail: 'Skipped. You can connect it later from Settings.' };
 }
 
 /** What is configured, with no secret ever leaving this process. */

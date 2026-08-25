@@ -44,7 +44,7 @@ const SOURCES = {
   },
   calendar: {
     title: 'Calendar is not connected',
-    body: 'Add the GOOGLE_ keys or CALENDAR_ICAL_ADDRESS to .env and restart to see the day here.',
+    body: 'Connect Google Calendar in Settings to see the day here.',
     tone: 'warning',
   },
   github: {

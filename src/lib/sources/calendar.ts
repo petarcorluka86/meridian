@@ -2,7 +2,22 @@ import { FixtureVaultError, vaultIsInsideApp } from '@/lib/vault/paths';
 import { z } from 'zod';
 import { now } from '@/lib/clock';
 import { loadConfig } from '@/lib/env';
-import { eventsBetween, type CalEvent } from './ical';
+
+/**
+ * One meeting, as every screen in the app wants it. It used to live in
+ * `ical.ts`, next to the hand-written parser that produced it; Google returns
+ * this shape already expanded, so the parser is gone and the type comes home.
+ */
+export type CalEvent = {
+  uid: string;
+  start: string; // ISO instant, or YYYY-MM-DD for an all-day event
+  end: string;
+  allDay: boolean;
+  summary: string;
+  location: string;
+  /** A video link, if the invite carries one. */
+  conference: string | null;
+};
 import { failureOf, freshnessOf, readCache, type Freshness, writeCache } from './cache';
 import { logEgress } from './egress';
 
@@ -43,74 +58,21 @@ export function readCalendar(): CalendarRead {
 }
 
 /**
- * A Google secret-address feed is a plain GET returning text/calendar. No OAuth,
- * no token exchange, and therefore no exception to the read-only rule.
- *
- * The URL is itself the credential: anyone holding it can read the calendar
- * indefinitely. It lives in .env at 0600 and is never sent to the browser.
- */
-export async function syncCalendarFromIcal(): Promise<{ events: number }> {
-  if (vaultIsInsideApp()) throw new FixtureVaultError();
-
-  const config = loadConfig();
-  if (config.calendar?.kind !== 'ical') throw new Error('No iCal address configured.');
-
-  const started = Date.now();
-  let status = 0;
-  let body: string;
-  try {
-    const response = await fetch(config.calendar.icalUrl, {
-      method: 'GET',
-      headers: { Accept: 'text/calendar' },
-      signal: AbortSignal.timeout(30_000),
-    });
-    status = response.status;
-    if (response.status === 404) {
-      throw new Error(
-        'The calendar address returned 404. Use the Secret address in iCal format, not the public one.',
-      );
-    }
-    if (!response.ok) throw new Error(`The calendar address returned ${response.status}.`);
-    body = await response.text();
-  } finally {
-    logEgress({
-      method: 'GET',
-      host: 'calendar.google.com',
-      path: '/ical',
-      status,
-      ms: Date.now() - started,
-    });
-  }
-
-  if (!body.includes('BEGIN:VCALENDAR')) {
-    throw new Error('That address did not return a calendar feed.');
-  }
-
-  // A fortnight either side is all any screen asks for, and it bounds recurrence
-  // expansion to something finite.
-  const from = new Date(Date.now() - 14 * 864e5).toISOString();
-  const to = new Date(Date.now() + 21 * 864e5).toISOString();
-  const events = eventsBetween(body, from, to);
-
-  writeCache('calendar', { fetchedAt: new Date().toISOString(), etag: null, events });
-  return { events: events.length };
-}
-
-/**
  * Google Calendar over OAuth.
  *
- * `singleEvents=true` makes Google expand recurrence server-side, so none of the
- * RRULE work in ical.ts is needed on this path.
+ * `singleEvents=true` makes Google expand recurrence server-side, so nothing in
+ * this app has to understand an RRULE — which is why the hand-written iCal
+ * parser that used to sit beside this could be deleted with the secret-address
+ * path it served.
  *
- * Callers must already hold an access token — obtaining one is a POST, and this
- * module runs inside the server, which never makes one. `scripts/calendar-sync.ts`
- * does the exchange in its own process and passes the token in.
+ * Callers must already hold an access token; `accessToken()` below is the one
+ * POST this app makes and the only place that exchange happens.
  */
 export async function syncCalendarWithToken(accessToken: string): Promise<{ events: number }> {
   if (vaultIsInsideApp()) throw new FixtureVaultError();
 
   const config = loadConfig();
-  if (config.calendar?.kind !== 'oauth') throw new Error('Google Calendar is not configured.');
+  if (!config.calendar) throw new Error('Google Calendar is not connected.');
 
   const timeMin = new Date(Date.now() - 2 * 864e5).toISOString();
   const timeMax = new Date(Date.now() + 21 * 864e5).toISOString();
@@ -237,7 +199,7 @@ export async function accessToken(
   }
 }
 
-/** Refreshes the calendar, whichever way it is configured. */
+/** Refreshes the calendar. */
 export async function syncCalendar(): Promise<{ events: number }> {
   // Before the token exchange, not after: the inner syncs refuse too, but by
   // then Google has already been asked for a token.
@@ -245,7 +207,6 @@ export async function syncCalendar(): Promise<{ events: number }> {
 
   const config = loadConfig();
   if (!config.calendar) throw new Error('Calendar is not connected.');
-  if (config.calendar.kind === 'ical') return syncCalendarFromIcal();
   const token = await accessToken(
     config.calendar.clientId,
     config.calendar.clientSecret,

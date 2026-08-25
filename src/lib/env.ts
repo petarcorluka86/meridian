@@ -118,21 +118,22 @@ export type Config = {
     };
   } | null;
   /**
-   * Either a secret-address iCal feed (one GET, no OAuth) or Google OAuth, whose
-   * token refresh is the one POST this app makes — permitted by exact URL, see
-   * TOKEN_ENDPOINT in lib/sources/calendar.ts.
+   * Google, and only Google, signed in to rather than addressed by a secret URL.
+   * Its token refresh is the one POST this app makes — permitted by exact URL,
+   * see TOKEN_ENDPOINT in lib/sources/calendar.ts.
+   *
+   * There used to be a second shape here: a secret iCal address, which is a
+   * credential in the form of a URL. Company Workspace accounts usually have
+   * those switched off, and an address that never expires and cannot be scoped
+   * is the wrong thing to keep for an account somebody else administers.
    */
-  calendar:
-    | { kind: 'ical'; icalUrl: string; maxAge: number }
-    | {
-        kind: 'oauth';
-        clientId: string;
-        clientSecret: string;
-        calendarId: string;
-        refreshToken: string;
-        maxAge: number;
-      }
-    | null;
+  calendar: {
+    clientId: string;
+    clientSecret: string;
+    calendarId: string;
+    refreshToken: string;
+    maxAge: number;
+  } | null;
   github: { token: string; login: string; repos: string[]; maxAge: number } | null;
   problems: EnvProblem[];
 };
@@ -211,27 +212,22 @@ export function loadConfig(): Config {
           },
         }
       : null,
-    calendar: /^https:\/\/calendar\.google\.com\//i.test(get('CALENDAR_ICAL_ADDRESS'))
+    // All four, or nothing: a client with no refresh token is a sign-in that was
+    // started and not finished, and the calendar is not connected until it is.
+    calendar: all(
+      'GOOGLE_CLIENT_ID',
+      'GOOGLE_CLIENT_SECRET',
+      'GOOGLE_CALENDAR_ID',
+      'GOOGLE_REFRESH_TOKEN',
+    )
       ? {
-          kind: 'ical' as const,
-          icalUrl: get('CALENDAR_ICAL_ADDRESS'),
+          clientId: get('GOOGLE_CLIENT_ID'),
+          clientSecret: get('GOOGLE_CLIENT_SECRET'),
+          calendarId: get('GOOGLE_CALENDAR_ID'),
+          refreshToken: get('GOOGLE_REFRESH_TOKEN'),
           maxAge: Number(get('CALENDAR_MAX_AGE')) || 300,
         }
-      : all(
-            'GOOGLE_CLIENT_ID',
-            'GOOGLE_CLIENT_SECRET',
-            'GOOGLE_CALENDAR_ID',
-            'GOOGLE_REFRESH_TOKEN',
-          )
-        ? {
-            kind: 'oauth' as const,
-            clientId: get('GOOGLE_CLIENT_ID'),
-            clientSecret: get('GOOGLE_CLIENT_SECRET'),
-            calendarId: get('GOOGLE_CALENDAR_ID'),
-            refreshToken: get('GOOGLE_REFRESH_TOKEN'),
-            maxAge: Number(get('CALENDAR_MAX_AGE')) || 300,
-          }
-        : null,
+      : null,
     github: all('GITHUB_TOKEN', 'GITHUB_LOGIN')
       ? {
           token: get('GITHUB_TOKEN'),
