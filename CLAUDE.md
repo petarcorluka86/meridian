@@ -716,9 +716,12 @@ because recording them has to be a deliberate act; a baseline generated
 automatically gates nothing. The gate does not run in CI at all, for the same reason: the
 baselines belong to the machine somebody actually looks at the screens on.
 
-Sixteen screens are gated in each scheme, thirty-two images in all, including
-Changelog in both diff modes, Settings and the setup wizard. The archived project list is not among them: it is this screen's own
-state rather than a URL, and the gate can only reach what a URL can. Changelog needs a vault that is its own git repository, so
+Nineteen screens are gated in each scheme, thirty-eight images in all, including
+Changelog in both diff modes, Settings, the setup wizard and the three connection
+screens it reopens one at a time. The archived project list is not among them,
+and neither is the setting-up screen the wizard ends on: one is this screen's own
+state rather than a URL and the other is reachable only by finishing the wizard,
+and the gate can only reach what a URL can. Changelog needs a vault that is its own git repository, so
 `tests/pixel/global-setup.ts` builds a throwaway one in `artifacts/` with a known
 diff, and a second dev server serves it — which is why `next.config.ts` takes its
 build directory from `NEXT_DIST_DIR`, since Next allows one dev server per

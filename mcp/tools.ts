@@ -28,6 +28,7 @@ import {
 import {
   createNote,
   getNote,
+  deleteNote,
   moveNote,
   saveNoteBody,
   setNoteMeta,
@@ -138,6 +139,7 @@ const ANNOTATIONS: Record<string, ToolAnnotations> = {
   write_about: CHANGES,
 
   delete_task: REMOVES,
+  delete_note: REMOVES,
   delete_hours: REMOVES,
   remove_link: REMOVES,
   remove_plan: REMOVES,
@@ -822,6 +824,16 @@ export function registerTools(target: Tooling): void {
         ...(date ? { date } : {}),
       });
       return text(result.path);
+    },
+  );
+
+  server.tool(
+    'delete_note',
+    'Delete a note. A snapshot is taken first, so `npm run vault:restore` can bring it back — nothing here can.',
+    { path: z.string() },
+    async ({ path }) => {
+      await deleteNote(path);
+      return text(`Deleted ${path}.`);
     },
   );
 

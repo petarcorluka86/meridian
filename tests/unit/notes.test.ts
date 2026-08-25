@@ -136,6 +136,62 @@ describe('moveNote', () => {
   });
 });
 
+describe('deleteNote', () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'meridian-delete-note-'));
+    process.env.VAULT_PATH = dir;
+    resetConfig();
+    fs.mkdirSync(path.join(dir, 'notes/general'), { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'notes/general/2026-08-18-hiring.md'),
+      '---\ncategory: planning\ndraft: false\npinned: false\n---\n# Hiring\n\nTwo roles.\n',
+    );
+  });
+
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+    delete process.env.VAULT_PATH;
+    resetConfig();
+  });
+
+  it('removes the file and leaves a snapshot behind it', async () => {
+    const { deleteNote } = await import('@/lib/vault/notes');
+    const { invalidateVault, getVault } = await import('@/lib/vault/index');
+    invalidateVault();
+
+    await deleteNote('notes/general/2026-08-18-hiring.md');
+
+    expect(fs.existsSync(path.join(dir, 'notes/general/2026-08-18-hiring.md'))).toBe(false);
+    // The confirmation promises vault:restore can bring it back. This is that
+    // promise, on disk.
+    const snapshots = fs.readdirSync(
+      path.join(dir, '.snapshots/notes/general/2026-08-18-hiring.md'),
+    );
+    expect(snapshots).toHaveLength(1);
+    expect(
+      fs.readFileSync(
+        path.join(dir, '.snapshots/notes/general/2026-08-18-hiring.md', snapshots[0]!),
+        'utf8',
+      ),
+    ).toContain('Two roles.');
+
+    expect(getVault().notes).toHaveLength(0);
+  });
+
+  it('refuses a path that is not a note it can read', async () => {
+    const { deleteNote } = await import('@/lib/vault/notes');
+    const { invalidateVault } = await import('@/lib/vault/index');
+    invalidateVault();
+
+    await expect(deleteNote('notes/general/never-existed.md')).rejects.toThrow();
+    // Nothing outside the vault, and nothing that is not a note.
+    await expect(deleteNote('../../etc/hosts')).rejects.toThrow();
+    await expect(deleteNote('people/entries.json')).rejects.toThrow();
+  });
+});
+
 describe('what counts as a note', () => {
   it('accepts only the three places a note can live', async () => {
     const { isNotePathForTests } = await import('@/lib/vault/index');

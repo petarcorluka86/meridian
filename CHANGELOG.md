@@ -12,6 +12,13 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ### Added
 
+- **A note can be deleted**, from the note's own toolbar and behind a
+  confirmation that names the file. A snapshot is taken first, so
+  `npm run vault:restore` can bring it back and nothing in the app can — the
+  same promise every other deletion here makes. `delete_note` is the MCP tool for
+  it, which takes the registry to thirty-three tools and closes the last row that
+  was Closed because the app could not do it either.
+
 - **A dark scheme**, and a Settings screen with the switch on it: Light, Dark or
   System. Meridian opens in Light until told otherwise — it is a light app that
   has a dark scheme, and which one it opens in is a choice made on that screen

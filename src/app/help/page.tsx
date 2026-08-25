@@ -229,6 +229,7 @@ function Guide() {
         'Pin a note to hold it at the top of the list.',
         'Changing the date renames the file; changing the person moves it into that person’s folder.',
         'Anything captured without a person lands in the inbox until you give it one.',
+        'The bin deletes a note, after asking. A snapshot is taken first, so npm run vault:restore in the app folder can bring it back — nothing in the app can.',
       ],
     ],
     [

@@ -2,7 +2,7 @@ import { getVault, invalidateVault, type Note } from './index';
 import { parseFrontmatter, serializeFrontmatter } from './frontmatter';
 import { NoteFrontmatter, type NoteCategory } from './schemas';
 import { safeVaultPath } from './paths';
-import { moveFile, mutateTextFile, withLock, writeTextAtomic } from './write';
+import { moveFile, mutateTextFile, removeFile, withLock, writeTextAtomic } from './write';
 import fs from 'node:fs';
 
 export type NoteLocation = 'person' | 'inbox' | 'general';
@@ -159,6 +159,24 @@ export async function moveNote(
     invalidateVault();
   });
   return { path: next, moved: true };
+}
+
+/**
+ * Deletes the note's file, and nothing else.
+ *
+ * A note is one file, so there is no third place to tidy up — no row to remove
+ * from an index, no reference to clear the way deleting a project has to. What
+ * the note said is in `.snapshots/` and `npm run vault:restore` can bring it
+ * back; nothing in the app can, which is what the confirmation says.
+ */
+export async function deleteNote(path: string): Promise<void> {
+  const note = getNote(path);
+  if (!note) throw new Error(`${path} is not a note Meridian can read.`);
+
+  await withLock(path, () => {
+    removeFile(path);
+    invalidateVault();
+  });
 }
 
 export async function createNote(input: {
