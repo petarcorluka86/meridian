@@ -354,6 +354,13 @@ pixel gate records the whole window for these screens rather than `[data-screen]
 — the page frame looks identical whether or not there is a nav beside it, so
 measuring the frame alone would hold neither half of this.
 
+The mark at the top of the sidebar is a plain `<a href="/">` rather than a
+`next/link`, and that is the whole of its point: it is the one control in the app
+that loads the document again instead of navigating inside it. Every other link
+in that nav keeps the running app, including anything it has got wrong — the mark
+is the way back to a freshly rendered Overview, which is what somebody means when
+they press a logo after something looks stale.
+
 That decision lives in `src/components/Shell.tsx`, a client component reading
 `usePathname()`, and **not** in the root layout — which is where it was first
 written, from the `x-meridian-path` header. A root layout is rendered once per
