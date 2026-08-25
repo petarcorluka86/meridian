@@ -98,9 +98,11 @@ describe('vault scaffolding', () => {
   it('creates the layout the app expects, and seeds empty files', async () => {
     const { vaultHealth } = await import('@/lib/vault/health');
     vaultHealth();
-    for (const rel of ['people', 'notes/inbox', 'notes/general']) {
+    for (const rel of ['people', 'notes/general']) {
       expect(fs.existsSync(path.join(dir, rel))).toBe(true);
     }
+    // The third folder there used to be. A fresh vault must not get one back.
+    expect(fs.existsSync(path.join(dir, 'notes/inbox'))).toBe(false);
     for (const rel of ['people/entries.json', 'tasks.json', 'time.json', 'config.json']) {
       expect(fs.existsSync(path.join(dir, rel))).toBe(true);
     }

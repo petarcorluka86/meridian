@@ -42,7 +42,6 @@ export function NoteFilters({ people, projects, person, project, category, draft
           options={[
             { value: 'all', label: 'Everyone' },
             { value: 'general', label: 'General only' },
-            { value: 'inbox', label: 'Inbox' },
             ...people.map((p) => ({ value: p.slug, label: p.name })),
           ]}
         />

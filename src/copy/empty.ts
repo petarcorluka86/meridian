@@ -245,11 +245,6 @@ export const EMPTY = {
       body: 'Widen the person, project or category filter, or turn off Drafts only.',
       tone: 'neutral',
     },
-    inbox: {
-      title: 'Inbox is clear',
-      body: 'Nothing left to file.',
-      tone: 'success',
-    },
     /** The editor column, when the list beside it has nothing to select. */
     unselected: {
       title: 'Nothing to read here',

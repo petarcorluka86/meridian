@@ -8,7 +8,6 @@ Markdown for prose. Readable and editable without the app that writes them.
     people/<slug>/links.json   label + url pairs
     people/<slug>/plans.json   planned rises and promotions
     people/<slug>/notes/       dated notes about that person
-    notes/inbox/               captured, not filed yet
     notes/general/             about no one in particular
     projects.json              longer-running work, with its phases
     tasks.json                 tasks

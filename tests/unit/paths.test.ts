@@ -98,6 +98,9 @@ describe('who is allowed to write to disk', () => {
     // Emptying the vault: the one delete in the app that a snapshot cannot
     // undo, because it takes the snapshots with it. Guarded in that file.
     'lib/vault/reset.ts',
+    // A format step moves files and then removes the folder it emptied — and
+    // only if it is empty. Anything left in there is somebody else's.
+    'lib/vault/migrate.ts',
   ]);
 
   it('is exactly the list above', () => {

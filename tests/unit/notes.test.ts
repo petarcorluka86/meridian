@@ -34,12 +34,6 @@ describe('notePath', () => {
     );
   });
 
-  it('keeps a captured note in the inbox until it has a person', () => {
-    expect(notePath({ ...base, personSlug: null, location: 'inbox' })).toBe(
-      'notes/inbox/2026-08-20-staff-track.md',
-    );
-  });
-
   it('puts a note about nobody in general', () => {
     expect(notePath({ ...base, personSlug: null, location: 'general' })).toBe(
       'notes/general/2026-08-20-staff-track.md',
@@ -47,7 +41,7 @@ describe('notePath', () => {
   });
 
   it('lets the person win over a stale location', () => {
-    expect(notePath({ ...base, personSlug: 'ana-horvat', location: 'inbox' })).toBe(
+    expect(notePath({ ...base, personSlug: 'ana-horvat', location: 'general' })).toBe(
       'people/ana-horvat/notes/2026-08-20-staff-track.md',
     );
   });
@@ -68,9 +62,9 @@ describe('moveNote', () => {
         { slug: 'marko-maric', displayName: 'Marko Marić' },
       ]),
     );
-    fs.mkdirSync(path.join(dir, 'notes/inbox'), { recursive: true });
+    fs.mkdirSync(path.join(dir, 'notes/general'), { recursive: true });
     fs.writeFileSync(
-      path.join(dir, 'notes/inbox/2026-08-18-misao.md'),
+      path.join(dir, 'notes/general/2026-08-18-misao.md'),
       '---\ncategory: idea\ndraft: true\npinned: false\n---\n# Misao\n\nBody.\n',
     );
   });
@@ -81,14 +75,16 @@ describe('moveNote', () => {
     resetConfig();
   });
 
-  it('moves a filed note out of the inbox and keeps its front matter', async () => {
+  it('files a note under a person and keeps its front matter', async () => {
     const { moveNote } = await import('@/lib/vault/notes');
     const { invalidateVault } = await import('@/lib/vault/index');
     invalidateVault();
 
-    const result = await moveNote('notes/inbox/2026-08-18-misao.md', { personSlug: 'ana-horvat' });
+    const result = await moveNote('notes/general/2026-08-18-misao.md', {
+      personSlug: 'ana-horvat',
+    });
     expect(result.path).toBe('people/ana-horvat/notes/2026-08-18-misao.md');
-    expect(fs.existsSync(path.join(dir, 'notes/inbox/2026-08-18-misao.md'))).toBe(false);
+    expect(fs.existsSync(path.join(dir, 'notes/general/2026-08-18-misao.md'))).toBe(false);
     expect(fs.readFileSync(path.join(dir, result.path), 'utf8')).toContain('category: idea');
   });
 
@@ -97,8 +93,8 @@ describe('moveNote', () => {
     const { invalidateVault } = await import('@/lib/vault/index');
     invalidateVault();
 
-    const result = await moveNote('notes/inbox/2026-08-18-misao.md', { date: '2026-01-05' });
-    expect(result.path).toBe('notes/inbox/2026-01-05-misao.md');
+    const result = await moveNote('notes/general/2026-08-18-misao.md', { date: '2026-01-05' });
+    expect(result.path).toBe('notes/general/2026-01-05-misao.md');
   });
 
   it('refuses a person who is not on the roster', async () => {
@@ -107,7 +103,7 @@ describe('moveNote', () => {
     invalidateVault();
 
     await expect(
-      moveNote('notes/inbox/2026-08-18-misao.md', { personSlug: 'nobody-here' }),
+      moveNote('notes/general/2026-08-18-misao.md', { personSlug: 'nobody-here' }),
     ).rejects.toThrow(/No person with the slug/);
   });
 
@@ -120,10 +116,10 @@ describe('moveNote', () => {
     fs.writeFileSync(path.join(dir, 'people/ana-horvat/notes/2026-08-18-misao.md'), '# Taken\n');
 
     await expect(
-      moveNote('notes/inbox/2026-08-18-misao.md', { personSlug: 'ana-horvat' }),
+      moveNote('notes/general/2026-08-18-misao.md', { personSlug: 'ana-horvat' }),
     ).rejects.toThrow(/already exists/);
     // The original must survive a refused move.
-    expect(fs.existsSync(path.join(dir, 'notes/inbox/2026-08-18-misao.md'))).toBe(true);
+    expect(fs.existsSync(path.join(dir, 'notes/general/2026-08-18-misao.md'))).toBe(true);
   });
 
   it('is a no-op when nothing that places the note changed', async () => {
@@ -131,7 +127,7 @@ describe('moveNote', () => {
     const { invalidateVault } = await import('@/lib/vault/index');
     invalidateVault();
 
-    const result = await moveNote('notes/inbox/2026-08-18-misao.md', { date: '2026-08-18' });
+    const result = await moveNote('notes/general/2026-08-18-misao.md', { date: '2026-08-18' });
     expect(result.moved).toBe(false);
   });
 });
@@ -195,7 +191,7 @@ describe('deleteNote', () => {
 describe('what counts as a note', () => {
   it('accepts only the three places a note can live', async () => {
     const { isNotePathForTests } = await import('@/lib/vault/index');
-    expect(isNotePathForTests('notes/inbox/2026-08-18-misao.md')).toBe(true);
+    expect(isNotePathForTests('notes/general/2026-08-18-misao.md')).toBe(true);
     expect(isNotePathForTests('notes/general/2026-08-15-plan.md')).toBe(true);
     expect(isNotePathForTests('people/ana-horvat/notes/2026-08-12-1on1.md')).toBe(true);
   });

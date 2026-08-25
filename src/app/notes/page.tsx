@@ -45,7 +45,6 @@ export default async function NotesPage({
 
   const filtered = vault.notes
     .filter((n) => {
-      if (person === 'inbox') return n.location === 'inbox';
       if (person === 'general') return n.personSlug === null;
       if (person !== 'all') return n.personSlug === person;
       return true;
@@ -123,11 +122,7 @@ export default async function NotesPage({
         </div>
 
         {filtered.map((note) => {
-          const where = note.personSlug
-            ? nameOf(note.personSlug)
-            : note.location === 'inbox'
-              ? 'Inbox'
-              : 'General';
+          const where = note.personSlug ? nameOf(note.personSlug) : 'General';
           return (
             <Link
               key={note.path}
@@ -159,8 +154,6 @@ export default async function NotesPage({
           <Stack gap={3}>
             {vault.notes.length === 0 ? (
               <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.notes.none} />
-            ) : person === 'inbox' ? (
-              <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.notes.inbox} />
             ) : (
               <EmptyState glyph={EMPTY_GLYPH.search} {...EMPTY.notes.filtered} />
             )}
