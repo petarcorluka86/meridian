@@ -90,26 +90,31 @@ export default async function SettingsPage() {
   const sources = [
     {
       name: 'BambooHR',
+      // Which step of the wizard connects it. Settings has no connection form of
+      // its own — it links back into the wizard, one step at a time.
+      step: 'bamboo' as const,
       target: 'roster' as const,
       freshness: readBamboo().freshness,
       reads: 'Roster, absences, approvals and the compensation history.',
-      unset: 'BAMBOOHR_SUBDOMAIN, BAMBOOHR_API_KEY and BAMBOOHR_MANAGER_EMPLOYEE_ID',
+      unset: 'The company name, an API key and your employee id.',
       configured: bamboo !== null,
     },
     {
       name: 'Google Calendar',
+      step: 'calendar' as const,
       target: 'calendar' as const,
       freshness: readCalendar().freshness,
       reads: 'Your meetings, for the day strip on the Overview.',
-      unset: 'CALENDAR_ICAL_ADDRESS, or the four GOOGLE_ keys',
+      unset: 'Not signed in to Google.',
       configured: calendar !== null,
     },
     {
       name: 'GitHub',
+      step: 'github' as const,
       target: 'github' as const,
       freshness: readGithub().freshness,
       reads: 'Pull requests waiting on your review, for the repositories you list.',
-      unset: 'GITHUB_TOKEN and GITHUB_LOGIN',
+      unset: 'A token and your handle.',
       configured: github !== null,
     },
   ];
@@ -159,7 +164,7 @@ export default async function SettingsPage() {
               <Stack gap={1}>
                 <Text level="bodyStrong">{source.name}</Text>
                 <Text level="small" tone="muted">
-                  {source.configured ? source.reads : `${source.unset} are unset.`}
+                  {source.configured ? source.reads : source.unset}
                 </Text>
               </Stack>
               <Spacer />
@@ -169,11 +174,10 @@ export default async function SettingsPage() {
                   target={source.target}
                   freshness={source.freshness}
                 />
-              ) : (
-                <ButtonLink href="/help?s=setup" size="sm" variant="neutral">
-                  How to connect it
-                </ButtonLink>
-              )}
+              ) : null}
+              <ButtonLink href={`/setup?only=${source.step}`} size="sm" variant="neutral">
+                {source.configured ? 'Reconnect' : 'Connect'}
+              </ButtonLink>
             </CardRow>
           ))}
           <CardFooter>

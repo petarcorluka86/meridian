@@ -23,8 +23,8 @@ export function DoneStep() {
             from then on. There is nothing to run and nothing to remember.
           </Text>
           <Text level="body">
-            Anything you skipped can be added later — Help explains each one, and shows what is
-            connected right now.
+            Anything you skipped can be connected later from Settings, which reopens exactly this
+            step and shows what is connected right now.
           </Text>
         </Stack>
       </CardBody>

@@ -43,12 +43,11 @@ const PINNED = {
   GITHUB_LOGIN: 'you',
   GITHUB_REPOS: 'platform/core',
   GITHUB_MAX_AGE: '300',
-  CALENDAR_ICAL_ADDRESS: 'https://calendar.google.com/calendar/ical/gate/private-gate/basic.ics',
+  GOOGLE_CLIENT_ID: 'gate.apps.googleusercontent.com',
+  GOOGLE_CLIENT_SECRET: 'gate-not-a-real-secret',
+  GOOGLE_CALENDAR_ID: 'you@yourcompany.com',
+  GOOGLE_REFRESH_TOKEN: 'gate-not-a-real-token',
   CALENDAR_MAX_AGE: '300',
-  GOOGLE_CLIENT_ID: '',
-  GOOGLE_CLIENT_SECRET: '',
-  GOOGLE_CALENDAR_ID: '',
-  GOOGLE_REFRESH_TOKEN: '',
 };
 
 export default defineConfig({
@@ -109,7 +108,10 @@ export default defineConfig({
         GITHUB_TOKEN: '',
         GITHUB_LOGIN: '',
         GITHUB_REPOS: '',
-        CALENDAR_ICAL_ADDRESS: '',
+        GOOGLE_CLIENT_ID: '',
+        GOOGLE_CLIENT_SECRET: '',
+        GOOGLE_CALENDAR_ID: '',
+        GOOGLE_REFRESH_TOKEN: '',
       },
     },
   ],

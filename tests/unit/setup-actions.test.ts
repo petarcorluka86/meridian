@@ -166,23 +166,74 @@ describe('connecting GitHub', () => {
 });
 
 describe('connecting a calendar', () => {
-  it('refuses an address that is not Google Calendar, without asking the network', async () => {
+  it('refuses an incomplete set, without asking the network', async () => {
     globalThis.fetch = vi.fn(async () => {
       throw new Error('should not have been called');
     }) as typeof fetch;
-    const { checkCalendarIcalAction } = await import('@/app/setup/actions');
+    const { checkCalendarAction } = await import('@/app/setup/actions');
 
-    expect((await checkCalendarIcalAction('https://evil.example/feed.ics')).ok).toBe(false);
-    expect((await checkCalendarIcalAction('not a url')).ok).toBe(false);
+    expect((await checkCalendarAction('', 's', 'r', 'c')).ok).toBe(false);
+    expect((await checkCalendarAction('12345', 's', 'r', 'c')).ok).toBe(false);
+    expect(fs.existsSync(envFile) ? fs.readFileSync(envFile, 'utf8') : '').not.toContain(
+      'GOOGLE_CLIENT_ID',
+    );
   });
 
-  it('refuses the public address, which is the one people copy by mistake', async () => {
-    const { checkCalendarIcalAction } = await import('@/app/setup/actions');
-    const result = await checkCalendarIcalAction(
-      'https://calendar.google.com/calendar/ical/x/public/basic.ics',
+  it('writes nothing when the account cannot read the calendar asked for', async () => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('oauth2.googleapis.com')) {
+        return new Response(JSON.stringify({ access_token: 'short-lived' }), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({
+          items: [{ id: 'someone.else@yourcompany.com', summary: 'Someone else' }],
+        }),
+        { status: 200 },
+      );
+    }) as unknown as typeof fetch;
+    const { checkCalendarAction } = await import('@/app/setup/actions');
+
+    const result = await checkCalendarAction(
+      '000-x.apps.googleusercontent.com',
+      'GOCSPX-secret',
+      '1//0e-refresh',
+      'you@yourcompany.com',
     );
+
     expect(result.ok).toBe(false);
-    expect(result.ok === false && result.hint).toContain('Secret address');
+    // The failure people actually hit, so it names what would have worked.
+    expect(result.ok === false && result.hint).toContain('someone.else@yourcompany.com');
+    expect(fs.readFileSync(envFile, 'utf8')).not.toContain('GOOGLE_REFRESH_TOKEN');
+  });
+
+  it('saves all four once Google confirms the calendar is readable', async () => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('oauth2.googleapis.com')) {
+        return new Response(JSON.stringify({ access_token: 'short-lived' }), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({
+          items: [{ id: 'you@yourcompany.com', summary: 'You', primary: true }],
+        }),
+        { status: 200 },
+      );
+    }) as unknown as typeof fetch;
+    const { checkCalendarAction } = await import('@/app/setup/actions');
+
+    const result = await checkCalendarAction(
+      '000-x.apps.googleusercontent.com',
+      'GOCSPX-secret',
+      '1//0e-refresh',
+      'you@yourcompany.com',
+    );
+
+    expect(result.ok).toBe(true);
+    const written = fs.readFileSync(envFile, 'utf8');
+    expect(written).toContain('GOOGLE_CLIENT_ID=000-x.apps.googleusercontent.com');
+    expect(written).toContain('GOOGLE_REFRESH_TOKEN=1//0e-refresh');
+    expect(written).toContain('GOOGLE_CALENDAR_ID=you@yourcompany.com');
   });
 });
 

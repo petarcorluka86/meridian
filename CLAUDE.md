@@ -320,6 +320,36 @@ compromise: a key that exists is replaced in place, a key that is commented out 
 uncommented in place, a key that is absent is appended under a heading, and every
 other byte is left exactly as found. Comments and hand-added keys survive.
 
+### Connecting a source, twice: the wizard and Settings
+
+There is one connection screen, and it is the wizard. Settings does not have a
+form of its own — each row links to `/setup?only=<bamboo|calendar|github>`, which
+renders that one step with the progress pills gone and the way back named, and
+returns to Settings when the connection is made. A second form would be a second
+set of checks and a second set of copy to keep in step with the first.
+
+`?only=` is a URL rather than a dialog so the screen can be linked to, reloaded
+and gated like any other.
+
+**Google Calendar is a set of credentials, typed and checked — not a sign-in
+flow.** The secret iCal address is gone: a company Workspace usually has those
+switched off, and a URL that is itself an unexpirable, unscopable credential is
+the wrong shape for an account somebody else administers. What replaced it is
+four values — client id, client secret, refresh token, calendar id — that the
+person brings from their own Google Cloud project.
+
+There is deliberately **no in-app consent flow**, and that is what keeps the
+architecture simple: no OAuth callback route, no `state` to store, no PKCE
+verifier held between two requests, and no cross-site GET that writes. The app
+asks Google for nothing it was not given.
+
+`checkCalendarAction` is where the care went. It exchanges the refresh token for
+an access token — proving the client and the token fit together — and then lists
+the calendars the account can read, which proves the fourth value is one of them.
+**Nothing is written until all four pass**, so a half-typed attempt cannot leave
+the app looking configured; and a calendar id that is not readable is named back
+with the ones that would have worked, which is the failure people actually hit.
+
 ---
 
 ## The vault
@@ -818,7 +848,7 @@ down here.
 ```
 src/app/         one folder per screen; page.tsx is a server component
 src/lib/vault/   paths · schemas · frontmatter · index (read) · write · migrate
-src/lib/sources/ calendar, github, cache, egress log
+src/lib/sources/ calendar, github, google-oauth, cache, egress log
 src/lib/sources/bamboohr/  client · cache · roster · inbox · compensation
 src/lib/secrets.ts    the credential shapes refused into the vault
 src/lib/net-guard.ts  the outbound guard — see the rule above

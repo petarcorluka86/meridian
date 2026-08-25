@@ -623,11 +623,7 @@ async function SetupSection({ vaultPath }: { vaultPath: string }) {
   const rows: Array<[string, boolean, string]> = [
     ['VAULT_PATH', Boolean(config.vaultPath), vaultPath],
     ['BAMBOOHR_*', Boolean(config.bamboo), 'people, absences, approvals, compensation'],
-    [
-      config.calendar?.kind === 'ical' ? 'CALENDAR_ICAL_ADDRESS' : 'GOOGLE_* (calendar)',
-      Boolean(config.calendar),
-      'the meetings strip on Overview',
-    ],
+    ['GOOGLE_* (calendar)', Boolean(config.calendar), 'the meetings strip on Overview'],
     ['GITHUB_*', Boolean(config.github), 'pull requests waiting on your review'],
     [
       'vault remote',
@@ -681,12 +677,22 @@ async function SetupSection({ vaultPath }: { vaultPath: string }) {
               back to you, and never sends one anywhere but this machine.
             </li>
             <li>
-              You can skip any step and add it later from here. A source that is not configured
-              simply leaves its section empty; everything local keeps working.
+              You can skip any step and add it later. A source that is not configured simply leaves
+              its section empty; everything local keeps working.
             </li>
             <li>
-              <strong>To change something afterwards</strong>, edit <Code>.env</Code> and restart.
-              There is no settings screen — the file is the setting.
+              <strong>To connect one afterwards, or to change it</strong>, go to{' '}
+              <strong>Settings → Connections</strong> and press Connect. That reopens the same step
+              of the same wizard, with the same checks — there is no second form to get out of step
+              with the first.
+            </li>
+            <li>
+              <strong>The calendar takes four values, and checks them together.</strong> An OAuth
+              client ID and secret from your own Google Cloud project, a refresh token minted for it
+              with the read-only calendar scope, and the calendar to read. Meridian asks Google
+              which calendars that token can reach and saves nothing unless yours is among them — so
+              a wrong value tells you which one is wrong instead of leaving a source that quietly
+              never works. The token is yours to revoke, from your Google account, at any time.
             </li>
             <li>
               <strong>To open it like an app instead of a browser tab</strong>, run{' '}
@@ -715,11 +721,10 @@ BAMBOOHR_INBOX_MAX_AGE=300       # approvals and absences
 # BAMBOOHR_COMP_DATE_FIELD=customDate1
 # BAMBOOHR_COMP_AMOUNT_FIELD=customTotal1
 
-# Calendar (read only) — either an iCal secret address:
-# CALENDAR_ICAL_ADDRESS=https://calendar.google.com/calendar/ical/.../private-.../basic.ics
-# or Google OAuth. Reading a Google calendar needs one POST — the token refresh,
-# which is authentication, not a write. It is permitted by its exact address, and
-# it is the only one Meridian ever makes.
+# Calendar (read only). Written by Settings → Connect, which checks all four
+# against Google before saving any of them. Reading a Google calendar needs one
+# POST — the refresh-token exchange, which is authentication, not a write. It is
+# permitted by its exact address, and it is the only one Meridian ever makes.
 GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=xxxxxxxxxxxxxxxx
 GOOGLE_CALENDAR_ID=you@yourcompany.com
