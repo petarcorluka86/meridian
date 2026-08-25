@@ -347,15 +347,25 @@ document and kept across every client navigation after it, so the wizard's own
 header is still right for `needsSetup` and `blocked`, which only decide anything
 on a full load.
 
-**The wizard ends in a wait, not a full stop.** `DoneStep` asks the server what
-ended up connected — several things changed on the way there, and it is the only
-thing that knows — then fetches each source once, in turn, before the app opens.
-The first Overview then has the team, the meetings and the reviews on it rather
-than three empty cards filling in one at a time. One source at a time rather than
-all at once: these credentials are being used for the first time, and a failure
-should name itself instead of arriving in a pile of three. A failure ends the
-wait rather than trapping anybody in it — it is said plainly and the way in stays
-open, because every card carries a badge that retries its own source.
+**The wizard ends in a wait, not a full stop.** `SettingUp` takes the whole
+window — no stepper, no card, no banner, because there is nothing to do but wait
+and the wizard's chrome would be furniture around a progress bar. It asks the
+server what ended up connected (several things changed on the way there, and it
+is the only thing that knows), then fetches each source once, in turn, so the
+first Overview has the team, the meetings and the reviews on it rather than three
+empty cards filling in one at a time.
+
+One source at a time rather than all at once: these credentials are being used
+for the first time, and a failure should name itself instead of arriving in a
+pile of three. The bar is a `Meter` and not a spinner, which is the rule this app
+already holds — there is a denominator here, so the wait is a proportion rather
+than motion that means nothing.
+
+A clean run walks straight into the app; a screen whose whole content is "that
+worked" is a button to press for no reason. Anything else stops and hands back
+what went wrong, and `DoneStep` — now only ever reached when the wait had
+something to say — names it and leaves the way in open, because every card
+carries a badge that retries its own source.
 
 **Google Calendar is a set of credentials, typed and checked — not a sign-in
 flow.** The secret iCal address is gone: a company Workspace usually has those
@@ -617,7 +627,7 @@ the right one. A `Pill` that toggles something passes every test in the repo.
 
 ### What is left of the screens' own CSS
 
-Ten module files, and not one of them sets a colour, a font, a radius or a
+Eleven module files, and not one of them sets a colour, a font, a radius or a
 spacing value:
 
 | Module | What only it can express |
@@ -626,6 +636,7 @@ spacing value:
 | `vault/Vault.module.css` | the tree's per-level indentation |
 | `notes/Notes.module.css` | the list column beside the editor column |
 | `help/Help.module.css` | the section list, and the one bulleted prose list |
+| `setup/Setup.module.css` | the first-run splash: centred on the screen, and how far its progress list stops short of the column |
 | `changelog/Changelog.module.css` | the diff's two aligned columns of lines |
 | `people/People.module.css` | the roster's auto-filling grid |
 | `people/Person.module.css` | the header's contact column, three field widths |

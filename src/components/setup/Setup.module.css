@@ -1,0 +1,19 @@
+/*
+ * The first-run splash, and the only layout in the app that is centred on the
+ * screen rather than on the page's own column.
+ *
+ * Two things only a stylesheet can say here: that the words are centred under
+ * the mark, and that the progress list stops well short of the column's width —
+ * a bar and three short rows stretched across 1040px read as a table of
+ * contents rather than as a wait.
+ */
+.splash {
+  text-align: center;
+}
+
+.progress {
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+  text-align: left;
+}
