@@ -16,6 +16,8 @@ import {
   Text,
 } from '@/components/ui';
 import { loadConfig, tildeHome } from '@/lib/env';
+import { changedFiles, repoState, unpushedCount, upstream } from '@/lib/git';
+import { getVault } from '@/lib/vault/index';
 import { readBamboo } from '@/lib/sources/bamboohr';
 import { readCalendar } from '@/lib/sources/calendar';
 import { readGithub } from '@/lib/sources/github';
@@ -30,8 +32,60 @@ import { readGithub } from '@/lib/sources/github';
  * destructive actions, which have to be somewhere a person can find them and
  * nowhere they can be hit by accident.
  */
+/**
+ * "6 notes, 8 tasks and 4 projects" — only what is actually there, and the
+ * plural spelled out rather than an `s` bolted on, because one of these is
+ * people.
+ */
+function listOf(parts: Array<[number, string, string]>): string {
+  const said = parts
+    .filter(([count]) => count > 0)
+    .map(([count, one, many]) => `${count} ${count === 1 ? one : many}`);
+
+  if (said.length === 0) return 'nothing yet';
+  if (said.length === 1) return said[0]!;
+  return `${said.slice(0, -1).join(', ')} and ${said[said.length - 1]}`;
+}
+
+/**
+ * Whether a copy of this vault exists anywhere else, which is the one thing
+ * somebody about to empty it actually needs to know. Every other line in that
+ * dialog describes what goes; this one says whether it is gone.
+ */
+async function safetyNet(): Promise<string> {
+  if ((await repoState()).kind !== 'ok') {
+    return 'This vault is not a Git repository, so there is no commit anywhere to go back to.';
+  }
+
+  const [changed, unpushed, remote] = await Promise.all([
+    changedFiles(),
+    unpushedCount(),
+    upstream(),
+  ]);
+
+  if (!remote) {
+    return 'This vault has no remote, so every copy of it is the folder itself.';
+  }
+  if (unpushed > 0 || changed.length > 0) {
+    return `${listOf([
+      [changed.length, 'change', 'changes'],
+      [unpushed, 'commit', 'commits'],
+    ])} here ${changed.length + unpushed === 1 ? 'has' : 'have'} not reached ${remote.remote}. Everything before that is on the remote and survives.`;
+  }
+  return `Everything is committed and pushed to ${remote.remote}, so that copy survives this.`;
+}
+
 export default async function SettingsPage() {
   const { theme, envPath, vaultPath, bamboo, calendar, github } = loadConfig();
+  const vault = getVault();
+
+  const contents = listOf([
+    [vault.notes.length, 'note', 'notes'],
+    [vault.tasks.length, 'task', 'tasks'],
+    [vault.projects.length, 'project', 'projects'],
+    [vault.people.length, 'person', 'people'],
+    [vault.time.length, 'hour entry', 'hour entries'],
+  ]);
 
   const sources = [
     {
@@ -135,6 +189,8 @@ export default async function SettingsPage() {
         <DangerZone
           vaultPath={vaultPath ? tildeHome(vaultPath) : 'the vault'}
           envPath={tildeHome(envPath)}
+          contents={contents}
+          safetyNet={await safetyNet()}
         />
       </Stack>
     </Page>

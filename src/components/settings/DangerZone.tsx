@@ -18,18 +18,26 @@ import {
 
 type Which = 'vault' | 'everything';
 
-const CONFIRM: Record<Which, { title: string; body: string; action: string }> = {
-  vault: {
-    title: 'Empty the vault?',
-    body: 'Every note, task, hour, plan and project is deleted from the folder — and so are its Git history and its snapshots, because both live inside it. There is no commit and no snapshot to go back to. Your keys and your theme stay.',
-    action: 'Empty the vault',
-  },
-  everything: {
-    title: 'Reset Meridian completely?',
-    body: 'The vault and .env both go: every note, the Git history behind them, the vault path and every API key. Nothing is removed from BambooHR, the calendar or GitHub — this app has never been able to write to them.',
-    action: 'Reset everything',
-  },
-};
+/**
+ * The confirmation names what is actually there rather than what could be —
+ * "13 people and 6 notes" is a different decision from "nothing yet", and the
+ * app knows which one this is. `safetyNet` is the line that matters most: it
+ * says whether a copy of this exists anywhere else.
+ */
+function confirmations(contents: string, safetyNet: string) {
+  return {
+    vault: {
+      title: 'Empty the vault?',
+      body: `${contents} — deleted from the folder, along with its Git history and its snapshots, because both live inside it. ${safetyNet} Your keys and your theme stay.`,
+      action: 'Empty the vault',
+    },
+    everything: {
+      title: 'Reset Meridian completely?',
+      body: `${contents}, the Git history behind it, the vault path and every API key. ${safetyNet} Nothing is removed from BambooHR, the calendar or GitHub — this app has never been able to write to them.`,
+      action: 'Reset everything',
+    },
+  } satisfies Record<Which, { title: string; body: string; action: string }>;
+}
 
 /**
  * The only two things in Meridian that a snapshot cannot undo, which is why they
@@ -40,7 +48,20 @@ const CONFIRM: Record<Which, { title: string; body: string; action: string }> = 
  * somebody's notes are gone, and a message that leaves by itself after three
  * seconds is the wrong shape for that.
  */
-export function DangerZone({ vaultPath, envPath }: { vaultPath: string; envPath: string }) {
+export function DangerZone({
+  vaultPath,
+  envPath,
+  contents,
+  safetyNet,
+}: {
+  vaultPath: string;
+  envPath: string;
+  /** What the vault actually holds right now, already counted and worded. */
+  contents: string;
+  /** Whether a copy of it exists anywhere else. */
+  safetyNet: string;
+}) {
+  const CONFIRM = confirmations(contents, safetyNet);
   const [asking, setAsking] = useState<Which | null>(null);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [pending, startTransition] = useTransition();
@@ -66,11 +87,16 @@ export function DangerZone({ vaultPath, envPath }: { vaultPath: string; envPath:
           }
         />
         <CardBody>
-          <Text level="small" tone="muted">
-            Both of these empty <Code>{vaultPath}</Code> — the notes, the Git history and the
-            snapshots together, since all three live in that one folder. Nothing here reaches
-            BambooHR, Google or GitHub.
-          </Text>
+          <Stack gap={2}>
+            <Text level="small" tone="muted">
+              Both of these empty <Code>{vaultPath}</Code> — the notes, the Git history and the
+              snapshots together, since all three live in that one folder. Nothing here reaches
+              BambooHR, Google or GitHub.
+            </Text>
+            <Text level="small" tone="muted">
+              It holds {contents}. {safetyNet}
+            </Text>
+          </Stack>
         </CardBody>
 
         <CardRow>

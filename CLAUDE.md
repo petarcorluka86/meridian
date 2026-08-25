@@ -368,7 +368,17 @@ inside the vault, so they go with it, and the confirmation says exactly that
 rather than mentioning `vault:restore` the way every other deletion does. The
 guards there matter more than the six lines that do the work — the fixture vault,
 a `VAULT_PATH` left at `/`, and a `VAULT_PATH` left at `~` are each a way for
-`rm -rf` to take something it must not. A full reset also removes `.env`, through
+`rm -rf` to take something it must not.
+
+The confirmation counts what is actually in the vault and says whether a copy of
+it exists anywhere else — which is why Settings is the only screen besides
+Changelog that shells out to git on render. "13 people and 6 notes, and nothing
+here has been pushed" is a different decision from the same sentence with
+"everything is on the remote" at the end of it, and the app knows which one it
+is. The buttons stay live when `VAULT_PATH` points inside this repository and the
+action refuses instead, because a fixture-shaped branch in the interface is
+exactly what "the fixture is selected by environment, so no fixture code path
+exists in the app" rules out. A full reset also removes `.env`, through
 `removeEnv()`, which unsets the keys in `process.env` as well: Next preloads that
 file at boot, so a deleted `VAULT_PATH` still reading as set is how the app would
 come back looking configured with nothing behind it.
