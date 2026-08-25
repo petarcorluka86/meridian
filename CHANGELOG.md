@@ -12,6 +12,13 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ### Added
 
+- **New note is on the Notes screen**, at the top of the list, always — not only
+  when the vault is empty. It lands on whoever the list is filtered to.
+- **Editing a note is editing the file.** The writing surface is as tall as the
+  window, Tab indents instead of leaving the field, ⌘S saves and Escape cancels.
+  Tab is inserted through the browser's own `insertText`, so the caret lands
+  where it should and ⌘Z still walks back through what was typed — setting the
+  value from state does neither.
 - **A note can be deleted**, from the note's own toolbar and behind a
   confirmation that names the file. A snapshot is taken first, so
   `npm run vault:restore` can bring it back and nothing in the app can — the

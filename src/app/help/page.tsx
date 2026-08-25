@@ -225,6 +225,8 @@ function Guide() {
       'Notes',
       '',
       [
+        'New note starts one from here; it lands on whoever the list is filtered to, or in the inbox if that is nobody.',
+        'Editing a note is editing the Markdown file: a monospace surface as tall as the window, Tab indents, ⌘S saves, Escape cancels. What you write is what is on disk, minus the front matter Meridian keeps at the top.',
         'Filter by person, by project, by category, or show only drafts.',
         'Pin a note to hold it at the top of the list.',
         'Changing the date renames the file; changing the person moves it into that person’s folder.',
