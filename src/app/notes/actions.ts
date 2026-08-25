@@ -1,7 +1,7 @@
 'use server';
 
 import { vaultChanged } from '@/app/changed';
-import { moveNote, saveNoteBody, setNoteMeta } from '@/lib/vault/notes';
+import { deleteNote, moveNote, saveNoteBody, setNoteMeta } from '@/lib/vault/notes';
 import type { NoteCategory } from '@/lib/vault/schemas';
 
 export type NoteResult = { ok: true; path: string } | { ok: false; message: string };
@@ -49,6 +49,32 @@ export async function moveNoteAction(
     const result = await moveNote(path, patch);
     vaultChanged('/notes');
     return { ok: true, path: result.path };
+  } catch (err) {
+    return { ok: false, message: (err as Error).message };
+  }
+}
+
+/**
+ * Deletes the note's file. A snapshot is taken first, so `npm run vault:restore`
+ * can bring it back and nothing in the app can — which is what the confirmation
+ * on the screen says, in those words.
+ *
+ * The person's page and the project's are revalidated as well as Notes: a note
+ * is counted in both, and a count that still includes a deleted note is the kind
+ * of wrong that gets believed.
+ */
+export async function deleteNoteAction(path: string): Promise<NoteResult> {
+  try {
+    const { getNote } = await import('@/lib/vault/notes');
+    const note = getNote(path);
+    await deleteNote(path);
+    vaultChanged(
+      '/notes',
+      note?.personSlug ? `/people/${note.personSlug}` : null,
+      note?.project ? `/projects/${note.project}` : null,
+      '/projects',
+    );
+    return { ok: true, path };
   } catch (err) {
     return { ok: false, message: (err as Error).message };
   }

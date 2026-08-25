@@ -2,8 +2,14 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { moveNoteAction, saveNoteAction, setMetaAction } from '@/app/notes/actions';
+import {
+  deleteNoteAction,
+  moveNoteAction,
+  saveNoteAction,
+  setMetaAction,
+} from '@/app/notes/actions';
 import type { NoteCategory } from '@/lib/vault/schemas';
+import { Confirm } from '@/components/Confirm';
 import { NAV_GLYPH } from '@/components/NavIcons';
 import {
   Banner,
@@ -15,6 +21,7 @@ import {
   CheckIcon,
   DateInput,
   EditIcon,
+  RemoveIcon,
   Icon,
   PinIcon,
   Prose,
@@ -83,6 +90,7 @@ export function NoteEditor({ note, people, projects }: Props) {
   const [body, setBody] = useState(note.body);
   const [saveState, setSaveState] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const [pending, startTransition] = useTransition();
 
   // Selecting a different note in the list re-renders this component in place.
@@ -93,6 +101,7 @@ export function NoteEditor({ note, people, projects }: Props) {
     setBody(note.body);
     setError(null);
     setSaveState('');
+    setConfirming(false);
   }, [note.path, note.title, note.body]);
 
   const run = (
@@ -123,6 +132,23 @@ export function NoteEditor({ note, people, projects }: Props) {
       return result;
     }, 'Saved');
 
+  /**
+   * Deleting cannot go through `run`: that one keeps the selection on the note
+   * it just wrote, and this note is gone. The list picks the next one.
+   */
+  const remove = () =>
+    startTransition(async () => {
+      const result = await deleteNoteAction(note.path);
+      if (result.ok) {
+        setConfirming(false);
+        router.replace('/notes', { scroll: false });
+        router.refresh();
+      } else {
+        setConfirming(false);
+        setError(result.message ?? 'Could not delete it.');
+      }
+    });
+
   return (
     <div className={`scroll ${styles.editorCol}`}>
       <div className={styles.column}>
@@ -137,6 +163,18 @@ export function NoteEditor({ note, people, projects }: Props) {
                 {saveState}
               </Text>
             ) : null}
+            {/* Farthest from Save and Edit, which are the two things somebody is
+                aiming at when this row is busy. It asks before it deletes, so a
+                misclick costs a dismissed dialog rather than a note. */}
+            {editing ? null : (
+              <Button
+                iconOnly
+                onClick={() => setConfirming(true)}
+                icon={<RemoveIcon />}
+                disabled={pending}
+                ariaLabel={`Delete “${note.title}”`}
+              />
+            )}
             <Toggle
               checked={note.draft}
               onChange={(checked) =>
@@ -256,6 +294,16 @@ export function NoteEditor({ note, people, projects }: Props) {
           {error ? <Banner tone="danger" description={error} /> : null}
         </Stack>
       </div>
+
+      <Confirm
+        open={confirming}
+        title="Delete this note?"
+        body={`“${note.title}” is removed from ${note.path}. A snapshot is taken first, so npm run vault:restore can bring it back — nothing in the app can.`}
+        action="Delete note"
+        pending={pending}
+        onCancel={() => setConfirming(false)}
+        onConfirm={remove}
+      />
     </div>
   );
 }

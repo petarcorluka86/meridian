@@ -100,7 +100,7 @@ person doing the work, at the screen or at `npm run vault -- projects`.
 | Set or clear the project | `setNoteProject()` / `setNoteMeta()` | `write_note` | **Open** |
 | Move a note: change its person or its date | `moveNote()` | `move_note` | **Open** |
 | Capture a note with no screen open | `captureNoteAction()` | `write_note` covers it | **Open** |
-| Delete a note | no store operation exists | — | **Closed** |
+| Delete a note | `deleteNote()` | `delete_note` | **Open** |
 
 ## Tasks — read
 
@@ -275,16 +275,16 @@ every other test green, and quietly hands an agent BambooHR.
 
 ## Where it stands
 
-Counted by row: **93 Open**, **9 Closed**, **30 Never** — 132 capabilities, against thirty-two tools.
+Counted by row: **94 Open**, **8 Closed**, **30 Never** — 132 capabilities, against thirty-three tools.
 
 Reading is effectively finished: the Overview, the caches behind it, pay, the
 whole task and note surface, the vault's own health and its git state are all
 reachable, and every cached answer says how old it is. Writing covers the vault's
 own records, and every one of those writes can now be corrected or taken back.
 
-Nine rows are Closed, each with its reason: the vault's file browser and its
+Eight rows are Closed, each with its reason: the vault's file browser and its
 snapshot restore, a person's cached photo, how many projects are finished,
-deleting a note and setting a task description — neither of which the app can do
-either — editing a roster entry, same, and which theme the app is painted in. Everything else that is shut is shut
+setting a task description — which the app cannot do either — editing a roster
+entry, same, and which theme the app is painted in. Everything else that is shut is shut
 on purpose: projects are read-only by decision, and nothing here goes to the
 network.
