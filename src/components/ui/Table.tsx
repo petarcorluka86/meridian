@@ -91,7 +91,12 @@ export function TD({
   link?: string;
 }) {
   return (
-    <td className={styles.td} data-align={align} data-numeric={numeric || undefined}>
+    <td
+      className={styles.td}
+      data-align={align}
+      data-numeric={numeric || undefined}
+      data-link={link ? '' : undefined}
+    >
       {link ? (
         <Link href={link} className={styles.rowLink}>
           {children}

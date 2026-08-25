@@ -65,11 +65,31 @@
 }
 
 .tr {
-  position: relative;
+  /*
+   * Deliberately not positioned. See `.td` — the row cannot be relied on to be a
+   * containing block, so nothing here may depend on it being one.
+   */
 }
 
 .tr[data-interactive]:hover .td {
   background: var(--surface-sunken);
+}
+
+/*
+ * The containing block for the stretched link below, and *only* this cell.
+ *
+ * Two things depend on it being here. It is not on `.tr` because
+ * `position: relative` on a table row is undefined per spec, and an engine that
+ * ignores it resolves the overlay against something much larger — which is not
+ * theoretical: it put an invisible, card-sized anchor over the People table, so
+ * clicking anywhere in the card header opened the last person in the list, and
+ * that person's row was highlighted from the moment the screen opened. And it is
+ * not on every `.td`, because a positioned cell paints above the overlay, and
+ * the cells after this one would take back the row-wide hit area it exists to
+ * give.
+ */
+.td[data-link] {
+  position: relative;
 }
 
 /* One anchor, stretched over its row. The text stays where it is; only the hit
@@ -79,8 +99,19 @@
   font: inherit;
   text-decoration: none;
 }
+
+/*
+ * Its own cell, and everything to the right of it — which is the rest of the
+ * row, since this is the first cell. It runs off the end deliberately and the
+ * card clips it: `overflow: hidden` on the card is what stops the band before
+ * the page gutter, so the hit area is the row and never a strip of empty space
+ * beside it.
+ */
 .rowLink::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: -100vw;
 }
