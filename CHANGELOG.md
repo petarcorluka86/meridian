@@ -42,6 +42,8 @@ so far. A migration that fails blocks the app rather than guessing.
 - **Connecting a source is one screen, reached from two places.** Settings →
   Connect opens `/setup?only=<source>` — that one step of the wizard, with the
   same checks and the same copy, returning to Settings when it is made.
+- **Setup has no sidebar**, and sits in the middle of the window. On a first run
+  every link in that nav points at a vault that does not exist yet.
 - **Connections, on the Settings screen** — whether each of the three sources is
   set up, how old its answer is, and the badge that goes and looks again. A
   source that is not set up names the keys it is waiting for rather than only

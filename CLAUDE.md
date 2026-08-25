@@ -331,6 +331,14 @@ set of checks and a second set of copy to keep in step with the first.
 `?only=` is a URL rather than a dialog so the screen can be linked to, reloaded
 and gated like any other.
 
+**Setup is the one screen with no sidebar**, and the content is centred in the
+space that leaves. On a first run every link in that nav goes somewhere with no
+vault to read yet, so it is furniture in the way of the only thing there is to
+do; a connection reopened from Settings carries its own way back instead. The
+pixel gate records the whole window for these screens rather than `[data-screen]`
+— the page frame looks identical whether or not there is a nav beside it, so
+measuring the frame alone would hold neither half of this.
+
 **Google Calendar is a set of credentials, typed and checked — not a sign-in
 flow.** The secret iCal address is gone: a company Workspace usually has those
 switched off, and a URL that is itself an unexpirable, unscopable credential is
@@ -595,7 +603,7 @@ spacing value:
 
 | Module | What only it can express |
 | --- | --- |
-| `Shell.module.css` | the fixed sidebar and the scrolling column |
+| `Shell.module.css` | the fixed sidebar, the scrolling column, and the one screen with neither |
 | `vault/Vault.module.css` | the tree's per-level indentation |
 | `notes/Notes.module.css` | the list column beside the editor column |
 | `help/Help.module.css` | the section list, and the one bulleted prose list |
