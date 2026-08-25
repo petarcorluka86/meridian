@@ -9,6 +9,7 @@ import { loadConfig, bambooSubdomainOf } from '@/lib/env';
 import { accessToken } from '@/lib/sources/calendar';
 import { type CalendarChoice, listCalendars } from '@/lib/sources/google-oauth';
 import { fold } from '@/lib/sources/bamboohr/client';
+import { findCompensationTable } from '@/lib/sources/bamboohr/compensation';
 import { logEgress } from '@/lib/sources/egress';
 import { writeEnv } from '@/lib/env-write';
 import { vaultHealth } from '@/lib/vault/health';
@@ -186,20 +187,67 @@ export async function checkBambooAction(
   };
 }
 
+/**
+ * Writes the connection, and finds where this company keeps pay while it has the
+ * key in its hand.
+ *
+ * `BAMBOOHR_COMP_TABLE` used to be the one credential nobody was asked for:
+ * BambooHR's standard `compensation` table is empty at plenty of companies, and
+ * the app cannot tell that apart from a company that pays nobody. It was set by
+ * hand, once, by somebody who had gone and read `meta/tables` — which meant that
+ * a `.env` rebuilt by this wizard came back without it, and pay silently stopped
+ * working while everything else looked fine. That is exactly what happened.
+ *
+ * So the wizard asks BambooHR instead, against the manager's own id, which the
+ * step before this one has just confirmed. Finding nothing is not a failure —
+ * the connection is still good — and the step says which of the two it was.
+ */
 export async function saveBambooAction(
   rawSubdomain: string,
   apiKey: string,
   managerId: string,
 ): Promise<Check> {
+  const subdomain = bambooSubdomainOf(rawSubdomain);
+  const employeeId = managerId.trim();
+  const key = apiKey.trim();
+
+  const pay = await findCompensationTable(subdomain, key, employeeId);
+
   writeEnv(loadConfig().envPath, {
-    BAMBOOHR_SUBDOMAIN: bambooSubdomainOf(rawSubdomain),
-    BAMBOOHR_API_KEY: apiKey.trim(),
-    BAMBOOHR_MANAGER_EMPLOYEE_ID: managerId.trim(),
+    BAMBOOHR_SUBDOMAIN: subdomain,
+    BAMBOOHR_API_KEY: key,
+    BAMBOOHR_MANAGER_EMPLOYEE_ID: employeeId,
     BAMBOOHR_MAX_AGE: '3600',
     BAMBOOHR_INBOX_MAX_AGE: '300',
+    ...(pay ? { BAMBOOHR_COMP_TABLE: pay.table } : {}),
   });
   configChanged();
-  return { ok: true, detail: 'BambooHR is connected.' };
+
+  if (!pay) {
+    return {
+      ok: true,
+      detail:
+        'BambooHR is connected. No pay table answered for you, so compensation will be empty until BAMBOOHR_COMP_TABLE names the right one.',
+    };
+  }
+
+  // The three field names are only consulted for a custom table, and the
+  // defaults are the common ones. A table that does not carry them still saves —
+  // and says so here, which is the difference between a blank column and a blank
+  // column somebody knows the reason for.
+  const { comp } = loadConfig().bamboo ?? { comp: null };
+  const missing = comp
+    ? [comp.dateField, comp.amountField].filter((field) => !pay.fields.includes(field))
+    : [];
+
+  return {
+    ok: true,
+    detail:
+      `BambooHR is connected. Pay is in ${pay.table} — ${pay.rows} ${pay.rows === 1 ? 'row' : 'rows'} for you.` +
+      (missing.length
+        ? ` It does not carry ${missing.join(' or ')}, so set BAMBOOHR_COMP_DATE_FIELD and BAMBOOHR_COMP_AMOUNT_FIELD to the names it does.`
+        : ''),
+  };
 }
 
 export async function checkGithubAction(

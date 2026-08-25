@@ -124,6 +124,10 @@ describe('connecting BambooHR', () => {
   it('saves the key but never gives one back', async () => {
     const { saveBambooAction, setupStateAction } = await import('@/app/setup/actions');
 
+    // Saving now also asks where pay lives. Nothing answers here, which is the
+    // ordinary case for a company that keeps it in the standard table.
+    globalThis.fetch = vi.fn(async () => new Response('[]', { status: 200 })) as typeof fetch;
+
     const saved = await saveBambooAction('yourcompany.bamboohr.com', API_KEY, '42');
     expect(saved.ok).toBe(true);
     expect(JSON.stringify(saved)).not.toContain(API_KEY);
@@ -162,6 +166,71 @@ describe('connecting GitHub', () => {
 
     expect(result.ok).toBe(true);
     expect(fs.readFileSync(envFile, 'utf8')).toContain('GITHUB_REPOS=good/one');
+  });
+});
+
+describe('finding where a company keeps pay', () => {
+  const TABLES = JSON.stringify([
+    { alias: 'jobInfo' },
+    { alias: 'compensation' },
+    { alias: 'dependents' },
+    { alias: 'customAdditionalOverallCompensation' },
+  ]);
+
+  it('saves the custom table when the standard one is empty', async () => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith('/meta/tables')) return new Response(TABLES, { status: 200 });
+      if (url.endsWith('/tables/compensation')) return new Response('[]', { status: 200 });
+      return new Response(
+        JSON.stringify([{ customDate1: '2026-01-01', customTotal1: '1', customGrosssalary: '2' }]),
+        { status: 200 },
+      );
+    }) as unknown as typeof fetch;
+    const { saveBambooAction } = await import('@/app/setup/actions');
+
+    const result = await saveBambooAction('yourcompany', 'key-not-a-real-one', '42');
+
+    expect(result.ok).toBe(true);
+    expect(result.ok && result.detail).toContain('customAdditionalOverallCompensation');
+    // The key that used to be nobody's job to write, and whose absence looked
+    // exactly like a company that pays nobody.
+    expect(fs.readFileSync(envFile, 'utf8')).toContain(
+      'BAMBOOHR_COMP_TABLE=customAdditionalOverallCompensation',
+    );
+  });
+
+  it('prefers the standard table when it answers', async () => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith('/meta/tables')) return new Response(TABLES, { status: 200 });
+      return new Response(JSON.stringify([{ startDate: '2026-01-01', rate: '1' }]), {
+        status: 200,
+      });
+    }) as unknown as typeof fetch;
+    const { saveBambooAction } = await import('@/app/setup/actions');
+
+    const result = await saveBambooAction('yourcompany', 'key-not-a-real-one', '42');
+
+    expect(fs.readFileSync(envFile, 'utf8')).toContain('BAMBOOHR_COMP_TABLE=compensation');
+    // It carries neither default field name, and the step says so rather than
+    // leaving a blank column to be discovered later.
+    expect(result.ok && result.detail).toContain('BAMBOOHR_COMP_DATE_FIELD');
+  });
+
+  it('connects anyway when nothing answers, and says which it was', async () => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith('/meta/tables')) return new Response(TABLES, { status: 200 });
+      return new Response('[]', { status: 200 });
+    }) as unknown as typeof fetch;
+    const { saveBambooAction } = await import('@/app/setup/actions');
+
+    const result = await saveBambooAction('yourcompany', 'key-not-a-real-one', '42');
+
+    expect(result.ok).toBe(true);
+    expect(result.ok && result.detail).toContain('BAMBOOHR_COMP_TABLE');
+    expect(fs.readFileSync(envFile, 'utf8')).not.toContain('BAMBOOHR_COMP_TABLE=');
   });
 });
 

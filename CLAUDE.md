@@ -322,6 +322,21 @@ other byte is left exactly as found. Comments and hand-added keys survive.
 
 ### Connecting a source, twice: the wizard and Settings
 
+**The BambooHR step also finds where the company keeps pay.** The standard
+`compensation` table is empty at plenty of tenants, and an empty table looks
+exactly like a company that pays nobody — so `findCompensationTable()` asks
+`meta/tables`, probes the pay-shaped names against the manager's own id, and
+`saveBambooAction` writes `BAMBOOHR_COMP_TABLE` from what answers. It used to be
+the one credential nobody was asked for, set by hand by whoever had gone and read
+`meta/tables` themselves; a `.env` rebuilt by this wizard therefore came back
+without it, and pay stopped working while every other source looked fine. That is
+not hypothetical — it is where the key went.
+
+Finding nothing is not a failure of the step: the connection is still good, and
+the result line says which of the two happened. The three field names stay
+manual, and the step names them when the table it found does not carry the
+defaults.
+
 There is one connection screen, and it is the wizard. Settings does not have a
 form of its own — each row links to `/setup?only=<bamboo|calendar|github>`, which
 renders that one step with the progress pills gone and the way back named, and

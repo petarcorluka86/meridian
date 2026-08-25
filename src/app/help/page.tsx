@@ -674,6 +674,12 @@ async function SetupSection({ vaultPath }: { vaultPath: string }) {
               folder is required.
             </li>
             <li>
+              <strong>It finds where your company keeps pay.</strong> BambooHR&rsquo;s standard
+              compensation table is empty at plenty of companies, which looks exactly like paying
+              nobody — so the BambooHR step asks which tables exist and writes the one that answers
+              for you. If none does, it says so instead of leaving you a blank column.
+            </li>
+            <li>
               The wizard writes <Code>.env</Code> for you, editing only the lines it must — your
               comments and anything you added by hand survive. It never shows a saved credential
               back to you, and never sends one anywhere but this machine.
@@ -718,7 +724,8 @@ BAMBOOHR_API_KEY=xxxxxxxxxxxxxxxx
 BAMBOOHR_MANAGER_EMPLOYEE_ID=123
 BAMBOOHR_MAX_AGE=3600            # roster and pay tables
 BAMBOOHR_INBOX_MAX_AGE=300       # approvals and absences
-# Only if pay is not in BambooHR's standard compensation table:
+# Where your company keeps pay. The wizard finds this and writes it; it is here
+# because a table with unusual field names still needs the three below.
 # BAMBOOHR_COMP_TABLE=customAdditionalOverallCompensation
 # BAMBOOHR_COMP_DATE_FIELD=customDate1
 # BAMBOOHR_COMP_AMOUNT_FIELD=customTotal1

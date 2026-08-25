@@ -30,6 +30,15 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ### Added
 
+- **The wizard finds where your company keeps pay.** BambooHR's standard
+  `compensation` table is empty at plenty of companies, and an empty table looks
+  exactly like a company that pays nobody. The BambooHR step now asks which
+  tables exist, probes the pay-shaped ones against your own employee id, and
+  writes `BAMBOOHR_COMP_TABLE` from whichever answers — naming it, and how many
+  rows it found, in the line it reports. It was the one credential nobody was
+  asked for, so a `.env` rebuilt by the wizard came back without it and pay
+  silently stopped working.
+
 - **A project's Tasks and Notes cards can start one.** Both carry the button the
   Phases and Links cards already had, and what it makes is already attached to
   the project — the one field the form does not ask for, because the project is
