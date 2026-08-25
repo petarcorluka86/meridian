@@ -102,8 +102,10 @@ export function Textarea({
   rows,
   mono,
   bare,
+  fill,
   ariaLabel,
   onChange,
+  onKeyDown,
 }: {
   name?: string;
   value?: string;
@@ -114,14 +116,19 @@ export function Textarea({
   mono?: boolean;
   /** No border: the card is the frame. */
   bare?: boolean;
+  /** As tall as the window. For editing a file rather than filling in a field. */
+  fill?: boolean;
   ariaLabel?: string;
   onChange?: (value: string) => void;
+  /** Editor keys — Tab, Escape, the save shortcut — belong to the caller. */
+  onKeyDown?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }) {
   return (
     <textarea
       className={styles.textarea}
       data-mono={mono || undefined}
       data-bare={bare || undefined}
+      data-fill={fill || undefined}
       name={name}
       value={value}
       defaultValue={defaultValue}
@@ -129,6 +136,7 @@ export function Textarea({
       rows={rows}
       aria-label={ariaLabel}
       onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+      onKeyDown={onKeyDown}
     />
   );
 }
