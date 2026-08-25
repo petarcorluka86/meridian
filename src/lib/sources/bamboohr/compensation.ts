@@ -88,6 +88,61 @@ function parseAmount(raw: string): number | null {
  * Compensation history, one call per direct report. Kept separate from the
  * roster sync so a pay table is only refetched when its own window expires.
  */
+export type CompTable = { table: string; rows: number; fields: string[] };
+
+/**
+ * Which table this company actually keeps pay in, asked of BambooHR rather than
+ * typed by somebody who has to go and find out.
+ *
+ * The standard `compensation` table is empty at plenty of companies, which looks
+ * on screen exactly like paying nobody — that is the confusion this removes. It
+ * is asked once, during setup, against the one employee whose id we have just
+ * confirmed: the manager's own.
+ *
+ * Candidates are the tables whose names look like pay, standard one first, and
+ * the first that returns a row wins. Thirty-four tables exist on a typical
+ * tenant and probing all of them would be thirty-four requests to somebody's HR
+ * system to answer a question three of them can.
+ */
+export async function findCompensationTable(
+  subdomain: string,
+  apiKey: string,
+  employeeId: string,
+): Promise<CompTable | null> {
+  let names: string[];
+  try {
+    const raw = await bambooGet(subdomain, apiKey, 'meta/tables');
+    names = Array.isArray(raw)
+      ? raw
+          .map((table) => (table as { alias?: unknown }).alias)
+          .filter((alias): alias is string => typeof alias === 'string')
+      : [];
+  } catch {
+    // Not being able to ask is not a failure of the step this runs inside: the
+    // key works, the roster is there, and the table can be set by hand.
+    return null;
+  }
+
+  const candidates = [
+    ...names.filter((name) => name === 'compensation'),
+    ...names.filter((name) => name !== 'compensation' && /comp|salar|pay/i.test(name)),
+  ];
+
+  for (const table of candidates) {
+    try {
+      const raw = await bambooGet(subdomain, apiKey, `employees/${employeeId}/tables/${table}`);
+      const rows = Array.isArray(raw) ? raw : [];
+      const first = rows[0];
+      if (!first || typeof first !== 'object') continue;
+      return { table, rows: rows.length, fields: Object.keys(first as object) };
+    } catch {
+      // A table this key cannot read is not the table we are looking for.
+    }
+  }
+
+  return null;
+}
+
 export async function syncBambooCompensation(): Promise<{ people: number; rows: number }> {
   if (vaultIsInsideApp()) throw new FixtureVaultError();
 
