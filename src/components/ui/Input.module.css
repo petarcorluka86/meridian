@@ -78,6 +78,18 @@
   min-height: calc(var(--space-7) * 8);
 }
 
+/*
+ * Editing a file rather than filling in a field: the writing surface is as tall
+ * as the window, less the chrome above and below it, so a long note is written
+ * in one place instead of in a box that scrolls inside a page that also scrolls.
+ * `dvh` because a phone's toolbars change what "the window" means, and this is
+ * the one surface where that is felt.
+ */
+.textarea[data-fill] {
+  min-height: calc(100dvh - var(--space-7) * 5);
+  resize: none;
+}
+
 .select {
   composes: field;
   width: auto;

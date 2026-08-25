@@ -133,6 +133,43 @@ export function NoteEditor({ note, people, projects }: Props) {
     }, 'Saved');
 
   /**
+   * The keys somebody editing a Markdown file already has in their hands.
+   *
+   * Tab indents rather than leaving the field, which is the one thing here that
+   * costs something: a keyboard user cannot leave the textarea with Tab any
+   * more. Shift+Tab still does, and Escape leaves editing altogether — without
+   * both of those this would be a trap rather than an editor.
+   */
+  const editorKeys = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault();
+      save();
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setEditing(false);
+      return;
+    }
+    if (event.key !== 'Tab' || event.shiftKey) return;
+
+    event.preventDefault();
+    const field = event.currentTarget;
+
+    // `insertText` rather than setting the value ourselves: it leaves the caret
+    // where the browser would leave it and keeps the native undo stack, so ⌘Z
+    // still walks back through what was typed. Writing the string by hand
+    // restores the caret a frame late — fast enough for a person, wrong for
+    // anything typed immediately after — and throws the undo history away.
+    if (document.execCommand('insertText', false, '  ')) return;
+
+    const from = field.selectionStart;
+    const to = field.selectionEnd;
+    setBody(`${body.slice(0, from)}  ${body.slice(to)}`);
+    requestAnimationFrame(() => field.setSelectionRange(from + 2, from + 2));
+  };
+
+  /**
    * Deleting cannot go through `run`: that one keeps the selection on the note
    * it just wrote, and this note is gone. The list picks the next one.
    */
@@ -193,6 +230,9 @@ export function NoteEditor({ note, people, projects }: Props) {
             </Button>
             {editing ? (
               <>
+                <Text level="small" tone="faint" nowrap>
+                  Markdown · ⌘S saves · Esc cancels
+                </Text>
                 <Button onClick={() => setEditing(false)}>Cancel</Button>
                 <Button variant="primary" onClick={save} pending={pending} icon={<CheckIcon />}>
                   Save
@@ -266,11 +306,26 @@ export function NoteEditor({ note, people, projects }: Props) {
                   heading
                   value={title}
                   onChange={setTitle}
+                  onKeyDown={(event) => {
+                    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+                      event.preventDefault();
+                      save();
+                    }
+                    if (event.key === 'Escape') setEditing(false);
+                  }}
                   placeholder="Note title"
                   ariaLabel="Note title"
                 />
               </CardRow>
-              <Textarea mono bare value={body} onChange={setBody} ariaLabel="Note body" />
+              <Textarea
+                mono
+                bare
+                fill
+                value={body}
+                onChange={setBody}
+                onKeyDown={editorKeys}
+                ariaLabel="Note body"
+              />
             </Card>
           ) : (
             <Card>

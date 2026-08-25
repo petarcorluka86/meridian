@@ -106,6 +106,11 @@ export default async function NotesPage({
         <div className={styles.listHead}>
           <Stack gap={4}>
             <PageHeader title="Notes" subtitle={subtitle} level="title" />
+            {/* Always, not only when the vault is empty. Writing one down is the
+                reason somebody opens this screen, and hiding the way to do it
+                behind an empty state means it is missing exactly when there is
+                already a note in the way of it. */}
+            <NewNote person={person} />
             <NoteFilters
               people={people}
               projects={projects}
@@ -159,13 +164,6 @@ export default async function NotesPage({
             ) : (
               <EmptyState glyph={EMPTY_GLYPH.search} {...EMPTY.notes.filtered} />
             )}
-            {/* A filter that matched nothing gets a sentence, not a button. The
-                action appears only when there is genuinely nothing to write yet. */}
-            {vault.notes.length === 0 ? (
-              <div className={styles.listHead}>
-                <NewNote person={person} />
-              </div>
-            ) : null}
           </Stack>
         ) : null}
       </div>
