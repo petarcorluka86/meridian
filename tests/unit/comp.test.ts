@@ -18,9 +18,10 @@ const rows = [
   { startDate: '2025-07-01', endDate: '2026-03-31', rate: 3900, reason: 'Market', comment: '' },
 ];
 
+// A plan's amount is the rise on top of what is in force, not the new rate.
 const plan: PlanEntry = {
   id: 'p1',
-  amount: 4500,
+  amount: 300,
   month: 4,
   year: 2027,
   promotion: 'Staff Engineer',
@@ -31,6 +32,17 @@ describe('buildTimeline', () => {
     const timeline = buildTimeline(rows, [plan]);
     expect(timeline.map((e) => e.ym)).toEqual([202304, 202507, 202604, 202704]);
     expect(timeline.map((e) => e.planned)).toEqual([false, false, false, true]);
+  });
+
+  it('folds a plan onto the rate in force, so the timeline stays absolute', () => {
+    const timeline = buildTimeline(rows, [plan]);
+    expect(timeline[3]?.amount).toBe(4500);
+  });
+
+  it('stacks plans on each other', () => {
+    const second: PlanEntry = { id: 'p2', amount: 100, month: 10, year: 2026, promotion: '' };
+    const timeline = buildTimeline(rows, [plan, second]);
+    expect(timeline.map((e) => e.amount)).toEqual([3650, 3900, 4200, 4300, 4600]);
   });
 
   it('handles a person with no payroll rows but a plan', () => {

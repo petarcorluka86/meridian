@@ -65,14 +65,15 @@ json('people/ana-horvat/links.json', [
 ]);
 json('people/marko-maric/links.json', [{ label: 'GitHub', url: 'https://github.com/markomaric' }]);
 
+// A plan's amount is the rise, not the new rate.
 json('people/ana-horvat/plans.json', [
-  { id: 'sp-ana', amount: 4500, month: 4, year: 2027, promotion: 'Staff Engineer' },
+  { id: 'sp-ana', amount: 300, month: 4, year: 2027, promotion: 'Staff Engineer' },
 ]);
 json('people/marko-maric/plans.json', [
-  { id: 'sp-marko', amount: 3400, month: 11, year: 2026, promotion: 'Senior Engineer' },
+  { id: 'sp-marko', amount: 300, month: 11, year: 2026, promotion: 'Senior Engineer' },
 ]);
 json('people/petra-kovac/plans.json', [
-  { id: 'sp-petra', amount: 3600, month: 1, year: 2027, promotion: '' },
+  { id: 'sp-petra', amount: 200, month: 1, year: 2027, promotion: '' },
 ]);
 
 const note = (category: string, draft: boolean, pinned: boolean, body: string, project?: string) =>
