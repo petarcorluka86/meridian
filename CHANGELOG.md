@@ -30,6 +30,11 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ### Added
 
+- **The Meridian mark reloads the app.** It is a plain anchor rather than a
+  client-side link, so pressing it loads the document again and lands on the
+  Overview — the one control in the app that starts the page over instead of
+  moving inside it.
+
 - **The wizard finds where your company keeps pay.** BambooHR's standard
   `compensation` table is empty at plenty of companies, and an empty table looks
   exactly like a company that pays nobody. The BambooHR step now asks which
