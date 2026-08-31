@@ -30,12 +30,23 @@ export type TimelineEntry = { ym: YearMonth; amount: number; planned: boolean };
  * Payroll history and your own planned rises on one timeline, so a plan shows up
  * in the same sequence as a real rise — marked as planned, never written back to
  * BambooHR.
+ *
+ * A payroll row carries the new rate; a plan carries the rise. The timeline is
+ * absolute throughout, so a plan's amount is folded onto whatever was in force
+ * before it — and plans stack on each other.
  */
 export function buildTimeline(rows: CompRow[], plans: PlanEntry[]): TimelineEntry[] {
-  return [
+  const entries = [
     ...rows.map((r) => ({ ym: ymOfIso(r.startDate), amount: r.rate, planned: false })),
     ...plans.map((p) => ({ ym: ym(p.year, p.month), amount: p.amount, planned: true })),
   ].sort((a, b) => a.ym - b.ym || Number(a.planned) - Number(b.planned));
+  let rate = 0;
+  for (const entry of entries) {
+    // To the cent: 4036.78 + 600 in floats is 4636.780000000001.
+    rate = entry.planned ? Math.round((rate + entry.amount) * 100) / 100 : entry.amount;
+    entry.amount = rate;
+  }
+  return entries;
 }
 
 export type RateAt = {
