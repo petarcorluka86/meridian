@@ -139,14 +139,17 @@ describe('what the server offers', () => {
     'remove_link',
     'remove_plan',
     'write_about',
+    'update_person',
     'vault_diff',
     'commit',
     'vault_health',
     'vault_status',
     'vault_problems',
+    'vault_tree',
+    'read_file',
   ];
 
-  it('offers exactly these forty-two tools', async () => {
+  it('offers exactly these forty-five tools', async () => {
     // Agents refer to tools by name, so renaming one is a breaking change and
     // should have to be made here on purpose.
     expect([...(await tools()).keys()]).toEqual(EXPECTED);
@@ -401,6 +404,57 @@ describe('what an agent can read', () => {
     await call(all.get('archive_project')!, { id: 'pay-review', archived: false });
     const [project] = JSON.parse(await call(all.get('list_projects')!, {}));
     expect(project).toMatchObject({ id: 'pay-review', phases: { total: 2, done: 1 } });
+  });
+
+  it('carries a task description in, keeps it through an unrelated edit, and clears it on null', async () => {
+    const all = await tools();
+    await call(all.get('add_task')!, {
+      title: 'Chase the vendor',
+      description: 'They owe us a quote.',
+    });
+    const [task] = JSON.parse(fs.readFileSync(path.join(dir, 'tasks.json'), 'utf8'));
+    expect(task.description).toBe('They owe us a quote.');
+
+    // An edit that says nothing about the description leaves it alone.
+    await call(all.get('update_task')!, { id: task.id, priority: 'urgent' });
+    expect(JSON.parse(await call(all.get('list_tasks')!, {})).tasks[0].description).toBe(
+      'They owe us a quote.',
+    );
+
+    await call(all.get('update_task')!, { id: task.id, description: null });
+    expect(JSON.parse(await call(all.get('list_tasks')!, {})).tasks[0].description).toBeNull();
+  });
+
+  it('edits the roster fields that are mine, and only those', async () => {
+    withPerson();
+    const all = await tools();
+    await call(all.get('update_person')!, {
+      slug: 'ana-horvat',
+      contactCadenceDays: 7,
+      targetLevel: 'Senior',
+      status: 'archived',
+    });
+
+    const [row] = JSON.parse(fs.readFileSync(path.join(dir, 'people/entries.json'), 'utf8'));
+    expect(row.mine.contactCadenceDays).toBe(7);
+    expect(row.mine.growth.targetLevel).toBe('Senior');
+    expect(row.status).toBe('archived');
+    // The display name was not touched by an edit that never mentioned it.
+    expect(row.displayName).toBe('Ana Horvat');
+
+    await expect(
+      call(all.get('update_person')!, { slug: 'nobody', status: 'active' }),
+    ).rejects.toThrow(/No person/);
+  });
+
+  it('walks the vault as a tree and reads one file by its path', async () => {
+    const all = await tools();
+    const tree = JSON.parse(await call(all.get('vault_tree')!, {}));
+    expect(tree.map((n: { name: string }) => n.name)).toContain('tasks.json');
+
+    expect(await call(all.get('read_file')!, { path: 'tasks.json' })).toContain('[]');
+    // A path that tries to leave the vault reads as missing, never as a file.
+    expect(await call(all.get('read_file')!, { path: '../../etc/hosts' })).toContain('No readable');
   });
 
   it('marks a phase project-only without touching its words', async () => {

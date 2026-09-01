@@ -24,7 +24,7 @@ Nothing here writes to BambooHR, Google or GitHub, and nothing here reads from t
 
 A note's person comes from the folder it is in, and its project from its front matter. Use move_note to change who a note is about; editing a path by hand is not a supported way to do it.
 
-Projects are read-only through this server. list_projects and read_project name them so a task or a note can point at one; creating, phasing and archiving a project happen in the app.`;
+Projects are yours to shape: create, phase, link and archive them, and file tasks under a phase. Deleting a project is the one project action that stays in the app — its confirmation promises what happens to the project's tasks and notes, and a promise is read by a person.`;
 
 export function createServer(): McpServer {
   const server = new McpServer(

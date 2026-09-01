@@ -30,7 +30,7 @@ revisited, which is why it is written down rather than left to be rediscovered.
 | Contact cadence and growth levels | `PersonEntry.mine` | `read_person` | **Open** |
 | Days since the last note about a person | `vault.notesByPerson` + `daysBetween()` | `list_people` | **Open** |
 | Who is past their contact cadence | that, against `mine.contactCadenceDays` | `list_people` (`overdue`) | **Open** |
-| Cached photo path for a person | `photoPath()` | — | **Closed** — a path to a file the client may not be able to open. |
+| Cached photo path for a person | `photoPath()` | `read_person` (`photo`) | **Open** — a local path the client may not be able to open, but whether a photo exists is an answer too. |
 
 ## People — write
 
@@ -41,7 +41,7 @@ revisited, which is why it is written down rather than left to be rediscovered.
 | Remove a link | `removeLink()` | `remove_link` | **Open** |
 | Record a planned rise or promotion | `addPlan()` | `plan_rise` | **Open** |
 | Remove a planned rise | `removePlan()` | `remove_plan` | **Open** |
-| Edit a roster entry: cadence, growth levels, status | no store operation exists — only `mergeRoster()` writes `entries.json` | — | **Closed** |
+| Edit a roster entry: cadence, growth levels, status | `updatePerson()` | `update_person` | **Open** — the HR block stays BambooHR's; a sync would put an edit back. |
 
 ## Projects — read
 
@@ -55,7 +55,7 @@ revisited, which is why it is written down rather than left to be rediscovered.
 | A project's tasks | `vault.tasks` by `projectId` | `read_project`, `list_tasks` | **Open** |
 | A project's notes | `vault.notesByProject` | `read_project`, `list_notes` | **Open** |
 | Description, created and updated timestamps | `ProjectEntry` | `read_project` | **Open** |
-| How many active projects have every phase done | computed in `app/projects/page.tsx` | — | **Closed** — one line over `list_projects`, which already gives the fraction. |
+| How many active projects have every phase done | `progressOf().complete` | `list_projects` (`phases.complete`) | **Open** — a flag on every row; the count is the client's one line. |
 
 ## Projects — write
 
@@ -128,7 +128,7 @@ to the project's tasks and notes, and a promise is read by a person.
 | Edit a task: title, priority, due date, person, project, phase, kind | `updateTask()` | `update_task` | **Open** |
 | Delete a task | `deleteTask()` | `delete_task` | **Open** |
 | Capture a task with no screen open | `captureTaskAction()` | `add_task` covers it | **Open** |
-| Give a task a description | no store operation exists — `TaskEntry` carries one, `NewTask` and `TaskPatch` do not | — | **Closed** |
+| Give a task a description | `NewTask.description` / `TaskPatch.description` | `add_task`, `update_task` (`description`) | **Open** — the screens do not show it yet; search and the task tools do. |
 
 ## Hours
 
@@ -164,8 +164,8 @@ Substring, case-insensitive, not fuzzy. Every list is capped by `limit`, and
 | Whether the vault can be written to at all | `vaultHealth()` / `blocksEditing()` | `vault_health` | **Open** |
 | Thresholds and data version from `config.json` | `vault.config` | `vault_health` | **Open** |
 | Scan the vault for credentials | `scanText()` | folded into `commit` | **Open** |
-| The file tree | `buildTree()` | — | **Closed** |
-| Preview any vault file | `readPreview()` | — | **Closed** |
+| The file tree | `buildTree()` | `vault_tree` | **Open** |
+| Preview any vault file | `readPreview()` | `read_file` | **Open** — text only, truncated, and `safeVaultPath()` keeps it inside the vault. |
 | Restore a file from `.snapshots/` | `npm run vault:restore` | — | **Closed** — the undo for a tool that went wrong, and the only one an agent cannot reach. |
 | Data version and pending migrations | `DATA_VERSION`, `migrateVault()` | — | **Never** — a migration is a decision made once, in the app. |
 | Show the vault in the desktop file manager | `revealVaultAction()` | — | **Never** — it opens a window on somebody's screen, which is theirs to do. |

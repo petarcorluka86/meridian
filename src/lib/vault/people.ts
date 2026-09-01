@@ -1,5 +1,5 @@
 import { getVault, invalidateVault } from './index';
-import { LinkEntry, PlanEntry } from './schemas';
+import { LinkEntry, PersonEntry, PlanEntry } from './schemas';
 import { mutateJsonRows, readForUpdate, withLock, writeTextAtomic } from './write';
 
 async function mutateJson<T>(
@@ -14,6 +14,54 @@ function requirePerson(slug: string): void {
   if (!getVault().peopleBySlug.has(slug)) {
     throw new Error(`No person with the slug ${slug} in people/entries.json.`);
   }
+}
+
+/**
+ * The fields in `entries.json` that are yours rather than BambooHR's: the
+ * contact cadence, the growth levels, and whether the person is archived. The
+ * HR block is deliberately not here — it is a copy of what BambooHR said, and
+ * the next roster sync would silently put an edit back.
+ */
+export type PersonPatch = {
+  contactCadenceDays?: number;
+  currentLevel?: string | null;
+  targetLevel?: string | null;
+  status?: 'active' | 'archived';
+};
+
+export async function updatePerson(slug: string, patch: PersonPatch): Promise<void> {
+  requirePerson(slug);
+  if (
+    patch.contactCadenceDays !== undefined &&
+    (!Number.isInteger(patch.contactCadenceDays) || patch.contactCadenceDays <= 0)
+  ) {
+    throw new Error('A contact cadence is a positive number of days.');
+  }
+  await mutateJson<PersonEntry>('people/entries.json', PersonEntry, (rows) => {
+    if (!rows.some((r) => r.slug === slug)) {
+      throw new Error(`No person with the slug ${slug} in people/entries.json.`);
+    }
+    return rows.map((r) =>
+      r.slug === slug
+        ? {
+            ...r,
+            status: patch.status ?? r.status,
+            mine: {
+              ...r.mine,
+              contactCadenceDays: patch.contactCadenceDays ?? r.mine.contactCadenceDays,
+              growth: {
+                currentLevel:
+                  patch.currentLevel === undefined
+                    ? r.mine.growth.currentLevel
+                    : patch.currentLevel,
+                targetLevel:
+                  patch.targetLevel === undefined ? r.mine.growth.targetLevel : patch.targetLevel,
+              },
+            },
+          }
+        : r,
+    );
+  });
 }
 
 export async function saveAbout(slug: string, body: string): Promise<void> {
