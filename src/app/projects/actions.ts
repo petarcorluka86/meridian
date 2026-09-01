@@ -73,7 +73,7 @@ export async function addPhaseAction(id: string, label: string): Promise<Project
 export async function editPhaseAction(
   id: string,
   phase: string,
-  input: { label: string; note: string },
+  input: { label: string; note: string; projectOnly: boolean },
 ): Promise<ProjectResult> {
   return run(() => updatePhase(id, phase, input), id);
 }

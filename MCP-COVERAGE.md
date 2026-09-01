@@ -72,6 +72,7 @@ to the project's tasks and notes, and a promise is read by a person.
 | Delete a project, clearing it off its tasks and notes | `deleteProject()` | — | **Never** — destructive, and its confirmation is words on a screen. |
 | Add a phase | `addPhase()` | `add_phase` | **Open** |
 | Edit a phase's label and note | `updatePhase()` | `update_phase` | **Open** |
+| Mark a phase project-only, keeping its tasks off Tasks and Overview | `updatePhase()` / `hiddenOutsideProject()` | `update_phase` (`projectOnly`) | **Open** |
 | Tick a phase off, or untick it | `setPhaseDone()` | `complete_phase` | **Open** |
 | Remove a phase | `removePhase()` | `remove_phase` | **Open** |
 | Add a link to a project | `addProjectLink()` | `add_project_link` | **Open** |

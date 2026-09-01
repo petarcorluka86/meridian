@@ -1,4 +1,5 @@
 import { getVault } from '@/lib/vault/index';
+import { hiddenOutsideProject } from '@/lib/vault/projects';
 import { photoPath } from '@/lib/sources/cache';
 import { daysBetween, dueLabel, dueTone, today } from '@/lib/dates';
 import { AddTask } from '@/components/tasks/AddTask';
@@ -58,10 +59,15 @@ export default async function TasksPage({
       ? (vault.projectsById.get(projectId)?.phases.find((ph) => ph.id === phaseId)?.label ?? null)
       : null;
 
+  // Tasks filed under a project-only phase belong to that project's page and
+  // are left out here whole — the counts too, or "12 open" would name eight
+  // rows nobody can see on this screen.
+  const shown = vault.tasks.filter((t) => !hiddenOutsideProject(vault.projectsById, t));
+
   // "Open" means open work of your own. A task you are waiting on someone else
   // for is counted and filtered separately.
-  const open = vault.tasks.filter((t) => t.status !== 'done' && t.kind === 'task');
-  const doneCount = vault.tasks.filter((t) => t.status === 'done').length;
+  const open = shown.filter((t) => t.status !== 'done' && t.kind === 'task');
+  const doneCount = shown.filter((t) => t.status === 'done').length;
 
   const inFilter = (t: (typeof vault.tasks)[number]) => {
     if (filter === 'done') return t.status === 'done';
@@ -69,7 +75,7 @@ export default async function TasksPage({
     return t.status !== 'done' && t.kind === 'task';
   };
 
-  const pool = vault.tasks.filter(inFilter);
+  const pool = shown.filter(inFilter);
   const matching = pool.filter((t) => prio === 'all' || t.priority === prio);
 
   const views: TaskView[] = matching

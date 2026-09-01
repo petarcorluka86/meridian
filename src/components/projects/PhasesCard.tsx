@@ -33,6 +33,7 @@ import {
   RemoveIcon,
   Spacer,
   Stack,
+  Toggle,
   type TaskPerson,
   type TaskProject,
   TaskRow,
@@ -213,6 +214,10 @@ export function PhasesCard({
                           fraction, the disclosure and the pencil sit against the
                           edge, whatever the label's length does on the left. */}
                       <Spacer />
+                      {/* The one sign, outside its own dialog, that this phase
+                          keeps its tasks off Tasks and Overview — a setting with
+                          no visible trace is a task that "disappeared". */}
+                      {phase.projectOnly ? <Pill tone="neutral">project-only</Pill> : null}
                       <Text level="small" tone={own.total > 0 ? 'muted' : 'faint'} numeric nowrap>
                         {own.total > 0 ? `${own.done}/${own.total} tasks` : 'No tasks'}
                       </Text>
@@ -367,12 +372,13 @@ function PhaseDialog({
 }: {
   phase: ProjectPhase;
   onClose: () => void;
-  onSave: (input: { label: string; note: string }) => void;
+  onSave: (input: { label: string; note: string; projectOnly: boolean }) => void;
   onRemove: () => void;
   pending: boolean;
 }) {
   const [label, setLabel] = useState(phase.label);
   const [note, setNote] = useState(phase.note);
+  const [projectOnly, setProjectOnly] = useState(phase.projectOnly);
   const [armed, setArmed] = useState(false);
 
   if (armed) {
@@ -415,7 +421,11 @@ function PhaseDialog({
           <Button variant="neutral" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={() => onSave({ label, note })} pending={pending}>
+          <Button
+            variant="primary"
+            onClick={() => onSave({ label, note, projectOnly })}
+            pending={pending}
+          >
             Save
           </Button>
         </>
@@ -429,7 +439,7 @@ function PhaseDialog({
             onChange={setLabel}
             ariaLabel="Phase name"
             onKeyDown={(event) => {
-              if (event.key === 'Enter') onSave({ label, note });
+              if (event.key === 'Enter') onSave({ label, note, projectOnly });
             }}
           />
         </Field>
@@ -442,6 +452,14 @@ function PhaseDialog({
             ariaLabel="Phase description"
           />
         </Field>
+        {/* A Toggle rather than a Checkbox with a paragraph beside it: the
+            switch and its words are one label, so the setting reads and clicks
+            as one thing. */}
+        <Toggle
+          checked={projectOnly}
+          onChange={setProjectOnly}
+          label="Only inside this project — its tasks stay off Tasks and the Overview"
+        />
       </Stack>
     </Dialog>
   );
