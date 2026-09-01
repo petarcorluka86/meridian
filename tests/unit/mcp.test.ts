@@ -106,6 +106,15 @@ describe('what the server offers', () => {
     'read_person',
     'list_projects',
     'read_project',
+    'create_project',
+    'update_project',
+    'archive_project',
+    'add_phase',
+    'update_phase',
+    'complete_phase',
+    'remove_phase',
+    'add_project_link',
+    'remove_project_link',
     'list_tasks',
     'list_notes',
     'read_note',
@@ -137,7 +146,7 @@ describe('what the server offers', () => {
     'vault_problems',
   ];
 
-  it('offers exactly these thirty-three tools', async () => {
+  it('offers exactly these forty-two tools', async () => {
     // Agents refer to tools by name, so renaming one is a breaking change and
     // should have to be made here on purpose.
     expect([...(await tools()).keys()]).toEqual(EXPECTED);
@@ -182,6 +191,19 @@ describe('a bad argument is refused, not written', () => {
   it('will not write a note in a category that does not exist', async () => {
     const write = (await tools()).get('write_note')!;
     await expect(call(write, { title: 'A note', category: 'gossip' })).rejects.toThrow(/refused/);
+  });
+
+  it('will not create a nameless project, nor hang a javascript: link on one', async () => {
+    const all = await tools();
+    await expect(call(all.get('create_project')!, { title: '' })).rejects.toThrow(/refused/);
+    await expect(call(all.get('add_phase')!, { id: 'x', label: '' })).rejects.toThrow(/refused/);
+    expect(fs.existsSync(path.join(dir, 'projects.json'))).toBe(false);
+
+    withProject();
+    // The schema takes any string; the store is what refuses the scheme.
+    await expect(
+      call(all.get('add_project_link')!, { id: 'pay-review', url: 'javascript:alert(1)' }),
+    ).rejects.toThrow(/http/);
   });
 
   it('will not touch a person who is not in the roster', async () => {
@@ -306,6 +328,60 @@ describe('what an agent can read', () => {
     expect(read.tasks.map((t: { title: string }) => t.title)).toEqual(['Pull the numbers']);
 
     expect(await call(all.get('read_project')!, { id: 'nope' })).toContain('No project');
+  });
+
+  it('shapes a project: created with phases, ticked, linked, and read back whole', async () => {
+    const all = await tools();
+    const created = await call(all.get('create_project')!, {
+      title: 'DevOps education',
+      description: 'The mentorship.',
+      phases: ['P1 Foundations', 'P2 AWS by hand'],
+    });
+    expect(created).toBe('Created devops-education.');
+
+    await call(all.get('complete_phase')!, { id: 'devops-education', phase: 'p1' });
+    await call(all.get('add_phase')!, { id: 'devops-education', label: 'P3 Terraform' });
+    await call(all.get('add_project_link')!, {
+      id: 'devops-education',
+      label: 'Roadmap',
+      url: 'https://example.com/roadmap',
+    });
+    await call(all.get('update_project')!, { id: 'devops-education', description: 'Week 1.' });
+
+    const read = JSON.parse(await call(all.get('read_project')!, { id: 'devops-education' }));
+    // The title survived an update that only sent the description.
+    expect(read.title).toBe('DevOps education');
+    expect(read.description).toBe('Week 1.');
+    expect(read.progress).toMatchObject({ total: 3, done: 1 });
+    expect(read.links).toEqual([{ label: 'Roadmap', url: 'https://example.com/roadmap' }]);
+
+    await call(all.get('remove_phase')!, { id: 'devops-education', phase: 'p3' });
+    await call(all.get('remove_project_link')!, { id: 'devops-education', index: 0 });
+    const after = JSON.parse(await call(all.get('read_project')!, { id: 'devops-education' }));
+    expect(after.progress.total).toBe(2);
+    expect(after.links).toEqual([]);
+  });
+
+  it('archives a project and restores it, with nothing lost in between', async () => {
+    withProject();
+    const all = await tools();
+    await call(all.get('archive_project')!, { id: 'pay-review' });
+    expect(JSON.parse(await call(all.get('list_projects')!, {}))).toEqual([]);
+
+    await call(all.get('archive_project')!, { id: 'pay-review', archived: false });
+    const [project] = JSON.parse(await call(all.get('list_projects')!, {}));
+    expect(project).toMatchObject({ id: 'pay-review', phases: { total: 2, done: 1 } });
+  });
+
+  it('says so, rather than Done, about a phase that is not there', async () => {
+    withProject();
+    const all = await tools();
+    expect(await call(all.get('complete_phase')!, { id: 'pay-review', phase: 'p9' })).toContain(
+      'No phase',
+    );
+    expect(await call(all.get('update_phase')!, { id: 'nope', phase: 'p1' })).toContain(
+      'No project',
+    );
   });
 
   it('says how long since the last note about somebody, against their cadence', async () => {
@@ -631,14 +707,21 @@ describe('what a client is told before it asks', () => {
     for (const name of ['list_people', 'read_day', 'search', 'vault_diff']) {
       expect(annotationsOf(name), name).toMatchObject({ readOnlyHint: true });
     }
-    for (const name of ['delete_task', 'delete_hours', 'remove_link', 'remove_plan']) {
+    for (const name of [
+      'delete_task',
+      'delete_hours',
+      'remove_link',
+      'remove_plan',
+      'remove_phase',
+      'remove_project_link',
+    ]) {
       expect(annotationsOf(name), name).toMatchObject({
         readOnlyHint: false,
         destructiveHint: true,
       });
     }
     // Anything that writes is not read-only, whatever else it is.
-    for (const name of ['add_task', 'write_note', 'commit', 'update_task']) {
+    for (const name of ['add_task', 'write_note', 'commit', 'update_task', 'create_project']) {
       expect(annotationsOf(name), name).toMatchObject({ readOnlyHint: false });
     }
   });

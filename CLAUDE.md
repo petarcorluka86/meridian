@@ -895,12 +895,13 @@ waiting, the balance, what is unsaved — and like every other source tool it re
 `.cache/` and names its own age. Nothing there can refresh itself; see the rule
 above.
 
-`list_projects` and `read_project` are read-only, and that is the one deliberate
-asymmetry in the set. An agent needs to *name* a project to file a task or a note
-against it —
-`add_task` takes `projectId` and `write_note` takes `project` — but creating a
-project, phasing it out and archiving it are decisions about how the work is
-shaped, and those stay with the person doing the work.
+The one deliberate asymmetry in the set was project shaping, and it was
+reversed on 2026-09-01: an agent shapes projects as well as filing work against
+them —
+`create_project`, `update_project`, `archive_project`, the phase tools and the
+project link tools. The one project operation still reserved for the screen is
+deletion: its confirmation promises what happens to the project's tasks and
+notes, and a promise is read by a person.
 
 `MCP-COVERAGE.md` is the map of what those tools do and do not reach: every
 capability in the app as a row, marked Open, Closed or Never. Read it before
