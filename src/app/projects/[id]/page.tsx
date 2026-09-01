@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getVault } from '@/lib/vault/index';
 import { progressOf, taskProgressByPhase } from '@/lib/vault/projects';
+import { photoPath } from '@/lib/sources/cache';
 import { dueLabel, dueTone, today } from '@/lib/dates';
 import { PhasesCard } from '@/components/projects/PhasesCard';
 import { ProjectHeader } from '@/components/projects/ProjectHeader';
@@ -45,7 +46,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       dueTone: dueTone(t.dueDate, t.status === 'done', now),
       personName: t.personSlug ? (vault.peopleBySlug.get(t.personSlug)?.displayName ?? null) : null,
       personSlug: t.personSlug,
-      personPhoto: null,
+      personPhoto: t.personSlug ? photoPath(t.personSlug) : null,
       projectId: t.projectId,
       projectName: project.title,
       phaseId: t.phaseId,

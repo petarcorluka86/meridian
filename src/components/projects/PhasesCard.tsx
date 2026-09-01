@@ -51,18 +51,21 @@ const NO_TASKS: Progress = { total: 0, done: 0, percent: 0, complete: false };
  * inside its body a block per phase — a nested `Card`, because a bordered
  * surface is a Card and containment is what says a task belongs to its phase.
  *
- * Each block is a small copy of the project's own shape. A head row: the step
- * pill ("Phase 01 / 05"), the tick — a judgement made by hand, never derived
- * from the tasks — the label, the task fraction, a disclosure, the pencil.
+ * Each block is a small copy of the project's own shape. A head row: the
+ * project-only mark where there is one, the tick — a judgement made by hand,
+ * never derived from the tasks — the label, the task fraction, a disclosure,
+ * the pencil. No step pill: the phases are a numbered list only in the sense
+ * that they are in order, and "Phase 03 / 07" was the widest thing in a row
+ * that now has to say the label at a glance.
  * Under it, edge to edge, the phase's own bar, counted from its tasks. Then
  * the tasks themselves as the shared `TaskRow`, and a footer that adds a task
  * already filed under this phase.
  *
  * The disclosure exists because a phase deep in a long project can hold ten
  * tasks; collapsed, the block is one line and the bar still says how far it
- * has got. A phase opens by default only while it is the work at hand — one
- * that is done, or has no tasks yet, starts collapsed, so the card opens on
- * what is actually in motion. The chevron overrides either way.
+ * has got. Every phase starts collapsed, so the card opens as a list of
+ * checkpoints and their bars rather than a page of tasks. The chevron opens
+ * the one being worked on.
  *
  * A task with no phase is not here at all; it is in the Uncategorized tasks
  * card. A phase with no tasks draws no bar — an empty bar reading 0% would
@@ -148,8 +151,6 @@ export function PhasesCard({
     );
   };
 
-  const pad = (n: number) => String(n).padStart(2, '0');
-
   return (
     <Card>
       {/* No `count`: "2 of 5 done" beside it already carries the total, and a
@@ -179,19 +180,16 @@ export function PhasesCard({
             />
 
             <Stack gap={3}>
-              {phases.map((phase, index) => {
+              {phases.map((phase) => {
                 const own = taskProgress[phase.id] ?? NO_TASKS;
                 const rows = tasks[phase.id] ?? [];
-                const open = disclosed[phase.id] ?? (rows.length > 0 && !phase.done);
+                const open = disclosed[phase.id] ?? false;
                 return (
                   <Card key={phase.id}>
                     <CardRow
                       tone={phase.done ? 'success' : undefined}
                       pending={busy === phase.id && pending}
                     >
-                      <Pill tone={phase.done ? 'success' : 'neutral'}>
-                        Phase {pad(index + 1)} / {pad(phases.length)}
-                      </Pill>
                       <Checkbox
                         checked={phase.done}
                         onToggle={() => toggle(phase)}
@@ -210,14 +208,20 @@ export function PhasesCard({
                           {phase.label}
                         </Text>
                       </span>
+                      {/* The one sign, outside its own dialog, that this phase
+                          keeps its tasks off Tasks and Overview — a setting with
+                          no visible trace is a task that "disappeared". It takes
+                          the accent rather than the neutral it used to, because
+                          the row is one line most of the time now and a grey
+                          word at the end of it is a mark nobody reads. It sits
+                          after the label and not before the tick: on a project
+                          where most phases carry it, a leading pill pushes every
+                          label it is on out of line with the ones it is not. */}
+                      {phase.projectOnly ? <Pill tone="accent">Only in this project</Pill> : null}
                       {/* Everything from here on is the right-hand group: the
                           fraction, the disclosure and the pencil sit against the
                           edge, whatever the label's length does on the left. */}
                       <Spacer />
-                      {/* The one sign, outside its own dialog, that this phase
-                          keeps its tasks off Tasks and Overview — a setting with
-                          no visible trace is a task that "disappeared". */}
-                      {phase.projectOnly ? <Pill tone="neutral">project-only</Pill> : null}
                       <Text level="small" tone={own.total > 0 ? 'muted' : 'faint'} numeric nowrap>
                         {own.total > 0 ? `${own.done}/${own.total} tasks` : 'No tasks'}
                       </Text>
