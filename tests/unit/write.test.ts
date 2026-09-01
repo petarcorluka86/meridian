@@ -325,6 +325,7 @@ describe('editing and deleting a task', () => {
       dueDate: null,
       personSlug: 'ana-horvat',
       projectId: 'platform-split',
+      phaseId: null,
       kind: 'waiting',
     });
 
@@ -354,6 +355,7 @@ describe('editing and deleting a task', () => {
       dueDate: '2026-09-01',
       personSlug: null,
       projectId: null,
+      phaseId: null,
       kind: 'task',
     });
 
@@ -373,6 +375,7 @@ describe('editing and deleting a task', () => {
         dueDate: null,
         personSlug: null,
         projectId: null,
+        phaseId: null,
         kind: 'task',
       }),
     ).rejects.toThrow(/needs a title/);
@@ -404,6 +407,7 @@ describe('editing and deleting a task', () => {
           dueDate: null,
           personSlug: null,
           projectId: null,
+          phaseId: null,
           kind: 'task',
         }),
       () => deleteTask(id),

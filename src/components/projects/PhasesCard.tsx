@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { captureTaskAction } from '@/app/actions';
 import {
   addPhaseAction,
   editPhaseAction,
@@ -21,54 +22,85 @@ import {
   CardHeader,
   CardRow,
   Checkbox,
+  CollapseIcon,
   Dialog,
   EditIcon,
   EmptyState,
+  ExpandIcon,
   Field,
   Meter,
   Pill,
   RemoveIcon,
   Spacer,
   Stack,
+  type TaskPerson,
+  type TaskProject,
+  TaskRow,
+  type TaskView,
   Text,
   Textarea,
   TextInput,
 } from '@/components/ui';
 import styles from './Projects.module.css';
 
+const NO_TASKS: Progress = { total: 0, done: 0, percent: 0, complete: false };
+
 /**
- * The checkpoints, and the only place a project's progress is decided.
+ * The checkpoints, laid out to the Claude Design canvas: one Phases card, and
+ * inside its body a block per phase — a nested `Card`, because a bordered
+ * surface is a Card and containment is what says a task belongs to its phase.
  *
- * A phase is ticked in the row, the way a task is — that is the action you come
- * to this card for, and putting it behind the pencil would make the common case
- * two clicks. The pencil is for the two things a row cannot hold: renaming the
- * phase, and writing down what has to be true for it to be done.
+ * Each block is a small copy of the project's own shape. A head row: the step
+ * pill ("Phase 01 / 05"), the tick — a judgement made by hand, never derived
+ * from the tasks — the label, the task fraction, a disclosure, the pencil.
+ * Under it, edge to edge, the phase's own bar, counted from its tasks. Then
+ * the tasks themselves as the shared `TaskRow`, and a footer that adds a task
+ * already filed under this phase.
  *
- * The bar and the count are both drawn only when there are phases. A project
- * without them has nothing to be a fraction of, and an empty bar reading 0%
- * would claim it had made no progress rather than that it is not measured
- * this way.
+ * The disclosure exists because a phase deep in a long project can hold ten
+ * tasks; collapsed, the block is one line and the bar still says how far it
+ * has got. A phase opens by default only while it is the work at hand — one
+ * that is done, or has no tasks yet, starts collapsed, so the card opens on
+ * what is actually in motion. The chevron overrides either way.
+ *
+ * A task with no phase is not here at all; it is in the Uncategorized tasks
+ * card. A phase with no tasks draws no bar — an empty bar reading 0% would
+ * claim no progress rather than "not measured this way" — and the same rule
+ * holds for the summary bar over a project with no phases.
  */
 export function PhasesCard({
   id,
   phases,
   progress,
+  taskProgress,
+  tasks,
+  people,
+  projects,
 }: {
   id: string;
   phases: readonly ProjectPhase[];
   progress: Progress;
+  /** By phase id. A phase with no tasks is `{ total: 0 }` and draws no bar. */
+  taskProgress: Record<string, Progress>;
+  /** By phase id, soonest due first. A done task keeps its place, struck through. */
+  tasks: Record<string, TaskView[]>;
+  people: readonly TaskPerson[];
+  projects: readonly TaskProject[];
 }) {
   const router = useRouter();
   const [label, setLabel] = useState('');
   const [editing, setEditing] = useState<ProjectPhase | null>(null);
   const [error, setError] = useState<string | null>(null);
   /*
-   * Which row is in flight, not merely that one is. All five rows share this
-   * component's transition, so dimming on `pending` dims the whole card when you
-   * tick one phase — and then it is the click you cannot account for.
+   * Which phase is in flight, not merely that one is. Every checkbox shares this
+   * component's transition, so disabling on `pending` alone would freeze all of
+   * them when you tick one.
    */
   const [busy, setBusy] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  /** Per phase, only where the chevron overrode the default. */
+  const [disclosed, setDisclosed] = useState<Record<string, boolean>>({});
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   const run = (work: () => Promise<{ ok: boolean; message?: string }>, after?: () => void) =>
     startTransition(async () => {
@@ -98,6 +130,25 @@ export function PhasesCard({
     );
   };
 
+  const addTaskTo = (phase: ProjectPhase) => {
+    const title = drafts[phase.id]?.trim();
+    if (!title || pending) return;
+    run(
+      () =>
+        captureTaskAction({
+          title,
+          priority: 'normal',
+          dueDate: null,
+          personSlug: null,
+          projectId: id,
+          phaseId: phase.id,
+        }),
+      () => setDrafts((d) => ({ ...d, [phase.id]: '' })),
+    );
+  };
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
   return (
     <Card>
       {/* No `count`: "2 of 5 done" beside it already carries the total, and a
@@ -116,56 +167,141 @@ export function PhasesCard({
         }
       />
 
-      {progress.total > 0 ? (
+      {phases.length > 0 ? (
         <CardBody>
-          <Meter
-            value={progress.done}
-            total={progress.total}
-            tone={progress.complete ? 'success' : 'accent'}
-            label="Phases done"
-          />
-        </CardBody>
-      ) : null}
+          <Stack gap={4}>
+            <Meter
+              value={progress.done}
+              total={progress.total}
+              tone={progress.complete ? 'success' : 'accent'}
+              label="Phases done"
+            />
 
-      {phases.map((phase, index) => (
-        <CardRow key={phase.id} pending={busy === phase.id}>
-          <Text level="mono" tone="faint" numeric>
-            {String(index + 1).padStart(2, '0')}
-          </Text>
-          <Checkbox
-            checked={phase.done}
-            onToggle={() => toggle(phase)}
-            ariaLabel={
-              phase.done ? `Mark "${phase.label}" as not done` : `Mark "${phase.label}" as done`
-            }
-          />
-          <span className={styles.phase}>
-            <Stack gap={1}>
-              <Text level="body" tone={phase.done ? 'faint' : 'strong'} strike={phase.done}>
-                {phase.label}
-              </Text>
-              {phase.note ? (
-                <Text level="small" tone="muted">
-                  {phase.note}
-                </Text>
-              ) : null}
+            <Stack gap={3}>
+              {phases.map((phase, index) => {
+                const own = taskProgress[phase.id] ?? NO_TASKS;
+                const rows = tasks[phase.id] ?? [];
+                const open = disclosed[phase.id] ?? (rows.length > 0 && !phase.done);
+                return (
+                  <Card key={phase.id}>
+                    <CardRow
+                      tone={phase.done ? 'success' : undefined}
+                      pending={busy === phase.id && pending}
+                    >
+                      <Pill tone={phase.done ? 'success' : 'neutral'}>
+                        Phase {pad(index + 1)} / {pad(phases.length)}
+                      </Pill>
+                      <Checkbox
+                        checked={phase.done}
+                        onToggle={() => toggle(phase)}
+                        ariaLabel={
+                          phase.done
+                            ? `Mark "${phase.label}" as not done`
+                            : `Mark "${phase.label}" as done`
+                        }
+                      />
+                      <span className={styles.phaseLabel}>
+                        <Text
+                          level="body"
+                          tone={phase.done ? 'faint' : 'strong'}
+                          strike={phase.done}
+                        >
+                          {phase.label}
+                        </Text>
+                      </span>
+                      {/* Everything from here on is the right-hand group: the
+                          fraction, the disclosure and the pencil sit against the
+                          edge, whatever the label's length does on the left. */}
+                      <Spacer />
+                      <Text level="small" tone={own.total > 0 ? 'muted' : 'faint'} numeric nowrap>
+                        {own.total > 0 ? `${own.done}/${own.total} tasks` : 'No tasks'}
+                      </Text>
+                      <Button
+                        iconOnly
+                        size="sm"
+                        variant="ghost"
+                        icon={open ? <CollapseIcon /> : <ExpandIcon />}
+                        onClick={() => setDisclosed((d) => ({ ...d, [phase.id]: !open }))}
+                        ariaLabel={open ? `Collapse "${phase.label}"` : `Expand "${phase.label}"`}
+                      />
+                      <Button
+                        iconOnly
+                        size="sm"
+                        variant="ghost"
+                        icon={<EditIcon />}
+                        onClick={() => setEditing(phase)}
+                        ariaLabel={`Edit "${phase.label}"`}
+                      />
+                    </CardRow>
+
+                    {/* Edge to edge, a direct child of the card: this bar is the
+                        block's own rule, not a figure inside a body. */}
+                    {own.total > 0 ? (
+                      <Meter
+                        value={own.done}
+                        total={own.total}
+                        tone={own.complete ? 'success' : 'accent'}
+                        label={`Tasks done on "${phase.label}"`}
+                      />
+                    ) : null}
+
+                    {phase.note ? (
+                      <CardBody>
+                        <Text level="small" tone="muted">
+                          {phase.note}
+                        </Text>
+                      </CardBody>
+                    ) : null}
+
+                    {open ? (
+                      <>
+                        {rows.map((task) => (
+                          <TaskRow
+                            key={task.id}
+                            task={task}
+                            people={people}
+                            projects={projects}
+                            showProject={false}
+                          />
+                        ))}
+                        {rows.length === 0 ? (
+                          <CardRow>
+                            <Text level="small" tone="muted">
+                              {EMPTY.project.phaseTasks.title}
+                            </Text>
+                          </CardRow>
+                        ) : null}
+                        <CardFooter>
+                          <span className={styles.grow}>
+                            <TextInput
+                              value={drafts[phase.id] ?? ''}
+                              onChange={(value) => setDrafts((d) => ({ ...d, [phase.id]: value }))}
+                              placeholder="Add a task to this phase…"
+                              ariaLabel={`New task on "${phase.label}"`}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter') addTaskTo(phase);
+                              }}
+                            />
+                          </span>
+                          <Button
+                            onClick={() => addTaskTo(phase)}
+                            pending={pending}
+                            icon={<AddIcon />}
+                          >
+                            Add
+                          </Button>
+                        </CardFooter>
+                      </>
+                    ) : null}
+                  </Card>
+                );
+              })}
             </Stack>
-          </span>
-          <Spacer />
-          <Button
-            iconOnly
-            size="sm"
-            variant="ghost"
-            icon={<EditIcon />}
-            onClick={() => setEditing(phase)}
-            ariaLabel={`Edit "${phase.label}"`}
-          />
-        </CardRow>
-      ))}
-
-      {phases.length === 0 ? (
+          </Stack>
+        </CardBody>
+      ) : (
         <EmptyState glyph={EMPTY_GLYPH.phases} {...EMPTY.project.phases} />
-      ) : null}
+      )}
 
       {error ? (
         <CardRow tone="danger">
@@ -258,8 +394,8 @@ function PhaseDialog({
         }
       >
         <Text level="body" tone="muted">
-          “{phase.label}” leaves this project, and the ones after it move up a number. Nothing else
-          on the project changes.
+          “{phase.label}” leaves this project. Its tasks stay on the project and lose only the phase
+          — they move to Uncategorized tasks. Nothing else changes.
         </Text>
       </Dialog>
     );

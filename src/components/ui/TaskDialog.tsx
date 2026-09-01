@@ -13,7 +13,11 @@ import type { TaskView } from './TaskRow';
 import { Code, Text } from './Text';
 
 export type TaskPerson = { slug: string; name: string };
-export type TaskProject = { id: string; title: string };
+export type TaskProject = {
+  id: string;
+  title: string;
+  phases: readonly { id: string; label: string }[];
+};
 
 const PRIORITIES = [
   { value: 'normal', label: 'Normal' },
@@ -61,6 +65,7 @@ export function TaskDialog({
   const [due, setDue] = useState(task.dueDate ?? '');
   const [person, setPerson] = useState(task.personSlug ?? '');
   const [project, setProject] = useState(task.projectId ?? '');
+  const [phase, setPhase] = useState(task.phaseId ?? '');
   const [armed, setArmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -78,6 +83,14 @@ export function TaskDialog({
     router.refresh();
   };
 
+  // A phase is only a fact together with its project, so changing the project
+  // has to drop it — `p2` on the new project is a different phase.
+  const pickProject = (next: string) => {
+    setProject(next);
+    setPhase('');
+  };
+  const phases = projects?.find((p) => p.id === project)?.phases ?? [];
+
   const save = () =>
     run(() =>
       editTaskAction(task.id, {
@@ -86,6 +99,7 @@ export function TaskDialog({
         dueDate: due || null,
         personSlug: person || null,
         projectId: project || null,
+        phaseId: (project && phase) || null,
         kind,
       }),
     );
@@ -195,7 +209,21 @@ export function TaskDialog({
                 ...projects.map((p) => ({ value: p.id, label: p.title })),
               ]}
               value={project}
-              onChange={setProject}
+              onChange={pickProject}
+            />
+          </Field>
+        ) : null}
+        {/* Drawn only when the chosen project has phases: a select offering only
+            "No phase" would be a field with nothing to say. */}
+        {phases.length > 0 ? (
+          <Field label="Phase">
+            <Select
+              options={[
+                { value: '', label: 'No phase' },
+                ...phases.map((p) => ({ value: p.id, label: p.label })),
+              ]}
+              value={phase}
+              onChange={setPhase}
             />
           </Field>
         ) : null}

@@ -35,6 +35,9 @@ export type TaskView = {
   projectId: string | null;
   /** Resolved on the server too. Null when the task names a project the vault has not got. */
   projectName: string | null;
+  phaseId: string | null;
+  /** Resolved on the server. Null when the task names a phase its project has not got. */
+  phaseName: string | null;
   kind: 'task' | 'waiting';
 };
 
@@ -96,7 +99,7 @@ export function TaskRow({
         ariaLabel={task.done ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
       />
       <span className={styles.title}>
-        <Text level="body" tone={task.done ? 'faint' : 'strong'}>
+        <Text level="body" tone={task.done ? 'faint' : 'strong'} strike={task.done}>
           {task.title}
         </Text>
       </span>
@@ -108,6 +111,9 @@ export function TaskRow({
           </Text>
         </TextLink>
       ) : null}
+      {/* No phase chip: on the project page a filed task sits under its phase in
+          the Phases card, which says it by position; anywhere else the phase is
+          a label from a list the reader cannot see. The dialog still carries it. */}
       {task.personName && task.personSlug ? (
         <TextLink href={`/people/${task.personSlug}`}>
           <Text level="small" tone="inherit">

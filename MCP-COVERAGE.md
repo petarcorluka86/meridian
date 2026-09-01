@@ -50,6 +50,7 @@ revisited, which is why it is written down rather than left to be rediscovered.
 | Projects, with phase progress, next phase, open task and note counts | `vault.projects` + `progressOf()` | `list_projects` | **Open** |
 | Archived projects as well as active | `ProjectEntry.archived` | `list_projects` (`includeArchived`) | **Open** |
 | One project's phases, each with its label, note and done flag | `ProjectEntry.phases` | `read_project` | **Open** |
+| A phase's own task progress, counted from the tasks filed under it | `taskProgressByPhase()` | `read_project` | **Open** |
 | One project's links | `ProjectEntry.links` | `read_project` | **Open** |
 | A project's tasks | `vault.tasks` by `projectId` | `read_project`, `list_tasks` | **Open** |
 | A project's notes | `vault.notesByProject` | `read_project`, `list_notes` | **Open** |
@@ -76,6 +77,7 @@ to the project's tasks and notes, and a promise is read by a person.
 | Add a link to a project | `addProjectLink()` | `add_project_link` | **Open** |
 | Remove a project link | `removeProjectLink()` | `remove_project_link` | **Open** |
 | Point a task at a project | `addTask()` / `updateTask()` | `add_task`, `update_task` | **Open** |
+| File a task under a phase of its project | `NewTask.phaseId` / `TaskPatch.phaseId` | `add_task`, `update_task` (`phaseId`) | **Open** |
 | Point a note at a project | `createNote()` / `setNoteProject()` | `write_note` | **Open** |
 
 ## Notes — read
@@ -122,7 +124,7 @@ to the project's tasks and notes, and a promise is read by a person.
 | …with a priority, a due date, a person, a project | `NewTask` | `add_task` | **Open** |
 | …as a *waiting* item rather than a task | `NewTask.kind` | `add_task` (`kind`) | **Open** |
 | Complete a task, or reopen it | `setTaskStatus()` | `complete_task` | **Open** |
-| Edit a task: title, priority, due date, person, project, kind | `updateTask()` | `update_task` | **Open** |
+| Edit a task: title, priority, due date, person, project, phase, kind | `updateTask()` | `update_task` | **Open** |
 | Delete a task | `deleteTask()` | `delete_task` | **Open** |
 | Capture a task with no screen open | `captureTaskAction()` | `add_task` covers it | **Open** |
 | Give a task a description | no store operation exists — `TaskEntry` carries one, `NewTask` and `TaskPatch` do not | — | **Closed** |

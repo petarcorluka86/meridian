@@ -222,6 +222,27 @@ export const EMPTY = {
       body: 'Add one above and it starts here, with this project’s chip on it wherever you meet it. Picking the project in the task form does the same thing from anywhere else.',
       tone: 'info',
     },
+    /*
+     * One line inside a phase block, not a full empty-state card: a project can
+     * have six empty phases at once, and six glyphs saying so would drown the
+     * card. Only the title is rendered; the body is the same invitation the
+     * input under it already makes.
+     */
+    phaseTasks: {
+      title: 'No tasks on this phase yet',
+      body: 'Add one below and it lands already filed under this phase.',
+      tone: 'info',
+    },
+    /*
+     * Not `tasks`. "No tasks on this project yet" under phases that each carry
+     * their own is the same wrong claim as "no projects yet" over three archived
+     * ones: it says there is nothing when everything is simply filed.
+     */
+    allFiled: {
+      title: 'Everything is filed',
+      body: 'Every task on this project sits under one of its phases above. A task added here starts unfiled; the pencil on its row is where it gets a phase.',
+      tone: 'success',
+    },
     notes: {
       title: 'No notes on this project yet',
       body: 'Decisions, retros, the reason a phase slipped. Start one above, or tag any note with this project — it lands here either way, wherever the note itself lives.',

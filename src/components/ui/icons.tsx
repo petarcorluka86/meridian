@@ -117,6 +117,25 @@ export const NextIcon = () => (
   </Icon>
 );
 
+/**
+ * Discloses a collapsed section in place; `CollapseIcon` is the same chevron
+ * turned down, the way `RestoreIcon` is `ArchiveIcon` reversed — expanding and
+ * collapsing are two verbs. Shares its shape with `NextIcon` on purpose: a
+ * disclosure points at where the content will appear, and the two never sit on
+ * the same control.
+ */
+export const ExpandIcon = () => (
+  <Icon size="sm" weight="bold">
+    <path d="M9 6l6 6-6 6" />
+  </Icon>
+);
+
+export const CollapseIcon = () => (
+  <Icon size="sm" weight="bold">
+    <path d="M6 9l6 6 6-6" />
+  </Icon>
+);
+
 /** Opens documentation — Help, the setup guide. */
 export const GuideIcon = () => (
   <Icon>

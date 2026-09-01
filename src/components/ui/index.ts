@@ -33,8 +33,10 @@ export {
   ArchiveIcon,
   CalendarIcon,
   CheckIcon,
+  CollapseIcon,
   CommitIcon,
   EditIcon,
+  ExpandIcon,
   ExternalIcon,
   EyeIcon,
   GoIcon,
@@ -71,6 +73,7 @@ export { Stat } from './Stat';
 export { type Step, Stepper, type StepState } from './Stepper';
 export { Table, TBody, TD, TH, THead, TR } from './Table';
 export { type TaskView, TaskRow } from './TaskRow';
+export type { TaskPerson, TaskProject } from './TaskDialog';
 export { Code, CodeBlock, Text, type TextLevel, type Tone } from './Text';
 export { TextLink } from './TextLink';
 export { Toggle } from './Toggle';

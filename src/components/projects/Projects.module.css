@@ -1,12 +1,13 @@
 /*
- * Two rules the primitives cannot express, both about what shrinks first.
- *
- * A phase's label and its description are one block that has to give way to the
- * number on its left and the pencil on its right; a footer field has to take the
- * leftover width without collapsing when the button beside it grows.
+ * Two rules the primitives cannot express, both about what shrinks first. A
+ * phase's label gives way to the counters and buttons around it; a card
+ * footer's field takes the leftover width without collapsing when the button
+ * beside it grows, and the links form's label field gives way before its URL.
  */
-.phase {
-  flex: 1 1 auto;
+/* Natural width, shrink before the right-hand group does — the Spacer beside
+ * it is what holds that group against the edge. */
+.phaseLabel {
+  flex: 0 1 auto;
   min-width: 0;
 }
 

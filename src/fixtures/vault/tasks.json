@@ -9,6 +9,7 @@
     "kind": "task",
     "personSlug": null,
     "projectId": null,
+    "phaseId": null,
     "completedAt": null,
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
@@ -23,6 +24,7 @@
     "kind": "task",
     "personSlug": "ana-horvat",
     "projectId": null,
+    "phaseId": null,
     "completedAt": null,
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
@@ -37,6 +39,7 @@
     "kind": "task",
     "personSlug": null,
     "projectId": null,
+    "phaseId": null,
     "completedAt": null,
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
@@ -51,6 +54,7 @@
     "kind": "task",
     "personSlug": null,
     "projectId": "hiring-two-backend-roles",
+    "phaseId": "p2",
     "completedAt": null,
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
@@ -65,6 +69,7 @@
     "kind": "task",
     "personSlug": "lea-novak",
     "projectId": null,
+    "phaseId": null,
     "completedAt": null,
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
@@ -79,6 +84,7 @@
     "kind": "task",
     "personSlug": null,
     "projectId": "on-call-reset",
+    "phaseId": "p4",
     "completedAt": null,
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
@@ -93,6 +99,7 @@
     "kind": "task",
     "personSlug": "ivan-babic",
     "projectId": "on-call-reset",
+    "phaseId": "p4",
     "completedAt": "2026-08-17T09:00:00.000Z",
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
@@ -107,6 +114,7 @@
     "kind": "waiting",
     "personSlug": null,
     "projectId": "platform-split",
+    "phaseId": "p3",
     "completedAt": null,
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
@@ -121,6 +129,7 @@
     "kind": "waiting",
     "personSlug": "petra-kovac",
     "projectId": null,
+    "phaseId": null,
     "completedAt": null,
     "createdAt": "2026-08-12T08:44:41.102Z",
     "updatedAt": "2026-08-12T08:44:41.102Z"
