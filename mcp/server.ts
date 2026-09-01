@@ -7,6 +7,7 @@
  * vault-server.ts is three lines of transport.
  */
 import { McpServer, type ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { DESCRIPTION, ICONS, NAME, TITLE, VERSION, WEBSITE } from './identity.js';
 import { registerTools, type Tooling } from './tools.js';
 
 /**
@@ -28,12 +29,19 @@ Projects are yours to shape: create, phase, link and archive them, and file task
 
 export function createServer(): McpServer {
   const server = new McpServer(
-    { name: 'meridian-vault', version: '0.1.0' },
+    {
+      name: NAME,
+      title: TITLE,
+      version: VERSION,
+      description: DESCRIPTION,
+      websiteUrl: WEBSITE,
+      icons: ICONS,
+    },
     { instructions: INSTRUCTIONS },
   );
 
   registerTools({
-    tool: (name, description, inputSchema, handler, annotations) => {
+    tool: (name, description, inputSchema, handler, meta) => {
       // The one assertion left, and it is on the argument type alone.
       //
       // This used to be `registerTools(server as unknown as Tooling)`, which
@@ -55,7 +63,7 @@ export function createServer(): McpServer {
       // the SDK, and that a bad argument is refused rather than handed on.
       server.registerTool(
         name,
-        { description, inputSchema, ...(annotations ? { annotations } : {}) },
+        { title: meta.title, description, inputSchema, annotations: meta.annotations },
         handler as unknown as ToolCallback<typeof inputSchema>,
       );
     },

@@ -791,16 +791,30 @@ describe('what an agent can see without going anywhere', () => {
 
 describe('what a client is told before it asks', () => {
   it('classifies every tool, so nothing is treated as the worst case by default', async () => {
-    const { annotationsOf } = await import('../../mcp/tools');
+    const { factsOf } = await import('../../mcp/tools');
     for (const name of (await tools()).keys()) {
-      expect(annotationsOf(name), name).toBeDefined();
+      expect(factsOf(name), name).toBeDefined();
+    }
+  });
+
+  it('gives every tool a title a person can read, and not its own name back', async () => {
+    const { factsOf } = await import('../../mcp/tools');
+    const titles = new Set<string>();
+    for (const name of (await tools()).keys()) {
+      const title = factsOf(name)?.title ?? '';
+      // A client lists these instead of the names, so `write_about` twice over
+      // is two rows that look like one thing.
+      expect(title, name).toMatch(/^[A-Z]/);
+      expect(title, name).not.toBe(name);
+      expect(titles.has(title), title).toBe(false);
+      titles.add(title);
     }
   });
 
   it('marks the reads read-only and the deletes destructive', async () => {
-    const { annotationsOf } = await import('../../mcp/tools');
+    const { factsOf } = await import('../../mcp/tools');
     for (const name of ['list_people', 'read_day', 'search', 'vault_diff']) {
-      expect(annotationsOf(name), name).toMatchObject({ readOnlyHint: true });
+      expect(factsOf(name)?.hints, name).toMatchObject({ readOnlyHint: true });
     }
     for (const name of [
       'delete_task',
@@ -810,14 +824,14 @@ describe('what a client is told before it asks', () => {
       'remove_phase',
       'remove_project_link',
     ]) {
-      expect(annotationsOf(name), name).toMatchObject({
+      expect(factsOf(name)?.hints, name).toMatchObject({
         readOnlyHint: false,
         destructiveHint: true,
       });
     }
     // Anything that writes is not read-only, whatever else it is.
     for (const name of ['add_task', 'write_note', 'commit', 'update_task', 'create_project']) {
-      expect(annotationsOf(name), name).toMatchObject({ readOnlyHint: false });
+      expect(factsOf(name)?.hints, name).toMatchObject({ readOnlyHint: false });
     }
   });
 });

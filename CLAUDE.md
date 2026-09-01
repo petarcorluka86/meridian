@@ -58,13 +58,22 @@ Two places, and nothing is written in both.
 Help, and a pointer to each of the files below. Nothing else — an explanation
 that grows there is an explanation that has left Help.
 
-Four files exist for people outside this repository rather than inside it, and
+Five files exist for people outside this repository rather than inside it, and
 they are the only Markdown allowed to hold prose of their own: `CONTRIBUTING.md`
 (how to send a change, and the Conventional Commits rules), `SECURITY.md` (what
-counts as a vulnerability and where to report it privately), `CODE_OF_CONDUCT.md`
-(Contributor Covenant 2.1, verbatim) and `LICENSE`. `CONTRIBUTING.md` points here
-for anything architectural rather than restating it, and `SECURITY.md` names the
-gate that enforces each guarantee — so when a gate moves, that table moves too.
+counts as a vulnerability and where to report it privately), `PRIVACY.md` (what
+is collected, what leaves the machine, and what the MCP server can reach),
+`CODE_OF_CONDUCT.md` (Contributor Covenant 2.1, verbatim) and `LICENSE`.
+`CONTRIBUTING.md` points here for anything architectural rather than restating
+it, and `SECURITY.md` names the gate that enforces each guarantee — so when a
+gate moves, that table moves too.
+
+`PRIVACY.md` is the one of the five with an audience that never opens this
+repository at all: `manifest.json` inside the `.mcpb` bundle points a connector
+review at its URL, which is what a privacy policy is required to be. It says
+nothing Help does not, and that is the exception the table above tolerates —
+Help is inside an app somebody has to install first, and this has to be readable
+before they do.
 
 Two invariants have their own gates, and both are tested: every visual value is
 defined once in `tokens.css` and applied by a primitive
@@ -870,6 +879,7 @@ alone is gone at Dock sizes.
 | `npm run vault:scan` | Check the vault for anything that looks like a credential |
 | `npm run vault:hook` | Install that check as the vault's git pre-commit hook |
 | `npm run vault -- <cmd>` | CLI over the same store: people, projects, tasks, notes, hours, search |
+| `npm run mcp:bundle` | Pack the MCP server into `artifacts/meridian-vault.mcpb` for Claude Desktop |
 | `npm run bamboo:sync` | Roster + photos from BambooHR |
 | `npm run bamboo:comp` | Compensation history |
 | `npm run bamboo:inbox` | Approvals and presence (the 5-minute window) |
@@ -910,6 +920,73 @@ project link tools. The one project operation still reserved for the screen is
 deletion: its confirmation promises what happens to the project's tasks and
 notes, and a promise is read by a person.
 
+### How the server introduces itself
+
+Three things a client is told before it calls anything, and all three used to be
+missing or hardcoded.
+
+**`mcp/identity.ts` is the name, the title, the version, the description, the
+icon and the links, in one place.** There are two audiences for those and they
+never meet: a connected client reads them from `initialize`, and Claude Desktop
+reads the same facts out of `manifest.json` inside the `.mcpb` bundle *before the
+server has ever run*. Written twice, the bundle ships last month's description
+and nothing fails, so `mcp/manifest.ts` generates the manifest from that module
+rather than keeping a copy — and lists the tools by running the real
+registration, so it cannot fall behind `tools.ts` either. The version comes from
+`package.json` for the same reason: the repo is the app, so there is no second
+version to bump.
+
+The icon is a `data:` URI built from `public/icon.svg` at start-up, which is the
+only shape that fits: a server that fetched its own logo would be a server that
+fetches. It is absent rather than fatal if the file cannot be found.
+
+**Every tool carries a title as well as a name.** `write_about` is what an
+argument is passed under; "Rewrite a person's About" is what a person choosing
+from a list of forty-five reads. Both live in `TOOLS` in `mcp/tools.ts` — one
+record rather than two keyed by the same names, because a tool nobody classified
+has to be a failing test rather than a tool that quietly asks permission to read
+the roster, and that only holds while there is exactly one list to be missing
+from. An unlisted tool is registered as destructive and non-idempotent, which is
+the belt; `tests/unit/mcp.test.ts` is the braces.
+
+**A question the vault cannot answer comes back flagged.** `fail()` is `text()`
+with `isError`, and the flag is the whole of it: without it, "No person with the
+slug ana" is a successful call whose result happens to be a sentence, and a
+caller reading only the content cannot tell it from a person whose About says
+that. Everything else throws from the store layer, and the SDK turns a throw
+into the same shape.
+
+### The bundle
+
+`npm run mcp:bundle` writes `artifacts/meridian-vault.mcpb` — the format Claude
+Desktop installs by double-click, with a name, an icon and a folder picker for
+the vault. It is a zip holding a generated manifest and one esbuild-bundled
+JavaScript file.
+
+The manifest is `mcp/manifest.ts` and the packing is `scripts/build-mcpb.ts`,
+split for the same reason `server.ts` is split out of `vault-server.ts`: the
+script runs esbuild and spawns `zip` on import, so nothing in it can be tested,
+and the manifest is the half worth testing. `tests/unit/mcpb.test.ts` holds the
+checks a connector review runs — the 55-character tagline, the 2 000-character
+description, a description on every tool, an entry point the packer actually
+writes, and a privacy policy URL that resolves to a file in this repository.
+
+**Bundled rather than a pointer at this checkout**, which is the decision worth
+knowing. `.mcp.json` and `desktop/mcp-server.sh` both run the TypeScript in
+place, by absolute path, and break the day the folder moves — fine for the
+machine this was written on, useless as something to hand somebody. esbuild
+resolves the `@/` alias exactly as `scripts/tsx-alias.mjs` does at runtime, so
+what ships is the code the tests ran against.
+
+The manifest asks for one thing, the vault folder, and passes it as `VAULT_PATH`
+in the environment — which `src/lib/env.ts` reads before it reads any `.env`, so
+the bundle works with no `.env` at all. **It deliberately has no field for a
+credential**: this server never contacts a source, so a key it could not use
+would be a secret collected for nothing. `read_sources` will say so.
+
+Nothing else needs rebuilding after a change to `mcp/` — the app and Claude Code
+run the TypeScript directly, and only the bundle is a copy.
+
 `MCP-COVERAGE.md` is the map of what those tools do and do not reach: every
 capability in the app as a row, marked Open, Closed or Never. Read it before
 concluding an agent cannot do something — the answer is a row rather than a
@@ -936,7 +1013,7 @@ src/copy/        empty states and error lines, one wording per situation
 src/styles/      tokens.css and the global sheet
 src/stories/     Storybook furniture and the Rules page
 src/fixtures/    the fixture vault (committed)
-mcp/             MCP server over the vault
+mcp/             MCP server over the vault: identity · tools · wiring · transport
 scripts/         sync, CLI, doctor, fixture builder
 desktop/         the macOS bundle: a WKWebView window and its build script
 tests/unit/      unit tests, including the read-only enforcement

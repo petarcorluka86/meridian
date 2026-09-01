@@ -36,6 +36,7 @@ the pre-commit checks run for you too.
 | Pointing an agent at it? | [`MCP-COVERAGE.md`](MCP-COVERAGE.md) — every capability, and whether the MCP server reaches it |
 | Sending a change? | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | Found a hole? | [`SECURITY.md`](SECURITY.md) — do not open an issue |
+| Wondering what it collects? | [`PRIVACY.md`](PRIVACY.md) — nothing, and where the data does live |
 | Taking part? | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) |
 
 MIT licensed.

@@ -30,6 +30,15 @@ so far. A migration that fails blocks the app rather than guessing.
 
 ### Added
 
+- **An installable MCP bundle.** `npm run mcp:bundle` packs the vault MCP server
+  into `artifacts/meridian-vault.mcpb`, which Claude Desktop installs by
+  double-click — a name, an icon, and a folder picker for the vault instead of a
+  hand-edited config holding an absolute path. It carries one bundled JavaScript
+  file rather than a pointer at this checkout, so moving the folder does not
+  break it.
+- **`PRIVACY.md`**, for the audience that never opens this repository: what is
+  collected (nothing), what leaves the machine, and what the MCP server can
+  reach. The bundle's manifest points a connector review at it.
 - **The Meridian mark reloads the app.** It is a plain anchor rather than a
   client-side link, so pressing it loads the document again and lands on the
   Overview — the one control in the app that starts the page over instead of
