@@ -1,4 +1,5 @@
 import { DangerZone } from '@/components/settings/DangerZone';
+import { ReloadApp } from '@/components/settings/ReloadApp';
 import { ThemeChoice } from '@/components/settings/ThemeChoice';
 import {
   ButtonLink,
@@ -185,9 +186,21 @@ export default async function SettingsPage() {
               Read only, in both directions: every request these make is a read, and nothing is ever
               written back to them. The badge says how old each answer is and fetches a new one.
               Credentials live in <Code>{tildeHome(envPath)}</Code>, and a key changed by hand there
-              needs a restart.
+              takes effect after Reload, below.
             </Text>
           </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader title="Reload" end={<ReloadApp />} />
+          <CardBody>
+            <Text level="small" tone="muted">
+              Starts the whole app over from disk: the vault is re-read file by file,{' '}
+              <Code>{tildeHome(envPath)}</Code> is read again, and every screen rebuilds. Nothing is
+              written and nothing is fetched — the source badges above keep their age. For when a
+              hand edit, a key change or a doubt should be settled by looking again.
+            </Text>
+          </CardBody>
         </Card>
 
         <DangerZone

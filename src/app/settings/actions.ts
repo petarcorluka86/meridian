@@ -1,7 +1,7 @@
 'use server';
 
 import { configChanged } from '@/app/changed';
-import { THEMES, type Theme, loadConfig } from '@/lib/env';
+import { THEMES, type Theme, loadConfig, resetConfig } from '@/lib/env';
 import { removeEnv, writeEnv } from '@/lib/env-write';
 import { invalidateVault } from '@/lib/vault/index';
 import { emptyVault } from '@/lib/vault/reset';
@@ -20,6 +20,19 @@ export async function setThemeAction(theme: Theme): Promise<void> {
   if (!(THEMES as readonly string[]).includes(theme)) return;
 
   writeEnv(loadConfig().envPath, { MERIDIAN_THEME: theme });
+  configChanged();
+}
+
+/**
+ * The server half of the Reload button: drop every in-memory cache, so the
+ * reload the client is about to do reads everything from disk again — `.env`
+ * included, which is what makes a key changed by hand take effect without
+ * restarting the app. The window reload itself belongs to the client; a Server
+ * Action cannot reach the screen.
+ */
+export async function reloadAppAction(): Promise<void> {
+  resetConfig();
+  invalidateVault();
   configChanged();
 }
 
