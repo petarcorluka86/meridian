@@ -1,6 +1,7 @@
 import { now as clockNow } from '@/lib/clock';
 import { meetingState } from '@/lib/sources/day';
 import { getVault } from '@/lib/vault/index';
+import { hiddenOutsideProject } from '@/lib/vault/projects';
 import { loadConfig } from '@/lib/env';
 import { readBamboo } from '@/lib/sources/bamboohr';
 import { readCalendar } from '@/lib/sources/calendar';
@@ -90,12 +91,13 @@ export default async function OverviewPage() {
 
   // Every open task, including the ones with no date and the ones you are waiting
   // on somebody else for — the Tasks screen filters those out, so this is where
-  // they stay visible.
+  // they stay visible. Tasks under a project-only phase are not: they belong to
+  // their project's page, and this card and Tasks leave them out the same way.
   //
   // The card filters and sorts it in place; the due label and its tone are
   // resolved here, because the browser's clock must not be what decides them.
   const open: TaskView[] = vault.tasks
-    .filter((t) => t.status !== 'done')
+    .filter((t) => t.status !== 'done' && !hiddenOutsideProject(vault.projectsById, t))
     .map((t) => ({
       id: t.id,
       title: t.title,

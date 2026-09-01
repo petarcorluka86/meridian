@@ -79,7 +79,7 @@ export async function createProject(input: NewProject): Promise<string> {
     const phases: ProjectPhase[] = (input.phases ?? [])
       .map((label) => label.trim())
       .filter(Boolean)
-      .map((label, i) => ({ id: `p${i + 1}`, label, note: '', done: false }));
+      .map((label, i) => ({ id: `p${i + 1}`, label, note: '', done: false, projectOnly: false }));
     return [
       ...projects,
       {
@@ -154,7 +154,7 @@ export async function addPhase(id: string, label: string): Promise<void> {
     ...project,
     phases: [
       ...project.phases,
-      { id: phaseId(project.phases), label: trimmed, note: '', done: false },
+      { id: phaseId(project.phases), label: trimmed, note: '', done: false, projectOnly: false },
     ],
   }));
 }
@@ -162,7 +162,7 @@ export async function addPhase(id: string, label: string): Promise<void> {
 export async function updatePhase(
   id: string,
   phase: string,
-  input: { label: string; note: string },
+  input: { label: string; note: string; projectOnly: boolean },
 ): Promise<void> {
   const label = input.label.trim();
   if (!label) throw new Error('A phase needs a name.');
@@ -173,7 +173,9 @@ export async function updatePhase(
     return {
       ...project,
       phases: project.phases.map((p) =>
-        p.id === phase ? { ...p, label, note: input.note.trim() } : p,
+        p.id === phase
+          ? { ...p, label, note: input.note.trim(), projectOnly: input.projectOnly }
+          : p,
       ),
     };
   });
@@ -245,6 +247,22 @@ function fraction(done: number, total: number): Progress {
 
 export function progressOf(project: Pick<ProjectEntry, 'phases'>): Progress {
   return fraction(project.phases.filter((p) => p.done).length, project.phases.length);
+}
+
+/**
+ * Whether a task is filed under a project-only phase — the ones Tasks and
+ * Overview leave out, so a roadmap's planned work does not drown today's list.
+ * The project's own page never asks. A task whose phase is gone, or whose
+ * project is not in the vault, is not hidden: hiding it there would make a
+ * dangling reference invisible everywhere at once.
+ */
+export function hiddenOutsideProject(
+  projectsById: ReadonlyMap<string, ProjectEntry>,
+  task: Pick<TaskEntry, 'projectId' | 'phaseId'>,
+): boolean {
+  if (!task.projectId || !task.phaseId) return false;
+  const phase = projectsById.get(task.projectId)?.phases.find((p) => p.id === task.phaseId);
+  return phase?.projectOnly ?? false;
 }
 
 /**

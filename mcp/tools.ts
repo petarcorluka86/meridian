@@ -414,12 +414,16 @@ export function registerTools(target: Tooling): void {
 
   server.tool(
     'update_phase',
-    'Change a phase label or its note. Only the fields given move. Phase ids come from read_project.',
+    'Change a phase label, its note, or whether it is project-only (its tasks then show only on the project page). Only the fields given move. Phase ids come from read_project.',
     {
       id: z.string(),
       phase: z.string(),
       label: z.string().min(1).optional(),
       note: z.string().optional(),
+      projectOnly: z
+        .boolean()
+        .optional()
+        .describe('True keeps the phase tasks off the Tasks screen and the Overview.'),
     },
     async ({ id, phase, ...patch }) => {
       const project = getVault().projectsById.get(id);
@@ -429,6 +433,7 @@ export function registerTools(target: Tooling): void {
       await updatePhase(id, phase, {
         label: patch.label ?? existing.label,
         note: patch.note ?? existing.note,
+        projectOnly: patch.projectOnly ?? existing.projectOnly,
       });
       return text('Changed.');
     },

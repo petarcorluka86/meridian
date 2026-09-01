@@ -61,6 +61,12 @@ export const ProjectPhase = z.object({
   label: z.string().min(1),
   note: z.string().default(''),
   done: z.boolean().default(false),
+  /**
+   * Its tasks show only on the project's own page — Tasks and Overview leave
+   * them out. For phases whose work is planned rather than actionable, so a
+   * six-month roadmap does not drown today's list.
+   */
+  projectOnly: z.boolean().default(false),
 });
 export type ProjectPhase = z.infer<typeof ProjectPhase>;
 

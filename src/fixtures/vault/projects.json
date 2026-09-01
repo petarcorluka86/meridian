@@ -8,31 +8,36 @@
         "id": "p1",
         "label": "Boundaries agreed with all three teams",
         "note": "Written down in the architecture note, signed off by Ana, Ivan and Petra.",
-        "done": true
+        "done": true,
+        "projectOnly": false
       },
       {
         "id": "p2",
         "label": "Scheduler extracted and running in staging",
         "note": "Two weeks in staging with no incidents before we call it done.",
-        "done": true
+        "done": true,
+        "projectOnly": false
       },
       {
         "id": "p3",
         "label": "Payments service extracted",
         "note": "The risky one — needs a migration window and a rollback path.",
-        "done": false
+        "done": false,
+        "projectOnly": false
       },
       {
         "id": "p4",
         "label": "API gateway in front of both",
         "note": "",
-        "done": false
+        "done": false,
+        "projectOnly": false
       },
       {
         "id": "p5",
         "label": "Monolith retired",
         "note": "",
-        "done": false
+        "done": false,
+        "projectOnly": false
       }
     ],
     "links": [
@@ -58,25 +63,29 @@
         "id": "p1",
         "label": "Current load measured per person",
         "note": "Six weeks of pager data, per night.",
-        "done": true
+        "done": true,
+        "projectOnly": false
       },
       {
         "id": "p2",
         "label": "New rotation drafted",
         "note": "",
-        "done": true
+        "done": true,
+        "projectOnly": false
       },
       {
         "id": "p3",
         "label": "Handover docs rewritten",
         "note": "",
-        "done": true
+        "done": true,
+        "projectOnly": false
       },
       {
         "id": "p4",
         "label": "Autumn rotation published",
         "note": "Publish by the end of September so nobody plans around a guess.",
-        "done": false
+        "done": false,
+        "projectOnly": false
       }
     ],
     "links": [],
@@ -93,25 +102,29 @@
         "id": "p1",
         "label": "Scorecard and levels agreed with HR",
         "note": "Mid and senior, same bar as last round.",
-        "done": true
+        "done": true,
+        "projectOnly": false
       },
       {
         "id": "p2",
         "label": "Roles posted",
         "note": "",
-        "done": false
+        "done": false,
+        "projectOnly": false
       },
       {
         "id": "p3",
         "label": "First loop run and calibrated",
         "note": "",
-        "done": false
+        "done": false,
+        "projectOnly": false
       },
       {
         "id": "p4",
         "label": "Offers out",
         "note": "",
-        "done": false
+        "done": false,
+        "projectOnly": false
       }
     ],
     "links": [],
@@ -138,13 +151,15 @@
         "id": "p1",
         "label": "Teams announced",
         "note": "",
-        "done": true
+        "done": true,
+        "projectOnly": false
       },
       {
         "id": "p2",
         "label": "First month reviewed",
         "note": "",
-        "done": true
+        "done": true,
+        "projectOnly": false
       }
     ],
     "links": [],

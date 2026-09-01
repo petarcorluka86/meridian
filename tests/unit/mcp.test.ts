@@ -403,6 +403,17 @@ describe('what an agent can read', () => {
     expect(project).toMatchObject({ id: 'pay-review', phases: { total: 2, done: 1 } });
   });
 
+  it('marks a phase project-only without touching its words', async () => {
+    withProject();
+    const all = await tools();
+    await call(all.get('update_phase')!, { id: 'pay-review', phase: 'p2', projectOnly: true });
+
+    const read = JSON.parse(await call(all.get('read_project')!, { id: 'pay-review' }));
+    expect(read.phases[1].projectOnly).toBe(true);
+    // Only the field given moved.
+    expect(read.phases[1].label).toBe('Draft proposals');
+  });
+
   it('says so, rather than Done, about a phase that is not there', async () => {
     withProject();
     const all = await tools();

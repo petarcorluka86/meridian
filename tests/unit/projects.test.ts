@@ -91,8 +91,8 @@ describe('creating a project', () => {
 
     // The blank one is dropped rather than becoming a phase with no name.
     expect(read('projects.json')[0].phases).toEqual([
-      { id: 'p1', label: 'Scorecard agreed', note: '', done: false },
-      { id: 'p2', label: 'Roles posted', note: '', done: false },
+      { id: 'p1', label: 'Scorecard agreed', note: '', done: false, projectOnly: false },
+      { id: 'p2', label: 'Roles posted', note: '', done: false, projectOnly: false },
     ]);
   });
 });
@@ -132,6 +132,31 @@ describe('phases', () => {
       percent: 0,
       complete: false,
     });
+  });
+
+  it('keeps a project-only phase to its own page, and no further', async () => {
+    const { createProject, updatePhase } = await projects();
+    const id = await createProject({ title: 'P', phases: ['Planned', 'Now'] });
+    await updatePhase(id, 'p1', { label: 'Planned', note: '', projectOnly: true });
+
+    expect(
+      (await projectRow(id)).phases.map((p: { projectOnly: boolean }) => p.projectOnly),
+    ).toEqual([true, false]);
+
+    const { addTask } = await tasks();
+    await addTask({ title: 'Later', projectId: id, phaseId: 'p1' });
+    await addTask({ title: 'Soon', projectId: id, phaseId: 'p2' });
+    await addTask({ title: 'Loose', projectId: id });
+
+    const { getVault, invalidateVault } = await import('@/lib/vault/index');
+    invalidateVault();
+    const vault = getVault();
+    const { hiddenOutsideProject } = await import('@/lib/vault/projects');
+    // Only the task on the project-only phase is left out of Tasks and Overview;
+    // a loose task and a task on an ordinary phase stay everywhere.
+    expect(
+      vault.tasks.filter((t) => hiddenOutsideProject(vault.projectsById, t)).map((t) => t.title),
+    ).toEqual(['Later']);
   });
 
   it('refuses a phase with no name', async () => {

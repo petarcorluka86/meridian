@@ -141,7 +141,13 @@ write(
 
 const stamp = '2026-08-12T08:44:41.102Z';
 
-const phase = (id: string, label: string, done: boolean, note = '') => ({ id, label, note, done });
+const phase = (id: string, label: string, done: boolean, note = '') => ({
+  id,
+  label,
+  note,
+  done,
+  projectOnly: false,
+});
 
 json('projects.json', [
   {
