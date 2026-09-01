@@ -676,7 +676,7 @@ spacing value:
 | `people/People.module.css` | the roster's auto-filling grid |
 | `people/Person.module.css` | the header's contact column, three field widths |
 | `overview/Overview.module.css` | the meetings card's clock column |
-| `projects/Projects.module.css` | which part of a phase row and a card footer shrinks first |
+| `projects/Projects.module.css` | which part of a phase head and a card footer's form shrinks first |
 | `timebalance/Time.module.css` | the summary dividers, the inline edit form |
 
 The migration took CSS across the app from 3 922 lines to 2 297, and the card

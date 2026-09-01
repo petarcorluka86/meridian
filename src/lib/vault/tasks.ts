@@ -1,4 +1,5 @@
 import { today } from '@/lib/dates';
+import { getVault } from './index';
 import { TaskEntry } from './schemas';
 import { mutateJsonRows } from './write';
 
@@ -42,12 +43,31 @@ export type NewTask = {
   dueDate?: string | null;
   personSlug?: string | null;
   projectId?: string | null;
+  phaseId?: string | null;
   kind?: TaskEntry['kind'];
 };
+
+/**
+ * A phase id is only a fact together with its project — `p2` on its own names a
+ * different phase on every project, and phase ids are reused across projects.
+ * So a phase without a project, or one its project has not got, is refused
+ * before anything is written rather than stored as a reference nothing can
+ * resolve.
+ */
+function requirePhaseOnProject(projectId: string | null, phaseId: string | null): void {
+  if (!phaseId) return;
+  if (!projectId) throw new Error('A phase only means something together with its project.');
+  const project = getVault().projectsById.get(projectId);
+  if (!project) throw new Error('That project is no longer in the vault.');
+  if (!project.phases.some((p) => p.id === phaseId)) {
+    throw new Error('That phase is not on this project.');
+  }
+}
 
 export async function addTask(input: NewTask): Promise<void> {
   const title = input.title.trim();
   if (!title) throw new Error('A task needs a title.');
+  requirePhaseOnProject(input.projectId || null, input.phaseId || null);
 
   await mutate((tasks) => {
     const now = stamp();
@@ -61,6 +81,7 @@ export async function addTask(input: NewTask): Promise<void> {
       kind: input.kind ?? 'task',
       personSlug: input.personSlug || null,
       projectId: input.projectId || null,
+      phaseId: input.phaseId || null,
       completedAt: null,
       createdAt: now,
       updatedAt: now,
@@ -99,12 +120,14 @@ export type TaskPatch = {
   dueDate: string | null;
   personSlug: string | null;
   projectId: string | null;
+  phaseId: string | null;
   kind: TaskEntry['kind'];
 };
 
 export async function updateTask(id: string, patch: TaskPatch): Promise<void> {
   const title = patch.title.trim();
   if (!title) throw new Error('A task needs a title.');
+  requirePhaseOnProject(patch.projectId || null, patch.phaseId || null);
 
   await mutate((tasks) => {
     // Thrown before anything is written, so a task deleted by hand between
@@ -121,6 +144,7 @@ export async function updateTask(id: string, patch: TaskPatch): Promise<void> {
             dueDate: patch.dueDate,
             personSlug: patch.personSlug || null,
             projectId: patch.projectId || null,
+            phaseId: patch.phaseId || null,
             kind: patch.kind,
             updatedAt: stamp(),
           }

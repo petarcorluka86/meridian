@@ -42,13 +42,21 @@ export default async function TasksPage({
   const now = today();
 
   const people = vault.people.map((p) => ({ slug: p.slug, name: p.displayName }));
-  const projects = vault.projects.map((p) => ({ id: p.id, title: p.title }));
+  const projects = vault.projects.map((p) => ({
+    id: p.id,
+    title: p.title,
+    phases: p.phases.map((ph) => ({ id: ph.id, label: ph.label })),
+  }));
   const nameOf = (slug: string | null) =>
     slug ? (vault.peopleBySlug.get(slug)?.displayName ?? slug) : null;
   // Null rather than the raw id when the vault has no such project: a chip
   // showing a slug nobody recognises is worse than no chip.
   const projectTitleOf = (id: string | null) =>
     id ? (vault.projectsById.get(id)?.title ?? null) : null;
+  const phaseLabelOf = (projectId: string | null, phaseId: string | null) =>
+    projectId && phaseId
+      ? (vault.projectsById.get(projectId)?.phases.find((ph) => ph.id === phaseId)?.label ?? null)
+      : null;
 
   // "Open" means open work of your own. A task you are waiting on someone else
   // for is counted and filtered separately.
@@ -85,6 +93,8 @@ export default async function TasksPage({
       personPhoto: t.personSlug ? photoPath(t.personSlug) : null,
       projectId: t.projectId,
       projectName: projectTitleOf(t.projectId),
+      phaseId: t.phaseId,
+      phaseName: phaseLabelOf(t.projectId, t.phaseId),
       kind: t.kind,
     }));
 

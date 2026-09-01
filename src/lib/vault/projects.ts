@@ -131,7 +131,9 @@ export async function deleteProject(id: string): Promise<void> {
 
   await mutateJsonRows<TaskEntry>('tasks.json', TaskEntry, (tasks) =>
     tasks.map((task) =>
-      task.projectId === id ? { ...task, projectId: null, updatedAt: stamp() } : task,
+      task.projectId === id
+        ? { ...task, projectId: null, phaseId: null, updatedAt: stamp() }
+        : task,
     ),
   );
 
@@ -184,7 +186,22 @@ export async function setPhaseDone(id: string, phase: string, done: boolean): Pr
   }));
 }
 
+/**
+ * The phase goes, its tasks stay and lose it — the same promise deleting a
+ * project makes, one level down. Cleared rather than left dangling for the same
+ * reason too: `phaseId()` can hand the freed ordinal to a later phase, which
+ * would silently adopt these tasks. Tasks first, so a failure leaves the phase
+ * still there to try again from.
+ */
 export async function removePhase(id: string, phase: string): Promise<void> {
+  await mutateJsonRows<TaskEntry>('tasks.json', TaskEntry, (tasks) =>
+    tasks.map((task) =>
+      task.projectId === id && task.phaseId === phase
+        ? { ...task, phaseId: null, updatedAt: stamp() }
+        : task,
+    ),
+  );
+
   await patch(id, (project) => ({
     ...project,
     phases: project.phases.filter((p) => p.id !== phase),
@@ -217,13 +234,33 @@ export async function removeProjectLink(id: string, index: number): Promise<void
  */
 export type Progress = { total: number; done: number; percent: number; complete: boolean };
 
-export function progressOf(project: Pick<ProjectEntry, 'phases'>): Progress {
-  const total = project.phases.length;
-  const done = project.phases.filter((p) => p.done).length;
+function fraction(done: number, total: number): Progress {
   return {
     total,
     done,
     percent: total === 0 ? 0 : Math.round((done / total) * 100),
     complete: total > 0 && done === total,
   };
+}
+
+export function progressOf(project: Pick<ProjectEntry, 'phases'>): Progress {
+  return fraction(project.phases.filter((p) => p.done).length, project.phases.length);
+}
+
+/**
+ * Each phase's own bar: how many of the tasks filed under it are done. Counted
+ * from the tasks every time, like every other derived number — and separate from
+ * the phase's tick, which stays a judgement made by hand. A plain object rather
+ * than a Map because it crosses into client components as a prop.
+ */
+export function taskProgressByPhase(
+  project: Pick<ProjectEntry, 'id' | 'phases'>,
+  tasks: readonly TaskEntry[],
+): Record<string, Progress> {
+  const byPhase: Record<string, Progress> = {};
+  for (const phase of project.phases) {
+    const own = tasks.filter((t) => t.projectId === project.id && t.phaseId === phase.id);
+    byPhase[phase.id] = fraction(own.filter((t) => t.status === 'done').length, own.length);
+  }
+  return byPhase;
 }

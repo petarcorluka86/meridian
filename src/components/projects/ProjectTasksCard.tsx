@@ -12,21 +12,26 @@ import {
   CardFooter,
   CardHeader,
   EmptyState,
-  type TaskView,
+  type TaskProject,
   TaskRow,
+  type TaskView,
   Text,
   TextInput,
 } from '@/components/ui';
 import styles from './Projects.module.css';
 
 /**
- * The project's tasks, and a way to add one without leaving the project.
+ * The project's unfiled tasks — the ones under no phase — and a way to add one
+ * without leaving the project. A task that has a phase is not here: it sits
+ * under that phase in the Phases card, where its position says what a chip
+ * would have.
  *
  * A title and nothing else. Every other field a task has — priority, a date, who
  * it is for — is one press away in the row's own dialog, and asking for four
  * things to write down "chase the vendor" is how a thought gets lost on the way
  * to being typed. The project is the page, so that field is not asked for at
- * all: it is the one thing this form already knows.
+ * all: it is the one thing this form already knows. The phase is not asked for
+ * either — a capture starts unfiled, and filing it is the dialog's job.
  */
 export function ProjectTasksCard({
   id,
@@ -34,12 +39,15 @@ export function ProjectTasksCard({
   people,
   projects,
   openTasks,
+  totalTasks,
 }: {
   id: string;
   tasks: TaskView[];
   people: { slug: string; name: string }[];
-  projects: { id: string; title: string }[];
+  projects: TaskProject[];
   openTasks: number;
+  /** The whole project's count, phased ones included — it decides which emptiness this is. */
+  totalTasks: number;
 }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
@@ -70,7 +78,7 @@ export function ProjectTasksCard({
   return (
     <Card>
       <CardHeader
-        title="Tasks"
+        title="Uncategorized tasks"
         count={openTasks || undefined}
         end={
           <Button
@@ -96,7 +104,10 @@ export function ProjectTasksCard({
       ))}
 
       {tasks.length === 0 && !adding ? (
-        <EmptyState glyph={NAV_GLYPH.tasks} {...EMPTY.project.tasks} />
+        <EmptyState
+          glyph={NAV_GLYPH.tasks}
+          {...(totalTasks > 0 ? EMPTY.project.allFiled : EMPTY.project.tasks)}
+        />
       ) : null}
 
       {adding ? (

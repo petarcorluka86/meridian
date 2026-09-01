@@ -109,10 +109,20 @@ export default async function OverviewPage() {
       personPhoto: photoOf(t.personSlug),
       projectId: t.projectId,
       projectName: t.projectId ? (vault.projectsById.get(t.projectId)?.title ?? null) : null,
+      phaseId: t.phaseId,
+      phaseName:
+        t.projectId && t.phaseId
+          ? (vault.projectsById.get(t.projectId)?.phases.find((ph) => ph.id === t.phaseId)?.label ??
+            null)
+          : null,
       kind: t.kind,
     }));
 
-  const projects = vault.projects.map((p) => ({ id: p.id, title: p.title }));
+  const projects = vault.projects.map((p) => ({
+    id: p.id,
+    title: p.title,
+    phases: p.phases.map((ph) => ({ id: ph.id, label: ph.label })),
+  }));
 
   const inbox = bamboo.data?.inbox ?? [];
   // Every leave the cache holds; the cards pick the day. BambooHR is only asked

@@ -362,6 +362,36 @@ describe('what an agent can read', () => {
     expect(after.links).toEqual([]);
   });
 
+  it('files a task under a phase, and the phase answers with its own task fraction', async () => {
+    withProject();
+    const all = await tools();
+    await call(all.get('add_task')!, {
+      title: 'Pull the numbers',
+      projectId: 'pay-review',
+      phaseId: 'p2',
+    });
+    await call(all.get('add_task')!, { title: 'Loose end', projectId: 'pay-review' });
+
+    const read = JSON.parse(await call(all.get('read_project')!, { id: 'pay-review' }));
+    expect(read.phases[1].tasks).toEqual({ total: 1, done: 0, percent: 0, complete: false });
+    expect(read.phases[0].tasks).toMatchObject({ total: 0 });
+    expect(read.tasks.find((t: { title: string }) => t.title === 'Pull the numbers').phaseId).toBe(
+      'p2',
+    );
+
+    // Moving the task to another project drops the phase rather than carrying a
+    // reference that names a different phase there.
+    await call(all.get('create_project')!, { title: 'Elsewhere' });
+    const task = JSON.parse(await call(all.get('list_tasks')!, {})).tasks.find(
+      (t: { title: string }) => t.title === 'Pull the numbers',
+    );
+    await call(all.get('update_task')!, { id: task.id, projectId: 'elsewhere' });
+    const moved = JSON.parse(await call(all.get('list_tasks')!, {})).tasks.find(
+      (t: { id: string }) => t.id === task.id,
+    );
+    expect(moved.phaseId).toBeNull();
+  });
+
   it('archives a project and restores it, with nothing lost in between', async () => {
     withProject();
     const all = await tools();

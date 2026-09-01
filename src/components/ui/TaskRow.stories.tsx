@@ -44,6 +44,8 @@ const base: TaskView = {
   personPhoto: null,
   projectId: null,
   projectName: null,
+  phaseId: null,
+  phaseName: null,
   kind: 'task',
 };
 

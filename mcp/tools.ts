@@ -43,6 +43,7 @@ import {
   removeProjectLink,
   setPhaseDone,
   setProjectArchived,
+  taskProgressByPhase,
   updatePhase,
   updateProject,
 } from '../src/lib/vault/projects.js';
@@ -219,6 +220,7 @@ export function registerTools(target: Tooling): void {
     completedAt: t.completedAt,
     personSlug: t.personSlug,
     projectId: t.projectId,
+    phaseId: t.phaseId,
   });
 
   const noteView = (n: Note) => ({
@@ -331,6 +333,10 @@ export function registerTools(target: Tooling): void {
       const project = vault.projectsById.get(id);
       if (!project) return text(`No project with the id ${id}.`);
       const now = today();
+      const own = vault.tasks.filter((t) => t.projectId === id);
+      // Per phase, its own task fraction — the bar the phase row draws in the
+      // app. Separate from `done`, which stays a tick made by hand.
+      const byPhase = taskProgressByPhase(project, own);
       return text({
         id: project.id,
         title: project.title,
@@ -339,9 +345,9 @@ export function registerTools(target: Tooling): void {
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
         progress: progressOf(project),
-        phases: project.phases,
+        phases: project.phases.map((p) => ({ ...p, tasks: byPhase[p.id] })),
         links: project.links,
-        tasks: vault.tasks.filter((t) => t.projectId === id).map((t) => taskView(t, now)),
+        tasks: own.map((t) => taskView(t, now)),
         notes: (vault.notesByProject.get(id) ?? []).map(noteView),
       });
     },
@@ -838,6 +844,11 @@ export function registerTools(target: Tooling): void {
       dueDate: IsoDate.nullable().optional(),
       personSlug: z.string().nullable().optional(),
       projectId: z.string().nullable().optional(),
+      phaseId: z
+        .string()
+        .nullable()
+        .optional()
+        .describe('A phase id on that same project, from read_project. Needs projectId.'),
       kind: z
         .enum(['task', 'waiting'])
         .optional()
@@ -850,6 +861,7 @@ export function registerTools(target: Tooling): void {
         dueDate: input.dueDate ?? null,
         personSlug: input.personSlug ?? null,
         projectId: input.projectId ?? null,
+        phaseId: input.phaseId ?? null,
         kind: input.kind ?? 'task',
       });
       return text('Added.');
@@ -876,6 +888,13 @@ export function registerTools(target: Tooling): void {
       dueDate: IsoDate.nullable().optional().describe('Null clears the due date.'),
       personSlug: z.string().nullable().optional().describe('Null unassigns it.'),
       projectId: z.string().nullable().optional().describe('Null takes it off its project.'),
+      phaseId: z
+        .string()
+        .nullable()
+        .optional()
+        .describe(
+          'A phase id on the task project, from read_project. Null takes it off its phase.',
+        ),
       kind: z.enum(['task', 'waiting']).optional(),
     },
     async ({ id, ...patch }) => {
@@ -884,12 +903,21 @@ export function registerTools(target: Tooling): void {
       // read back here rather than left for the store to guess.
       const task = getVault().tasksById.get(id);
       if (!task) return text(`No task with the id ${id}.`);
+      const projectId = patch.projectId === undefined ? task.projectId : patch.projectId;
       await updateTask(id, {
         title: patch.title ?? task.title,
         priority: patch.priority ?? task.priority,
         dueDate: patch.dueDate === undefined ? task.dueDate : patch.dueDate,
         personSlug: patch.personSlug === undefined ? task.personSlug : patch.personSlug,
-        projectId: patch.projectId === undefined ? task.projectId : patch.projectId,
+        projectId,
+        // A phase read back across a project change would name a phase on the
+        // old project, so moving projects drops it unless a new one is given.
+        phaseId:
+          patch.phaseId === undefined
+            ? projectId === task.projectId
+              ? task.phaseId
+              : null
+            : patch.phaseId,
         kind: patch.kind ?? task.kind,
       });
       return text('Changed.');

@@ -82,7 +82,11 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
   // The roster, for the edit dialog's Who field: a task on this page can be
   // moved to somebody else, which is the whole reason the field is there.
   const people = vault.people.map((p) => ({ slug: p.slug, name: p.displayName }));
-  const projects = vault.projects.map((p) => ({ id: p.id, title: p.title }));
+  const projects = vault.projects.map((p) => ({
+    id: p.id,
+    title: p.title,
+    phases: p.phases.map((ph) => ({ id: ph.id, label: ph.label })),
+  }));
 
   const personTasks: TaskView[] = vault.tasks
     .filter((t) => t.personSlug === slug)
@@ -100,6 +104,12 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
       personPhoto: null,
       projectId: t.projectId,
       projectName: t.projectId ? (vault.projectsById.get(t.projectId)?.title ?? null) : null,
+      phaseId: t.phaseId,
+      phaseName:
+        t.projectId && t.phaseId
+          ? (vault.projectsById.get(t.projectId)?.phases.find((ph) => ph.id === t.phaseId)?.label ??
+            null)
+          : null,
       kind: t.kind,
     }));
 

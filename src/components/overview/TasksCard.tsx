@@ -13,6 +13,7 @@ import {
   EmptyState,
   GoIcon,
   Row,
+  type TaskProject,
   TaskRow,
   type TaskView,
   Text,
@@ -46,7 +47,7 @@ export function TasksCard({
 }: {
   open: TaskView[];
   people: readonly { slug: string; name: string }[];
-  projects: readonly { id: string; title: string }[];
+  projects: readonly TaskProject[];
 }) {
   const [prio, setPrio] = useState<Prio>('all');
 

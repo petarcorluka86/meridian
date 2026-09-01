@@ -143,6 +143,70 @@ describe('phases', () => {
   });
 });
 
+describe('tasks on a phase', () => {
+  it('refuses a phase without a project, and a phase the project has not got', async () => {
+    const { createProject } = await projects();
+    const id = await createProject({ title: 'P', phases: ['One'] });
+
+    const { addTask } = await tasks();
+    await expect(addTask({ title: 'Orphan', phaseId: 'p1' })).rejects.toThrow(/its project/);
+    await expect(addTask({ title: 'Wrong', projectId: id, phaseId: 'p9' })).rejects.toThrow(
+      /not on this project/,
+    );
+    expect(read('tasks.json')).toEqual([]);
+  });
+
+  it('counts each phase from its own tasks, and never writes the fraction down', async () => {
+    const { createProject } = await projects();
+    const id = await createProject({ title: 'P', phases: ['One', 'Two'] });
+
+    const { addTask, setTaskStatus } = await tasks();
+    await addTask({ title: 'A', projectId: id, phaseId: 'p1' });
+    await addTask({ title: 'B', projectId: id, phaseId: 'p1' });
+    await addTask({ title: 'Loose', projectId: id });
+    await setTaskStatus(
+      read('tasks.json').find((t: { title: string }) => t.title === 'A').id,
+      true,
+    );
+
+    const { taskProgressByPhase } = await projects();
+    const byPhase = taskProgressByPhase(await projectRow(id), read('tasks.json'));
+    expect(byPhase.p1).toEqual({ total: 2, done: 1, percent: 50, complete: false });
+    // A phase with no tasks is 0 of 0, not missing — the card asks it directly.
+    expect(byPhase.p2).toEqual({ total: 0, done: 0, percent: 0, complete: false });
+  });
+
+  it('removing a phase takes it off its tasks, so a reused ordinal cannot adopt them', async () => {
+    const { createProject } = await projects();
+    const id = await createProject({ title: 'P', phases: ['One'] });
+
+    const { addTask } = await tasks();
+    await addTask({ title: 'Filed', projectId: id, phaseId: 'p1' });
+
+    const { removePhase } = await projects();
+    await removePhase(id, 'p1');
+
+    const [task] = read('tasks.json');
+    expect(task.phaseId).toBeNull();
+    // The task keeps its project — only the phase is gone.
+    expect(task.projectId).toBe(id);
+  });
+
+  it('deleting the project takes the phase off its tasks along with the project', async () => {
+    const { createProject } = await projects();
+    const id = await createProject({ title: 'P', phases: ['One'] });
+
+    const { addTask } = await tasks();
+    await addTask({ title: 'Filed', projectId: id, phaseId: 'p1' });
+
+    await (await projects()).deleteProject(id);
+
+    const [task] = read('tasks.json');
+    expect(task.projectId).toBeNull();
+    expect(task.phaseId).toBeNull();
+  });
+});
+
 describe('links', () => {
   it('refuses anything that is not http(s)', async () => {
     const { createProject, addProjectLink } = await projects();

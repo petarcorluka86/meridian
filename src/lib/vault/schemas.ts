@@ -53,7 +53,8 @@ export type PlanEntry = z.infer<typeof PlanEntry>;
 /**
  * A checkpoint the project has to pass. Not a task: a phase is how you know
  * where the project stands, and it is ticked off by hand rather than by
- * finishing anything in particular.
+ * finishing anything in particular. Tasks can be filed under a phase — that
+ * gives the phase a task count of its own, never the tick.
  */
 export const ProjectPhase = z.object({
   id: z.string().min(1),
@@ -101,6 +102,8 @@ export const TaskEntry = z.object({
   personSlug: Slug.nullable().default(null),
   /** A task belongs to a project the same way it belongs to a person: both, or neither. */
   projectId: Slug.nullable().default(null),
+  /** A phase id on the task's own project. Meaningless without `projectId`, and the store refuses the pair apart. */
+  phaseId: z.string().min(1).nullable().default(null),
   completedAt: z.string().nullable().default(null),
   createdAt: z.string(),
   updatedAt: z.string(),

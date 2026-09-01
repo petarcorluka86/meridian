@@ -18,6 +18,8 @@ export async function captureTaskAction(input: {
   dueDate: string | null;
   personSlug: string | null;
   projectId: string | null;
+  /** Only meaningful with projectId — the phase card's own add form sets it. */
+  phaseId?: string | null;
 }): Promise<CaptureResult> {
   try {
     await addTask(input);

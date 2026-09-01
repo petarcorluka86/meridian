@@ -15,6 +15,7 @@ import {
   Chip,
   EmptyState,
   Select,
+  type TaskProject,
   TaskRow,
   type TaskView,
   TextInput,
@@ -39,7 +40,7 @@ export function PersonTasks({
   firstName: string;
   tasks: TaskView[];
   people: readonly { slug: string; name: string }[];
-  projects: readonly { id: string; title: string }[];
+  projects: readonly TaskProject[];
 }) {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>('open');
