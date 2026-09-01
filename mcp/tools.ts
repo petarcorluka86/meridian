@@ -34,7 +34,18 @@ import {
   setNoteMeta,
 } from '../src/lib/vault/notes.js';
 import { addLink, addPlan, removeLink, removePlan, saveAbout } from '../src/lib/vault/people.js';
-import { progressOf } from '../src/lib/vault/projects.js';
+import {
+  addPhase,
+  addProjectLink,
+  createProject,
+  progressOf,
+  removePhase,
+  removeProjectLink,
+  setPhaseDone,
+  setProjectArchived,
+  updatePhase,
+  updateProject,
+} from '../src/lib/vault/projects.js';
 import {
   changedFiles,
   commitAll,
@@ -129,6 +140,9 @@ const ANNOTATIONS: Record<string, ToolAnnotations> = {
   log_hours: ADDS,
   add_link: ADDS,
   plan_rise: ADDS,
+  create_project: ADDS,
+  add_phase: ADDS,
+  add_project_link: ADDS,
   // Not idempotent: a second commit with nothing left to save refuses.
   commit: ADDS,
 
@@ -137,12 +151,18 @@ const ANNOTATIONS: Record<string, ToolAnnotations> = {
   move_note: CHANGES,
   update_hours: CHANGES,
   write_about: CHANGES,
+  update_project: CHANGES,
+  archive_project: CHANGES,
+  update_phase: CHANGES,
+  complete_phase: CHANGES,
 
   delete_task: REMOVES,
   delete_note: REMOVES,
   delete_hours: REMOVES,
   remove_link: REMOVES,
   remove_plan: REMOVES,
+  remove_phase: REMOVES,
+  remove_project_link: REMOVES,
 };
 
 /** Every tool's classification, for the test that keeps the list complete. */
@@ -269,11 +289,11 @@ export function registerTools(target: Tooling): void {
   );
 
   /*
-   * Read-only on purpose. An agent needs to *name* a project to file a task or a
-   * note against it, which is what this gives it. Creating one, phasing it out
-   * and archiving it are decisions about how the work is shaped, and those belong
-   * to the person doing the work — `npm run vault -- projects` lists them in a
-   * terminal, and the screen is where they are changed.
+   * The reads give an agent the id a task or note points at. Since 2026-09-01 the
+   * shaping calls are here too — creating, phasing, linking, archiving — the
+   * owner reversed the earlier decision (MCP-COVERAGE.md, Projects — write).
+   * Deleting is the one that stays at the screen: its confirmation promises what
+   * happens to the project's tasks and notes, and a promise is read by a person.
    */
   server.tool(
     'list_projects',
@@ -324,6 +344,138 @@ export function registerTools(target: Tooling): void {
         tasks: vault.tasks.filter((t) => t.projectId === id).map((t) => taskView(t, now)),
         notes: (vault.notesByProject.get(id) ?? []).map(noteView),
       });
+    },
+  );
+
+  server.tool(
+    'create_project',
+    'Create a project, optionally with its phases in the order given. Answers with the id a task or note points at.',
+    {
+      title: z.string().min(1),
+      description: z.string().optional(),
+      phases: z.array(z.string().min(1)).optional().describe('Phase labels, in order.'),
+    },
+    async (input) => {
+      const id = await createProject({
+        title: input.title,
+        description: input.description,
+        phases: input.phases,
+      });
+      return text(`Created ${id}.`);
+    },
+  );
+
+  server.tool(
+    'update_project',
+    'Change a project title or description. Only the fields given move.',
+    {
+      id: z.string(),
+      title: z.string().min(1).optional(),
+      description: z.string().optional(),
+    },
+    async ({ id, ...patch }) => {
+      // updateProject takes both fields, on purpose: the dialog it was written
+      // for always has both. A tool may send one, so the other is read back here.
+      const project = getVault().projectsById.get(id);
+      if (!project) return text(`No project with the id ${id}.`);
+      await updateProject(id, {
+        title: patch.title ?? project.title,
+        description: patch.description ?? project.description,
+      });
+      return text('Changed.');
+    },
+  );
+
+  server.tool(
+    'archive_project',
+    'Archive a project, or restore it. A flag, not a deletion — its tasks and notes stay where they are.',
+    { id: z.string(), archived: z.boolean().default(true) },
+    async ({ id, archived }) => {
+      await setProjectArchived(id, archived);
+      return text(archived ? 'Archived.' : 'Restored.');
+    },
+  );
+
+  server.tool(
+    'add_phase',
+    'Add a phase to the end of a project. Phase ids come back from read_project.',
+    { id: z.string(), label: z.string().min(1) },
+    async ({ id, label }) => {
+      await addPhase(id, label);
+      return text('Added.');
+    },
+  );
+
+  server.tool(
+    'update_phase',
+    'Change a phase label or its note. Only the fields given move. Phase ids come from read_project.',
+    {
+      id: z.string(),
+      phase: z.string(),
+      label: z.string().min(1).optional(),
+      note: z.string().optional(),
+    },
+    async ({ id, phase, ...patch }) => {
+      const project = getVault().projectsById.get(id);
+      if (!project) return text(`No project with the id ${id}.`);
+      const existing = project.phases.find((p) => p.id === phase);
+      if (!existing) return text(`No phase ${phase} on ${id}.`);
+      await updatePhase(id, phase, {
+        label: patch.label ?? existing.label,
+        note: patch.note ?? existing.note,
+      });
+      return text('Changed.');
+    },
+  );
+
+  server.tool(
+    'complete_phase',
+    'Tick a phase off, or untick it. Progress is never written down, so this is the number moving.',
+    { id: z.string(), phase: z.string(), done: z.boolean().default(true) },
+    async ({ id, phase, done }) => {
+      const project = getVault().projectsById.get(id);
+      if (!project) return text(`No project with the id ${id}.`);
+      // setPhaseDone maps over the phases and a miss changes nothing, so the
+      // answer would say Done about a phase that is not there.
+      if (!project.phases.some((p) => p.id === phase)) {
+        return text(`No phase ${phase} on ${id}.`);
+      }
+      await setPhaseDone(id, phase, done);
+      return text(done ? 'Done.' : 'Reopened.');
+    },
+  );
+
+  server.tool(
+    'remove_phase',
+    'Remove a phase from a project. The remaining phases keep their ids.',
+    { id: z.string(), phase: z.string() },
+    async ({ id, phase }) => {
+      await removePhase(id, phase);
+      return text('Removed.');
+    },
+  );
+
+  server.tool(
+    'add_project_link',
+    'Add a labelled link to a project. http(s) only — the same rule as links on a person.',
+    {
+      id: z.string(),
+      url: z.string(),
+      label: z.string().optional().describe('The site name if left out.'),
+    },
+    async ({ id, url, label }) => {
+      await addProjectLink(id, label ?? '', url);
+      return text('Added.');
+    },
+  );
+
+  server.tool(
+    'remove_project_link',
+    'Remove a project link by its position in read_project, counting from zero.',
+    { id: z.string(), index: z.number().int().min(0) },
+    async ({ id, index }) => {
+      await removeProjectLink(id, index);
+      return text('Removed.');
     },
   );
 
