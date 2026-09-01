@@ -600,7 +600,7 @@ describe('what an agent can see without going anywhere', () => {
       },
     });
     const all = await tools();
-    await call(all.get('plan_rise')!, { slug: 'ana-horvat', amount: 4800, month: 12, year: 2026 });
+    await call(all.get('plan_rise')!, { slug: 'ana-horvat', amount: 400, month: 12, year: 2026 });
 
     const pay = JSON.parse(
       await call(all.get('read_compensation')!, { slug: 'ana-horvat', asOf: '2026-08-24' }),

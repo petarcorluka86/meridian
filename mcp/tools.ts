@@ -894,7 +894,7 @@ export function registerTools(target: Tooling): void {
 
   server.tool(
     'plan_rise',
-    'Record a planned pay rise or promotion. Never written to BambooHR.',
+    'Record a planned pay rise or promotion. The amount is the monthly rise, not the new rate. Never written to BambooHR.',
     {
       slug: z.string(),
       amount: z.number().positive(),

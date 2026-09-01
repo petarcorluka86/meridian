@@ -208,7 +208,7 @@ export default async function PersonPage({ params }: { params: Promise<{ slug: s
                 plans={plans.map((p) => ({
                   id: p.id,
                   when: `${MONTHS[p.month - 1]} ${p.year}`,
-                  amount: formatEur(p.amount),
+                  amount: `+${formatEur(p.amount)}`,
                   promotion: p.promotion,
                 }))}
               />

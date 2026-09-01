@@ -104,8 +104,8 @@ export function PlansCard({
           <TextInput
             value={amount}
             onChange={setAmount}
-            placeholder="€"
-            ariaLabel="Planned amount"
+            placeholder="+€"
+            ariaLabel="Planned rise amount"
           />
         </span>
         <Select

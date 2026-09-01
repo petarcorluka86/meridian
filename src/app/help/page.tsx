@@ -188,6 +188,7 @@ function Guide() {
         'Meetings, Working from home and Out each step through the days the calendar cache reaches — back a couple, forward three weeks.',
         'Your hours — your overtime balance.',
         'Unsaved changes — edits not yet committed to the vault.',
+        'Pressing the Meridian mark at the top of the sidebar comes back here and reloads the app from scratch — the one thing in the app that starts the page over rather than moving inside it.',
       ],
     ],
     [
