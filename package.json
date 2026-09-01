@@ -39,7 +39,8 @@
     "bamboo:comp": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-comp.ts",
     "bamboo:inbox": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-inbox.ts",
     "bamboo:sync": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-sync.ts",
-    "bamboo:whoami": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-whoami.ts"
+    "bamboo:whoami": "tsx --import ./scripts/tsx-alias.mjs scripts/bamboo-whoami.ts",
+    "mcp:bundle": "tsx --import ./scripts/tsx-alias.mjs scripts/build-mcpb.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
@@ -64,6 +65,7 @@
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "esbuild": "^0.28.2",
     "storybook": "^10.5.10",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.2",

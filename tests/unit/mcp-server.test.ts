@@ -107,7 +107,35 @@ describe('the server an agent actually talks to', () => {
     for (const tool of tools) {
       expect(tool.description, tool.name).toBeTruthy();
       expect(tool.inputSchema, tool.name).toBeTruthy();
+      // The name is what an argument is passed under; the title is what a
+      // person picking through a list of forty-five of them reads.
+      expect(tool.title, tool.name).toBeTruthy();
     }
+  });
+
+  it('says who it is, so a client has something to show besides the name', async () => {
+    const client = await connected();
+    const info = client.getServerVersion();
+    const { DESCRIPTION, NAME, TITLE, VERSION, WEBSITE } = await import('../../mcp/identity');
+
+    // Written once in identity.ts because the .mcpb manifest says the same four
+    // things to an installer that never runs this code.
+    expect(info).toMatchObject({
+      name: NAME,
+      title: TITLE,
+      version: VERSION,
+      description: DESCRIPTION,
+      websiteUrl: WEBSITE,
+    });
+    // A data URI rather than a URL: a server that fetched its own icon would be
+    // a server that fetches.
+    expect(info?.icons?.[0]?.src).toMatch(/^data:image\/svg\+xml;base64,/);
+  });
+
+  it('carries the version the repo is on, rather than one written out twice', async () => {
+    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    const { VERSION } = await import('../../mcp/identity');
+    expect(VERSION).toBe(pkg.version);
   });
 
   it('carries the annotations to the client, which is where they are used', async () => {
@@ -150,6 +178,17 @@ describe('the server an agent actually talks to', () => {
     const text = (result.content as { type: string; text: string }[]).map((c) => c.text).join('\n');
 
     expect(text).toContain('Ana Horvat');
+  });
+
+  it('flags a question the vault cannot answer, rather than answering it', async () => {
+    const client = await connected();
+    const result = await client.callTool({ name: 'read_person', arguments: { slug: 'nobody' } });
+
+    // Without the flag this is a successful call whose result is a sentence,
+    // which reads exactly like a person whose About says "No person with the
+    // slug nobody."
+    expect(result.isError).toBe(true);
+    expect((result.content as { text: string }[])[0]?.text).toContain('No person');
   });
 
   it('refuses an argument the schema does not accept', async () => {

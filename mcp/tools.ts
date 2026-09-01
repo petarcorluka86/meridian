@@ -80,7 +80,11 @@ import { coversDay, meetingState } from '../src/lib/sources/day.js';
 import { readEgress } from '../src/lib/sources/egress.js';
 import { buildTimeline, lastRiseLabel, nextRiseLabel, rateAt, ymOfIso } from '../src/lib/comp.js';
 
-export type ToolResult = { content: { type: 'text'; text: string }[] };
+export type ToolResult = {
+  content: { type: 'text'; text: string }[];
+  /** The call did not do what it was asked. Absent means it did. */
+  isError?: boolean;
+};
 
 /**
  * What a client needs in order to decide what it may run without asking. A tool
@@ -118,69 +122,90 @@ const REMOVES: ToolAnnotations = {
 };
 
 /**
- * Which tool is which, in one list rather than beside each registration.
- *
- * A client reads these to decide what it can run on its own, so the difference
- * between `read_day` and `delete_task` has to be legible in a single pass — and
- * a new tool that nobody classified has to be a failing test rather than a tool
- * that quietly asks permission for reading the roster. `tests/unit/mcp.test.ts`
- * fails if a registered tool is missing from here.
+ * What a tool nobody classified is treated as. The worst case on purpose, so
+ * the cost of forgetting is a permission prompt rather than an unattended
+ * deletion — and `tests/unit/mcp.test.ts` fails on it as well, so this is the
+ * belt rather than the answer.
  */
-const ANNOTATIONS: Record<string, ToolAnnotations> = {
-  list_people: READS,
-  read_person: READS,
-  list_projects: READS,
-  read_project: READS,
-  list_tasks: READS,
-  list_notes: READS,
-  read_note: READS,
-  read_hours: READS,
-  read_day: READS,
-  read_compensation: READS,
-  read_sources: READS,
-  read_egress: READS,
-  search: READS,
-  vault_diff: READS,
-  vault_problems: READS,
-  vault_health: READS,
-  vault_status: READS,
-  vault_tree: READS,
-  read_file: READS,
-
-  add_task: ADDS,
-  write_note: ADDS,
-  log_hours: ADDS,
-  add_link: ADDS,
-  plan_rise: ADDS,
-  create_project: ADDS,
-  add_phase: ADDS,
-  add_project_link: ADDS,
-  // Not idempotent: a second commit with nothing left to save refuses.
-  commit: ADDS,
-
-  complete_task: CHANGES,
-  update_task: CHANGES,
-  move_note: CHANGES,
-  update_hours: CHANGES,
-  write_about: CHANGES,
-  update_person: CHANGES,
-  update_project: CHANGES,
-  archive_project: CHANGES,
-  update_phase: CHANGES,
-  complete_phase: CHANGES,
-
-  delete_task: REMOVES,
-  delete_note: REMOVES,
-  delete_hours: REMOVES,
-  remove_link: REMOVES,
-  remove_plan: REMOVES,
-  remove_phase: REMOVES,
-  remove_project_link: REMOVES,
+const UNCLASSIFIED: ToolAnnotations = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: false,
 };
 
-/** Every tool's classification, for the test that keeps the list complete. */
-export function annotationsOf(name: string): ToolAnnotations | undefined {
-  return ANNOTATIONS[name];
+/**
+ * Which tool is which, in one list rather than beside each registration.
+ *
+ * Two facts per tool and both are read by something other than the handler. The
+ * title is what a person sees in a client's list of what this server can do —
+ * `write_about` is the name an argument is passed under, not a thing to show
+ * somebody. The hints are what a client reads to decide what it may run without
+ * asking, so the difference between `read_day` and `delete_task` has to be
+ * legible in a single pass.
+ *
+ * One record rather than two keyed by the same names: a tool nobody classified
+ * has to be a failing test rather than a tool that quietly asks permission to
+ * read the roster, and that is only true while there is exactly one list to be
+ * missing from. `tests/unit/mcp.test.ts` fails on a registered tool that is not
+ * here.
+ */
+type ToolFacts = { title: string; hints: ToolAnnotations };
+
+const TOOLS: Record<string, ToolFacts> = {
+  list_people: { title: 'List people', hints: READS },
+  read_person: { title: 'Read a person', hints: READS },
+  list_projects: { title: 'List projects', hints: READS },
+  read_project: { title: 'Read a project', hints: READS },
+  list_tasks: { title: 'List tasks', hints: READS },
+  list_notes: { title: 'List notes', hints: READS },
+  read_note: { title: 'Read a note', hints: READS },
+  read_hours: { title: 'Read the time balance', hints: READS },
+  read_day: { title: 'Read a day', hints: READS },
+  read_compensation: { title: "Read a person's pay", hints: READS },
+  read_sources: { title: 'Check the sources', hints: READS },
+  read_egress: { title: 'Read the outbound log', hints: READS },
+  search: { title: 'Search the vault', hints: READS },
+  vault_diff: { title: 'Show unsaved changes', hints: READS },
+  vault_problems: { title: 'List vault problems', hints: READS },
+  vault_health: { title: 'Check vault health', hints: READS },
+  vault_status: { title: 'Read git status', hints: READS },
+  vault_tree: { title: 'Browse the vault', hints: READS },
+  read_file: { title: 'Read a vault file', hints: READS },
+
+  add_task: { title: 'Add a task', hints: ADDS },
+  write_note: { title: 'Write a note', hints: ADDS },
+  log_hours: { title: 'Log hours', hints: ADDS },
+  add_link: { title: "Add a person's link", hints: ADDS },
+  plan_rise: { title: 'Plan a rise', hints: ADDS },
+  create_project: { title: 'Create a project', hints: ADDS },
+  add_phase: { title: 'Add a phase', hints: ADDS },
+  add_project_link: { title: "Add a project's link", hints: ADDS },
+  // Not idempotent: a second commit with nothing left to save refuses.
+  commit: { title: 'Save the vault', hints: ADDS },
+
+  complete_task: { title: 'Complete a task', hints: CHANGES },
+  update_task: { title: 'Update a task', hints: CHANGES },
+  move_note: { title: 'Move a note', hints: CHANGES },
+  update_hours: { title: 'Update a time entry', hints: CHANGES },
+  write_about: { title: "Rewrite a person's About", hints: CHANGES },
+  update_person: { title: 'Update a person', hints: CHANGES },
+  update_project: { title: 'Update a project', hints: CHANGES },
+  archive_project: { title: 'Archive or restore a project', hints: CHANGES },
+  update_phase: { title: 'Update a phase', hints: CHANGES },
+  complete_phase: { title: 'Complete a phase', hints: CHANGES },
+
+  delete_task: { title: 'Delete a task', hints: REMOVES },
+  delete_note: { title: 'Delete a note', hints: REMOVES },
+  delete_hours: { title: 'Delete a time entry', hints: REMOVES },
+  remove_link: { title: "Remove a person's link", hints: REMOVES },
+  remove_plan: { title: 'Remove a planned rise', hints: REMOVES },
+  remove_phase: { title: 'Remove a phase', hints: REMOVES },
+  remove_project_link: { title: "Remove a project's link", hints: REMOVES },
+};
+
+/** What a tool calls itself and what it may do, for the test that keeps the list complete. */
+export function factsOf(name: string): ToolFacts | undefined {
+  return TOOLS[name];
 }
 
 /**
@@ -194,19 +219,31 @@ export type Tooling = {
     description: string,
     schema: T,
     handler: (input: z.infer<z.ZodObject<T>>) => Promise<ToolResult>,
-    annotations?: ToolAnnotations,
+    facts: { title: string; annotations: ToolAnnotations },
   ): void;
 };
 
 export function registerTools(target: Tooling): void {
   // Every registration below goes through this, so no call site has to remember
-  // to annotate itself and none of them can disagree with the list above.
-  const server: Tooling = {
-    tool: (name, description, schema, handler) =>
-      target.tool(name, description, schema, handler, ANNOTATIONS[name]),
+  // to name or annotate itself and none of them can disagree with the list
+  // above. A tool missing from that list arrives with no title and no hints,
+  // which is what the test looks for.
+  const server = {
+    tool: <T extends z.ZodRawShape>(
+      name: string,
+      description: string,
+      schema: T,
+      handler: (input: z.infer<z.ZodObject<T>>) => Promise<ToolResult>,
+    ) => {
+      const facts = TOOLS[name];
+      target.tool(name, description, schema, handler, {
+        title: facts?.title ?? name,
+        annotations: facts?.hints ?? UNCLASSIFIED,
+      });
+    },
   };
 
-  const text = (value: unknown) => ({
+  const text = (value: unknown): ToolResult => ({
     content: [
       {
         type: 'text' as const,
@@ -214,6 +251,18 @@ export function registerTools(target: Tooling): void {
       },
     ],
   });
+
+  /*
+   * The answer to a question the vault cannot answer — an id that names nothing,
+   * a git operation on a folder that is not a repository.
+   *
+   * It is `text()` with a flag, and the flag is the whole point: without it "No
+   * person with the slug ana" is a successful call whose result happens to be a
+   * sentence, and a caller reading only the content cannot tell it from a
+   * person whose About says that. The store layer throws for everything else,
+   * and the SDK turns a throw into this same shape.
+   */
+  const fail = (message: string): ToolResult => ({ ...text(message), isError: true });
 
   /*
    * One shape for a task and one for a note, wherever either is listed. A tool
@@ -288,7 +337,7 @@ export function registerTools(target: Tooling): void {
     async ({ slug }) => {
       const vault = getVault();
       const person = vault.peopleBySlug.get(slug);
-      if (!person) return text(`No person with the slug ${slug}.`);
+      if (!person) return fail(`No person with the slug ${slug}.`);
       return text({
         person,
         // A local path under .cache/photos, or null — the client may not be able
@@ -346,7 +395,7 @@ export function registerTools(target: Tooling): void {
     async ({ id }) => {
       const vault = getVault();
       const project = vault.projectsById.get(id);
-      if (!project) return text(`No project with the id ${id}.`);
+      if (!project) return fail(`No project with the id ${id}.`);
       const now = today();
       const own = vault.tasks.filter((t) => t.projectId === id);
       // Per phase, its own task fraction — the bar the phase row draws in the
@@ -398,7 +447,7 @@ export function registerTools(target: Tooling): void {
       // updateProject takes both fields, on purpose: the dialog it was written
       // for always has both. A tool may send one, so the other is read back here.
       const project = getVault().projectsById.get(id);
-      if (!project) return text(`No project with the id ${id}.`);
+      if (!project) return fail(`No project with the id ${id}.`);
       await updateProject(id, {
         title: patch.title ?? project.title,
         description: patch.description ?? project.description,
@@ -442,9 +491,9 @@ export function registerTools(target: Tooling): void {
     },
     async ({ id, phase, ...patch }) => {
       const project = getVault().projectsById.get(id);
-      if (!project) return text(`No project with the id ${id}.`);
+      if (!project) return fail(`No project with the id ${id}.`);
       const existing = project.phases.find((p) => p.id === phase);
-      if (!existing) return text(`No phase ${phase} on ${id}.`);
+      if (!existing) return fail(`No phase ${phase} on ${id}.`);
       await updatePhase(id, phase, {
         label: patch.label ?? existing.label,
         note: patch.note ?? existing.note,
@@ -460,11 +509,11 @@ export function registerTools(target: Tooling): void {
     { id: z.string(), phase: z.string(), done: z.boolean().default(true) },
     async ({ id, phase, done }) => {
       const project = getVault().projectsById.get(id);
-      if (!project) return text(`No project with the id ${id}.`);
+      if (!project) return fail(`No project with the id ${id}.`);
       // setPhaseDone maps over the phases and a miss changes nothing, so the
       // answer would say Done about a phase that is not there.
       if (!project.phases.some((p) => p.id === phase)) {
-        return text(`No phase ${phase} on ${id}.`);
+        return fail(`No phase ${phase} on ${id}.`);
       }
       await setPhaseDone(id, phase, done);
       return text(done ? 'Done.' : 'Reopened.');
@@ -717,7 +766,7 @@ export function registerTools(target: Tooling): void {
     { slug: z.string(), asOf: IsoDate.optional().describe('Today if left out.') },
     async ({ slug, asOf }) => {
       const vault = getVault();
-      if (!vault.peopleBySlug.has(slug)) return text(`No person with the slug ${slug}.`);
+      if (!vault.peopleBySlug.has(slug)) return fail(`No person with the slug ${slug}.`);
       const bamboo = readBamboo();
       const comp = bamboo.data?.compensation[slug];
       const plans = vault.plans.get(slug) ?? [];
@@ -925,7 +974,7 @@ export function registerTools(target: Tooling): void {
       // always has one. A tool has a few named fields instead, so the rest are
       // read back here rather than left for the store to guess.
       const task = getVault().tasksById.get(id);
-      if (!task) return text(`No task with the id ${id}.`);
+      if (!task) return fail(`No task with the id ${id}.`);
       const projectId = patch.projectId === undefined ? task.projectId : patch.projectId;
       await updateTask(id, {
         title: patch.title ?? task.title,
@@ -977,7 +1026,7 @@ export function registerTools(target: Tooling): void {
     async (input) => {
       if (input.path) {
         const existing = getNote(input.path);
-        if (!existing) return text(`No note at ${input.path}.`);
+        if (!existing) return fail(`No note at ${input.path}.`);
         // saveNoteBody rewrites the H1 from the title it is given, so a caller
         // that only wanted to change the body must not have to guess at one.
         await saveNoteBody(input.path, input.title ?? existing.title, input.body);
@@ -996,7 +1045,7 @@ export function registerTools(target: Tooling): void {
         }
         return text(input.path);
       }
-      if (!input.title) return text('A note needs a title.');
+      if (!input.title) return fail('A note needs a title.');
       const created = await createNote({
         title: input.title,
         body: input.body,
@@ -1066,7 +1115,7 @@ export function registerTools(target: Tooling): void {
     },
     async ({ id, hours, note, date }) => {
       const entry = allTimeEntries().find((e) => e.id === id);
-      if (!entry) return text(`No time entry with the id ${id}.`);
+      if (!entry) return fail(`No time entry with the id ${id}.`);
       await updateTimeEntry(id, {
         date: date ?? entry.date,
         hoursDelta: hours === undefined ? entry.hoursDelta : parseHours(hours),
@@ -1165,7 +1214,7 @@ export function registerTools(target: Tooling): void {
     async () => {
       const repo = await repoState();
       if (repo.kind !== 'ok')
-        return text(`The vault is not its own git repository (${repo.kind}).`);
+        return fail(`The vault is not its own git repository (${repo.kind}).`);
       const files = await changedFiles();
       if (files.length === 0) return text('Nothing to save. The vault matches what you see.');
       return text(await fileDiffs(files));
@@ -1209,7 +1258,7 @@ export function registerTools(target: Tooling): void {
     async ({ commits }) => {
       const repo = await repoState();
       if (repo.kind !== 'ok')
-        return text(`The vault is not its own git repository (${repo.kind}).`);
+        return fail(`The vault is not its own git repository (${repo.kind}).`);
       const target = await upstream();
       return text({
         unsavedFiles: (await changedFiles()).length,
