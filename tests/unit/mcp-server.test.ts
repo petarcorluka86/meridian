@@ -56,12 +56,17 @@ describe('the server an agent actually talks to', () => {
 
     // The count is asserted here, where a test maintains it, rather than written
     // into a Markdown file where nothing does.
-    expect(tools).toHaveLength(33);
+    expect(tools).toHaveLength(42);
     expect(tools.map((t) => t.name).sort()).toEqual([
       'add_link',
+      'add_phase',
+      'add_project_link',
       'add_task',
+      'archive_project',
       'commit',
+      'complete_phase',
       'complete_task',
+      'create_project',
       'delete_hours',
       'delete_note',
       'delete_task',
@@ -81,9 +86,13 @@ describe('the server an agent actually talks to', () => {
       'read_project',
       'read_sources',
       'remove_link',
+      'remove_phase',
       'remove_plan',
+      'remove_project_link',
       'search',
       'update_hours',
+      'update_phase',
+      'update_project',
       'update_task',
       'vault_diff',
       'vault_health',

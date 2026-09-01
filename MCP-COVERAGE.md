@@ -58,22 +58,23 @@ revisited, which is why it is written down rather than left to be rediscovered.
 
 ## Projects — write
 
-The comment above `list_projects` in `mcp/tools.ts` is the decision: an agent
-needs to *name* a project to file work against it; shaping one belongs to the
-person doing the work, at the screen or at `npm run vault -- projects`.
+Shaping was **Never** until 2026-09-01 — "shaping the work is the person's" —
+and the owner reversed that: an agent may now create, phase, link and archive a
+project. Deleting stays at the screen; its confirmation promises what happens
+to the project's tasks and notes, and a promise is read by a person.
 
 | Capability | Where it lives | Tool | Status |
 | --- | --- | --- | --- |
-| Create a project, optionally with phases | `createProject()` | — | **Never** — shaping the work is the person's. |
-| Edit a project's title and description | `updateProject()` | — | **Never** — same. |
-| Archive or restore a project | `setProjectArchived()` | — | **Never** — same. |
+| Create a project, optionally with phases | `createProject()` | `create_project` | **Open** |
+| Edit a project's title and description | `updateProject()` | `update_project` | **Open** |
+| Archive or restore a project | `setProjectArchived()` | `archive_project` | **Open** |
 | Delete a project, clearing it off its tasks and notes | `deleteProject()` | — | **Never** — destructive, and its confirmation is words on a screen. |
-| Add a phase | `addPhase()` | — | **Never** — same. |
-| Edit a phase's label and note | `updatePhase()` | — | **Never** — same. |
-| Tick a phase off, or untick it | `setPhaseDone()` | — | **Never** — same. |
-| Remove a phase | `removePhase()` | — | **Never** — same. |
-| Add a link to a project | `addProjectLink()` | — | **Never** — same. |
-| Remove a project link | `removeProjectLink()` | — | **Never** — same. |
+| Add a phase | `addPhase()` | `add_phase` | **Open** |
+| Edit a phase's label and note | `updatePhase()` | `update_phase` | **Open** |
+| Tick a phase off, or untick it | `setPhaseDone()` | `complete_phase` | **Open** |
+| Remove a phase | `removePhase()` | `remove_phase` | **Open** |
+| Add a link to a project | `addProjectLink()` | `add_project_link` | **Open** |
+| Remove a project link | `removeProjectLink()` | `remove_project_link` | **Open** |
 | Point a task at a project | `addTask()` / `updateTask()` | `add_task`, `update_task` | **Open** |
 | Point a note at a project | `createNote()` / `setNoteProject()` | `write_note` | **Open** |
 
