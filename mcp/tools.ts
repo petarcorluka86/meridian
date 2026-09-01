@@ -33,7 +33,16 @@ import {
   saveNoteBody,
   setNoteMeta,
 } from '../src/lib/vault/notes.js';
-import { addLink, addPlan, removeLink, removePlan, saveAbout } from '../src/lib/vault/people.js';
+import {
+  addLink,
+  addPlan,
+  removeLink,
+  removePlan,
+  saveAbout,
+  updatePerson,
+} from '../src/lib/vault/people.js';
+import { buildTree, readPreview } from '../src/lib/vault/tree.js';
+import { photoPath } from '../src/lib/sources/cache.js';
 import {
   addPhase,
   addProjectLink,
@@ -135,6 +144,8 @@ const ANNOTATIONS: Record<string, ToolAnnotations> = {
   vault_problems: READS,
   vault_health: READS,
   vault_status: READS,
+  vault_tree: READS,
+  read_file: READS,
 
   add_task: ADDS,
   write_note: ADDS,
@@ -152,6 +163,7 @@ const ANNOTATIONS: Record<string, ToolAnnotations> = {
   move_note: CHANGES,
   update_hours: CHANGES,
   write_about: CHANGES,
+  update_person: CHANGES,
   update_project: CHANGES,
   archive_project: CHANGES,
   update_phase: CHANGES,
@@ -279,6 +291,9 @@ export function registerTools(target: Tooling): void {
       if (!person) return text(`No person with the slug ${slug}.`);
       return text({
         person,
+        // A local path under .cache/photos, or null — the client may not be able
+        // to open it, but knowing whether a photo exists is an answer too.
+        photo: photoPath(slug),
         about: vault.about.get(slug) ?? '',
         links: vault.links.get(slug) ?? [],
         plans: vault.plans.get(slug) ?? [],
@@ -307,13 +322,13 @@ export function registerTools(target: Tooling): void {
         vault.projects
           .filter((p) => includeArchived || !p.archived)
           .map((p) => {
-            const { total, done, percent } = progressOf(p);
+            const { total, done, percent, complete } = progressOf(p);
             return {
               id: p.id,
               title: p.title,
               description: p.description,
               archived: p.archived,
-              phases: { total, done, percent },
+              phases: { total, done, percent, complete },
               nextPhase: p.phases.find((phase) => !phase.done)?.label ?? null,
               openTasks: vault.tasks.filter((t) => t.projectId === p.id && t.status !== 'done')
                 .length,
@@ -845,6 +860,7 @@ export function registerTools(target: Tooling): void {
     'Add a task. Everything except the title is optional.',
     {
       title: z.string().min(1),
+      description: z.string().nullable().optional(),
       priority: z.enum(['urgent', 'important', 'normal']).optional(),
       dueDate: IsoDate.nullable().optional(),
       personSlug: z.string().nullable().optional(),
@@ -862,6 +878,7 @@ export function registerTools(target: Tooling): void {
     async (input) => {
       await addTask({
         title: input.title,
+        description: input.description ?? null,
         priority: input.priority ?? 'normal',
         dueDate: input.dueDate ?? null,
         personSlug: input.personSlug ?? null,
@@ -889,6 +906,7 @@ export function registerTools(target: Tooling): void {
     {
       id: z.string(),
       title: z.string().min(1).optional(),
+      description: z.string().nullable().optional().describe('Null clears it.'),
       priority: TaskPriority.optional(),
       dueDate: IsoDate.nullable().optional().describe('Null clears the due date.'),
       personSlug: z.string().nullable().optional().describe('Null unassigns it.'),
@@ -911,6 +929,7 @@ export function registerTools(target: Tooling): void {
       const projectId = patch.projectId === undefined ? task.projectId : patch.projectId;
       await updateTask(id, {
         title: patch.title ?? task.title,
+        description: patch.description,
         priority: patch.priority ?? task.priority,
         dueDate: patch.dueDate === undefined ? task.dueDate : patch.dueDate,
         personSlug: patch.personSlug === undefined ? task.personSlug : patch.personSlug,
@@ -1124,6 +1143,22 @@ export function registerTools(target: Tooling): void {
   );
 
   server.tool(
+    'update_person',
+    'Edit the roster fields that are yours rather than BambooHR’s: contact cadence, growth levels, active/archived. Only the fields given move. HR fields are a cached copy and cannot be edited.',
+    {
+      slug: z.string(),
+      contactCadenceDays: z.number().int().positive().optional(),
+      currentLevel: z.string().nullable().optional().describe('Null clears it.'),
+      targetLevel: z.string().nullable().optional().describe('Null clears it.'),
+      status: z.enum(['active', 'archived']).optional(),
+    },
+    async ({ slug, ...patch }) => {
+      await updatePerson(slug, patch);
+      return text('Changed.');
+    },
+  );
+
+  server.tool(
     'vault_diff',
     'What has changed in the vault since the last commit.',
     {},
@@ -1192,4 +1227,28 @@ export function registerTools(target: Tooling): void {
     const problems = getVault().problems;
     return text(problems.length === 0 ? 'No problems found.' : problems);
   });
+
+  server.tool(
+    'vault_tree',
+    'Every file in the vault as a tree, including .cache. The paths are what read_file takes.',
+    {},
+    async () => text(buildTree()),
+  );
+
+  server.tool(
+    'read_file',
+    'One vault file, as text. Prefer read_note, read_person and the other typed reads — this is for the file none of them covers. Text files only, truncated past 200k characters; a path outside the vault reads as missing.',
+    { path: z.string() },
+    async ({ path }) => {
+      const preview = readPreview(path);
+      if (preview.state === 'ok') return text(preview.body);
+      return text(
+        preview.state === 'missing'
+          ? `No readable file at ${path}.`
+          : preview.state === 'empty'
+            ? `${path} is empty.`
+            : `${path} is not a text file.`,
+      );
+    },
+  );
 }

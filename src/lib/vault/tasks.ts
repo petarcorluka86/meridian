@@ -39,6 +39,7 @@ function makeId(title: string, existing: Set<string>): string {
 
 export type NewTask = {
   title: string;
+  description?: string | null;
   priority?: TaskEntry['priority'];
   dueDate?: string | null;
   personSlug?: string | null;
@@ -74,7 +75,7 @@ export async function addTask(input: NewTask): Promise<void> {
     const task: TaskEntry = {
       id: makeId(title, new Set(tasks.map((t) => t.id))),
       title,
-      description: null,
+      description: input.description?.trim() || null,
       priority: input.priority ?? 'normal',
       dueDate: input.dueDate ?? null,
       status: 'todo',
@@ -116,6 +117,12 @@ export async function setTaskStatus(id: string, done: boolean): Promise<void> {
  */
 export type TaskPatch = {
   title: string;
+  /**
+   * Optional, unlike every other field: the edit dialog has no description
+   * field, so a required one would make the dialog erase what a tool wrote.
+   * Undefined keeps what is there; null clears it.
+   */
+  description?: string | null;
   priority: TaskEntry['priority'];
   dueDate: string | null;
   personSlug: string | null;
@@ -140,6 +147,10 @@ export async function updateTask(id: string, patch: TaskPatch): Promise<void> {
         ? {
             ...task,
             title,
+            description:
+              patch.description === undefined
+                ? task.description
+                : patch.description?.trim() || null,
             priority: patch.priority,
             dueDate: patch.dueDate,
             personSlug: patch.personSlug || null,
