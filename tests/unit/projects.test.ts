@@ -119,14 +119,68 @@ describe('phases', () => {
     const row = await projectRow(id);
     // Nothing derived is written down, so there is no percentage on disk to drift.
     expect(Object.keys(row)).not.toContain('percent');
-    expect(progressOf(row)).toEqual({ total: 3, done: 2, percent: 67, complete: false });
+    expect(progressOf(row, [])).toEqual({ total: 3, done: 2, percent: 67, complete: false });
+  });
+
+  it('counts a phase that is under way for the part of it that is done', async () => {
+    const { createProject, setPhaseDone, progressOf } = await projects();
+    const id = await createProject({ title: 'P', phases: ['One', 'Two', 'Three'] });
+    await setPhaseDone(id, 'p1', true);
+
+    const { addTask, setTaskStatus } = await tasks();
+    await addTask({ title: 'A', projectId: id, phaseId: 'p2' });
+    await addTask({ title: 'B', projectId: id, phaseId: 'p2' });
+    await addTask({ title: 'C', projectId: id, phaseId: 'p2' });
+    await setTaskStatus(
+      read('tasks.json').find((t: { title: string }) => t.title === 'A').id,
+      true,
+    );
+
+    // One phase ticked and a third of the next one done: 1.333 of 3 phases. The
+    // tick count beside it still says one.
+    expect(progressOf(await projectRow(id), read('tasks.json'))).toEqual({
+      total: 3,
+      done: 1,
+      percent: 44,
+      complete: false,
+    });
+  });
+
+  it('holds a project whose work is finished but unticked at 99%', async () => {
+    const { createProject, progressOf } = await projects();
+    const id = await createProject({ title: 'P', phases: ['One'] });
+
+    const { addTask, setTaskStatus } = await tasks();
+    await addTask({ title: 'A', projectId: id, phaseId: 'p1' });
+    await setTaskStatus(read('tasks.json')[0].id, true);
+
+    // 100% is the tick, which is the judgement; the tasks are the evidence for
+    // it. A bar reading finished beside an open phase would be the app deciding.
+    expect(progressOf(await projectRow(id), read('tasks.json'))).toMatchObject({
+      done: 0,
+      percent: 99,
+      complete: false,
+    });
+  });
+
+  it('ignores tasks filed under another project', async () => {
+    const { createProject, progressOf } = await projects();
+    const mine = await createProject({ title: 'Mine', phases: ['One'] });
+    const theirs = await createProject({ title: 'Theirs', phases: ['One'] });
+
+    const { addTask, setTaskStatus } = await tasks();
+    await addTask({ title: 'Theirs', projectId: theirs, phaseId: 'p1' });
+    await setTaskStatus(read('tasks.json')[0].id, true);
+
+    // Same phase id on both projects — the filter is the pair, not the id.
+    expect(progressOf(await projectRow(mine), read('tasks.json')).percent).toBe(0);
   });
 
   it('calls a project with no phases 0% rather than complete', async () => {
     const { createProject, progressOf } = await projects();
     const id = await createProject({ title: 'A ritual' });
 
-    expect(progressOf(await projectRow(id))).toEqual({
+    expect(progressOf(await projectRow(id), [])).toEqual({
       total: 0,
       done: 0,
       percent: 0,

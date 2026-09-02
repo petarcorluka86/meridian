@@ -17,7 +17,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   if (!project) notFound();
 
   const now = today();
-  const progress = progressOf(project);
+  const own = vault.tasks.filter((t) => t.projectId === id);
+  const progress = progressOf(project, own);
   const notes = vault.notesByProject.get(id) ?? [];
 
   // The roster and the project list, for the edit dialog on each task row: a task
@@ -93,10 +94,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               id={project.id}
               phases={project.phases}
               progress={progress}
-              taskProgress={taskProgressByPhase(
-                project,
-                vault.tasks.filter((t) => t.projectId === id),
-              )}
+              taskProgress={taskProgressByPhase(project, own)}
               tasks={tasksByPhase}
               people={people}
               projects={projects}

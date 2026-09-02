@@ -25,10 +25,12 @@ function counts(openTasks: number, notes: number): string {
  * else on it to press — everything that changes a project happens on its own
  * page.
  *
- * The bar and the "3 of 5 phases" pill say the same thing twice on purpose: the
- * pill is the number you can quote, the bar is the one you can see. A project
- * with no phases gets neither, and is not pretending to have progress it has no
- * way to measure.
+ * The bar and the percentage are the same fact twice on purpose: the pill is the
+ * number you can quote, the bar is the one you can see. "3 of 5 phases" beside
+ * them is a different fact — how many are ticked — and the two disagree whenever
+ * a phase is part-way through, which is the point of counting it that way. A
+ * project with no phases gets none of it, and is not pretending to have progress
+ * it has no way to measure.
  */
 export function ProjectCard({ project }: { project: ProjectCardView }) {
   const { progress } = project;
@@ -61,11 +63,13 @@ export function ProjectCard({ project }: { project: ProjectCardView }) {
 
           {progress.total > 0 ? (
             <Stack gap={2}>
+              {/* The percentage, not the tick count: a phase under way fills
+                  part of the bar, and the pill above says the same number. */}
               <Meter
-                value={progress.done}
-                total={progress.total}
+                value={progress.percent}
+                total={100}
                 tone={progress.complete ? 'success' : 'accent'}
-                label={`Phases done on ${project.title}`}
+                label={`Progress on ${project.title}`}
               />
               {/* Branched on the value rather than on `complete`, so a project
                   that is somehow neither draws no line instead of "Next: null". */}

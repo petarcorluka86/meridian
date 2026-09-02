@@ -363,7 +363,7 @@ export function registerTools(target: Tooling): void {
    */
   server.tool(
     'list_projects',
-    'Projects, with how far their phases have got. Read only — the id is what a task or note points at.',
+    'Projects, with how far each has got: phases ticked, and a percentage that also counts the tasks inside a phase still open. Read only — the id is what a task or note points at.',
     { includeArchived: z.boolean().default(false) },
     async ({ includeArchived }) => {
       const vault = getVault();
@@ -371,7 +371,7 @@ export function registerTools(target: Tooling): void {
         vault.projects
           .filter((p) => includeArchived || !p.archived)
           .map((p) => {
-            const { total, done, percent, complete } = progressOf(p);
+            const { total, done, percent, complete } = progressOf(p, vault.tasks);
             return {
               id: p.id,
               title: p.title,
@@ -408,7 +408,7 @@ export function registerTools(target: Tooling): void {
         archived: project.archived,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
-        progress: progressOf(project),
+        progress: progressOf(project, own),
         phases: project.phases.map((p) => ({ ...p, tasks: byPhase[p.id] })),
         links: project.links,
         tasks: own.map((t) => taskView(t, now)),

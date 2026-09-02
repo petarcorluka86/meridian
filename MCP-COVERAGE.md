@@ -47,7 +47,7 @@ revisited, which is why it is written down rather than left to be rediscovered.
 
 | Capability | Where it lives | Tool | Status |
 | --- | --- | --- | --- |
-| Projects, with phase progress, next phase, open task and note counts | `vault.projects` + `progressOf()` | `list_projects` | **Open** |
+| Projects, with progress, next phase, open task and note counts | `vault.projects` + `progressOf()` | `list_projects` | **Open** |
 | Archived projects as well as active | `ProjectEntry.archived` | `list_projects` (`includeArchived`) | **Open** |
 | One project's phases, each with its label, note and done flag | `ProjectEntry.phases` | `read_project` | **Open** |
 | A phase's own task progress, counted from the tasks filed under it | `taskProgressByPhase()` | `read_project` | **Open** |
@@ -233,7 +233,7 @@ Nothing here is stored. Each is recomputed, and each is a question an agent asks
 
 | Capability | Where it lives | Tool | Status |
 | --- | --- | --- | --- |
-| Phase progress: total, done, percent, complete | `progressOf()` | `list_projects`, `read_project` | **Open** |
+| Project progress: ticks as total and done, percent weighted by each phase's tasks | `progressOf()` | `list_projects`, `read_project` | **Open** |
 | Compensation timeline, actual and planned | `buildTimeline()` | `read_compensation` | **Open** |
 | Current rate, last rise, next planned rise | `rateAt()`, `lastRiseLabel()`, `nextRiseLabel()` | `read_compensation` | **Open** |
 | Due labels for a task | `dueLabel()` | `list_tasks`, `read_day` | **Open** |

@@ -72,7 +72,7 @@ switch (command) {
       which === 'all' ? true : which === 'archived' ? p.archived : !p.archived,
     );
     for (const p of projects) {
-      const { total, done, percent } = progressOf(p);
+      const { total, done, percent } = progressOf(p, vault.tasks);
       const phases = total ? `${done}/${total} phases ${percent}%` : 'no phases';
       const open = vault.tasks.filter((t) => t.projectId === p.id && t.status !== 'done').length;
       const notes = vault.notesByProject.get(p.id)?.length ?? 0;

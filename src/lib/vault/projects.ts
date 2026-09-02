@@ -245,8 +245,42 @@ function fraction(done: number, total: number): Progress {
   };
 }
 
-export function progressOf(project: Pick<ProjectEntry, 'phases'>): Progress {
-  return fraction(project.phases.filter((p) => p.done).length, project.phases.length);
+/**
+ * Every phase weighs the same, and a phase that is under way counts for the part
+ * of it that is done: ticked is a whole one, and anything else is the fraction
+ * of its own tasks that are finished. A phase with no tasks under it counts for
+ * nothing until it is ticked — there is nothing there to measure, and guessing
+ * at a half would be a number nobody could check.
+ *
+ * `done` and `total` stay the phases, because "2 of 5 done" is a count of ticks
+ * and has to keep saying that. Only `percent` knows about the tasks.
+ *
+ * 100% is reserved for a project whose every phase is ticked, so a project that
+ * has finished all its work and not said so yet stops at 99 rather than reading
+ * finished beside a phase still open. The tick is the judgement; the tasks are
+ * only the evidence for it.
+ */
+export function progressOf(
+  project: Pick<ProjectEntry, 'id' | 'phases'>,
+  tasks: readonly TaskEntry[],
+): Progress {
+  const total = project.phases.length;
+  const done = project.phases.filter((p) => p.done).length;
+  const complete = total > 0 && done === total;
+
+  const byPhase = taskProgressByPhase(project, tasks);
+  const earned = project.phases.reduce((sum, phase) => {
+    if (phase.done) return sum + 1;
+    const own = byPhase[phase.id];
+    return sum + (own && own.total > 0 ? own.done / own.total : 0);
+  }, 0);
+
+  return {
+    total,
+    done,
+    percent: complete ? 100 : total === 0 ? 0 : Math.min(99, Math.round((earned / total) * 100)),
+    complete,
+  };
 }
 
 /**
