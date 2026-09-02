@@ -12,6 +12,37 @@ struct Config {
     static let projectDir = string("MeridianProjectDir", "")
     static let port = Int(string("MeridianPort", "3210")) ?? 3210
     static let command = string("MeridianCommand", "npm run dev")
+
+    /// One key out of the app's own .env, read the way the app reads it: an
+    /// uncommented `KEY=value`, last one winning, quotes stripped.
+    static func env(_ key: String) -> String? {
+        guard let text = try? String(contentsOfFile: projectDir + "/.env", encoding: .utf8) else {
+            return nil
+        }
+
+        var found: String?
+        for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard trimmed.hasPrefix(key + "=") else { continue }
+            found = String(trimmed.dropFirst(key.count + 1))
+                .trimmingCharacters(in: CharacterSet(charactersIn: " \"'"))
+        }
+        return found
+    }
+
+    /// The splash is painted before the server can answer, so this is the one
+    /// place the theme rule has to be said twice — nothing here can ask the app
+    /// which scheme it is in, because the app is what it is waiting for.
+    /// MERIDIAN_THEME, with absent or unrecognised meaning light, and `system`
+    /// the one value that hands the question to the machine.
+    static var isDark: Bool {
+        switch env("MERIDIAN_THEME") {
+        case "dark": return true
+        case "system":
+            return NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+        default: return false
+        }
+    }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -25,7 +56,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     /// 127.0.0.1, not localhost: the dev server binds the IPv4 loopback only, and
     /// `localhost` can resolve to ::1 first.
     let baseURL = URL(string: "http://127.0.0.1:\(Config.port)")!
-    let background = NSColor(red: 0.949, green: 0.941, blue: 0.925, alpha: 1.0) // --bg
+    /// --bg, both halves — #f2f0ec and #161310. A colour written out here is a
+    /// colour that cannot come from a token, and this one is on screen before a
+    /// stylesheet exists.
+    let ground = (
+        light: NSColor(red: 0.949, green: 0.941, blue: 0.925, alpha: 1.0),
+        dark: NSColor(red: 0.086, green: 0.075, blue: 0.063, alpha: 1.0)
+    )
+
+    /// The page reaches the window through `window.webkit.messageHandlers.meridian`,
+    /// which exists only inside this shell — in a browser tab the same button
+    /// falls back to reloading the document. See `settings/ReloadApp.tsx`.
+    let bridgeName = "meridian"
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupMainMenu()
@@ -37,6 +79,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - UI Setup
 
     func setupWindow() {
+        let isDark = Config.isDark
+        let background = isDark ? ground.dark : ground.light
         let screen = NSScreen.main!.frame
         let width: CGFloat = 1280
         let height: CGFloat = 860
@@ -63,6 +107,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let config = WKWebViewConfiguration()
         config.preferences.setValue(true, forKey: "developerExtrasEnabled")
+        config.userContentController.add(self, name: bridgeName)
         webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = self
         webView.uiDelegate = self
@@ -73,6 +118,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         splashView = NSView(frame: .zero)
         splashView.wantsLayer = true
         splashView.layer?.backgroundColor = background.cgColor
+        // The ground above is one fixed colour, so the spinner and the label
+        // over it cannot be left to the machine's appearance: in dark mode on a
+        // light app they came out white on cream, and the wait looked like a
+        // blank window. Scoped to the splash — the web view keeps the machine's
+        // answer, which is what `system` renders from.
+        splashView.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
         let spinner = NSProgressIndicator(frame: .zero)
         spinner.style = .spinning
@@ -315,6 +366,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.terminate(nil)
     }
 
+    /// Settings → Reload, when the page is running inside this window: the window
+    /// *is* the app, so starting over means this process rather than the
+    /// document. The server goes with it under the same rule as quitting — only
+    /// if this app was the one that started it.
+    ///
+    /// The reopening is a detached shell rather than anything in here, because
+    /// nothing in a process can outlive its own termination. It waits for this
+    /// pid to actually go: `open` on a bundle that is still terminating
+    /// activates the instance that is on its way out, and no new one appears.
+    @objc func restartApp() {
+        killServer()
+
+        let pid = ProcessInfo.processInfo.processIdentifier
+        let relaunch = Process()
+        relaunch.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        relaunch.arguments = [
+            "-c",
+            "while kill -0 \(pid) 2>/dev/null; do sleep 0.2; done; "
+                + "open \(shellQuoted(Bundle.main.bundlePath))",
+        ]
+        relaunch.standardOutput = FileHandle.nullDevice
+        relaunch.standardError = FileHandle.nullDevice
+        try? relaunch.run()
+
+        NSApp.terminate(nil)
+    }
+
     // MARK: - Lifecycle
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
@@ -395,6 +473,22 @@ extension AppDelegate: WKUIDelegate {
             }
         }
         return nil
+    }
+}
+
+// MARK: - WKScriptMessageHandler
+
+extension AppDelegate: WKScriptMessageHandler {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceive message: WKScriptMessage
+    ) {
+        guard message.name == bridgeName, let body = message.body as? String else { return }
+
+        switch body {
+        case "restart": restartApp()
+        default: break
+        }
     }
 }
 

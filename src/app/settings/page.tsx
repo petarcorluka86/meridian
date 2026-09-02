@@ -198,7 +198,9 @@ export default async function SettingsPage() {
               Starts the whole app over from disk: the vault is re-read file by file,{' '}
               <Code>{tildeHome(envPath)}</Code> is read again, and every screen rebuilds. Nothing is
               written and nothing is fetched — the source badges above keep their age. For when a
-              hand edit, a key change or a doubt should be settled by looking again.
+              hand edit, a key change or a doubt should be settled by looking again. In the desktop
+              app it is a real restart: the window closes and opens again, and the server it started
+              goes with it.
             </Text>
           </CardBody>
         </Card>
