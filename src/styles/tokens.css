@@ -8,9 +8,10 @@
  * for — it fails the build on a colour, a radius, a spacing step or a font
  * declared anywhere but a primitive.
  *
- * The scales are closed. Eleven type levels, seven spacing steps, five radii,
- * two shadows. A twelfth type level is a change to this file and a change to
- * `Text`, deliberately — not a number somebody picks at a call site.
+ * The scales are closed. Twelve type levels, seven spacing steps, five radii,
+ * two shadows. A thirteenth type level is a change to this file and a change to
+ * `Text` or to the one stylesheet that needs it, deliberately — not a number
+ * somebody picks at a call site.
  *
  * There are two schemes and one set of tokens. Every colour is a `light-dark()`
  * pair, so a component asks for `--fg-muted` and gets the right one — no second
@@ -27,6 +28,18 @@
    */
   --sans: system-ui, -apple-system, "Helvetica Neue", sans-serif;
   --mono: ui-monospace, Menlo, monospace;
+  /*
+   * The note editor's face, and a third stack because it is neither of the other
+   * two. `--sans` is the interface's voice; `--mono` is a label — a path, a
+   * count, a diff line. This is a page somebody writes on. The trade is that it
+   * is proportional, so an indent or a fence in the Markdown does not line up in
+   * a column the way it does in the file — and that emphasis cannot be shown as
+   * weight, because the editor paints a coloured copy of the text under a
+   * transparent textarea and the two only stay aligned while every character
+   * occupies the same width in both. Measured, Arial drifts 19px over forty
+   * characters when a run is bolded; a monospace face drifts none.
+   */
+  --writing: Arial, "Helvetica Neue", Helvetica, sans-serif;
 
   --type-display: 650 34px / 1.15 var(--sans);
   --type-title: 600 27px / 1.2 var(--sans);
@@ -45,11 +58,23 @@
   --type-mono: 400 12px / 1.4 var(--mono);
 
   /*
-   * The eleventh level, and the reason there are eleven: a diff line is doubled
+   * The eleventh level, and the reason there is an eleventh: a diff line is doubled
    * so a line that wraps still reads as one row against its unwrapped neighbour.
    * Nothing but the diff viewer uses it.
    */
   --type-diff: 400 12px / 2 var(--mono);
+
+  /*
+   * The twelfth, and the last one a stylesheet names directly: the note editor's
+   * writing surface, set in the writing face rather than in either of the other
+   * two. It was `--type-mono`, and that level is a label — read once, glanced
+   * away from — small and thin enough to be uncomfortable in the one place in
+   * the app somebody sits and writes.
+   *
+   * 500 rather than 400 or 600: 400 is the thin one this replaced, and 600 reads
+   * as emphasis — a whole surface of emphasis is a surface with none.
+   */
+  --type-code: 500 14px / 1.5 var(--writing);
 
   --tracking-display: -0.03em;
   --tracking-title: -0.02em;
@@ -199,6 +224,26 @@
   --cat-idea-bg: light-dark(oklch(0.95 0.035 70), oklch(0.28 0.04 70));
   --cat-generic: var(--fg-muted);
   --cat-generic-bg: var(--surface-muted);
+
+  /* --------------------------------------------------------------- Syntax ---
+   * Markdown, coloured as it is typed. Six roles and no more: what a line *is*
+   * (a heading, a quote), what a run of characters *does* (emphasis, code, a
+   * link), and the characters that mark them (`#`, `-`, `>`, backticks), which
+   * are dimmer than everything they mark because they are notation rather than
+   * words.
+   *
+   * A closed set, like the categories: a seventh role is an edit here and to
+   * `MarkdownEditor.module.css`, deliberately. Both halves are real even though
+   * the editor pins itself to the dark one — a token with one value is a token
+   * that renders wrong the day that decision is revisited, and the gate fails
+   * the build on it.
+   */
+  --syntax-heading: light-dark(oklch(0.45 0.13 250), oklch(0.78 0.11 250));
+  --syntax-emphasis: light-dark(oklch(0.45 0.13 300), oklch(0.8 0.1 300));
+  --syntax-code: light-dark(oklch(0.5 0.12 45), oklch(0.8 0.1 45));
+  --syntax-link: light-dark(oklch(0.45 0.13 200), oklch(0.78 0.11 200));
+  --syntax-quote: light-dark(oklch(0.45 0.11 145), oklch(0.75 0.1 145));
+  --syntax-marker: light-dark(oklch(0.62 0.01 70), oklch(0.58 0.008 70));
 
   /* ---------------------------------------------------------------- Icons ---
    * One colour. An icon that sits beside a label is decoration and takes this;
