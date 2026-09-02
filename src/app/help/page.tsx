@@ -713,7 +713,9 @@ async function SetupSection({ vaultPath }: { vaultPath: string }) {
               <Code>./desktop/build-app.sh</Code> once. It puts <Code>Meridian.app</Code> in{' '}
               <Code>~/Applications</Code> — drag it to the Dock, and opening it starts the server if
               it is not already running. The app is this folder, so a <Code>git pull</Code> is a new
-              version and there is nothing to reinstall.
+              version and there is nothing to reinstall. Reload, on Settings, closes and reopens
+              that window rather than only the page — a restart, server included when the app is the
+              one running it.
             </li>
             <li>
               Run <Code>git init</Code> in the vault if you want history, and set a remote only if

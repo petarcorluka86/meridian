@@ -624,13 +624,16 @@ than details:
 - **`--selected-fg` is no longer `--fg-inverted`.** A selected chip inverts to
   near-white in the dark, so its ink is dark — while `--fg-inverted` stays white,
   because the fills it sits on stay saturated.
-- **`--bg` is written out twice more, and both are named.** `GROUND` in
-  `app/layout.tsx` carries both halves for `themeColor`, which the browser chrome
-  reads before any stylesheet exists, and `app/manifest.ts` reads `GROUND` back —
-  the manifest is generated rather than a static file precisely because it holds
-  a colour and there are now two. `app/global-error.tsx` inlines its own pair and
-  follows the machine rather than the setting: reading the setting means reading
-  the config, and that page is the one that must not.
+- **`--bg` is written out three times more, and all three are named.** `GROUND`
+  in `app/layout.tsx` carries both halves for `themeColor`, which the browser
+  chrome reads before any stylesheet exists, and `app/manifest.ts` reads `GROUND`
+  back — the manifest is generated rather than a static file precisely because it
+  holds a colour and there are now two. `app/global-error.tsx` inlines its own
+  pair and follows the machine rather than the setting: reading the setting means
+  reading the config, and that page is the one that must not. `ground` in
+  `desktop/Meridian.swift` is the third, and the reason is the same one a step
+  further out — it paints the launch splash, which is on screen before there is a
+  server to ask.
 
 Storybook has a **Theme** toolbar that sets the same attribute on the same
 element, so the design system's view of itself can be either. The dark values
@@ -921,6 +924,26 @@ was run, so the source has no one checkout's path in it and a second copy is
 **It loads `127.0.0.1`, never `localhost`.** The dev server binds the IPv4
 loopback only, and `localhost` can resolve to `::1` first. `src/proxy.ts` allows
 both names, so this is about reaching the socket, not about the Host check.
+
+**The splash reads `MERIDIAN_THEME` itself, and it is the only duplicate of that
+rule.** `Config.isDark` parses the key out of `.env` — absent or unrecognised is
+light, `system` defers to `NSApp.effectiveAppearance` — because the thing the
+splash is waiting for is the server that would otherwise answer. It picks the
+half of `ground` and pins that scheme on the splash view alone: the spinner and
+the status label are system-drawn, so on a machine in dark mode they came out
+white on the light ground and the wait looked like an empty window. The web view
+is deliberately left out of it, since `system` is rendered from the machine's own
+answer.
+
+**Reload, on the Settings screen, is a restart here rather than a reload.** The
+page has no way to know it is in a window until it looks: the shell registers one
+`WKScriptMessageHandler` named `meridian`, and `settings/ReloadApp.tsx` posts
+`restart` to it when it is there and calls `location.reload()` when it is not.
+`restartApp()` quits and has a detached `zsh` wait for the pid to go before it
+reopens the bundle — `open` on a bundle that is still terminating activates the
+instance on its way out. The Server Action that drops the caches still runs
+first, because a dev server somebody else started outlives the restart under the
+rule below and would come back holding them.
 
 **It starts the server only if the port is free, and kills it only if it started
 it.** A dev server you are already running is attached to and left alive on quit.

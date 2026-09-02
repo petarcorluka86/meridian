@@ -256,7 +256,7 @@ Nothing here is stored. Each is recomputed, and each is a question an agent asks
 | Install the vault's credential hook | `npm run vault:hook` | — | **Never** — writing an executable into somebody's repository is not a side effect. |
 | Any write to BambooHR, Google or GitHub | — | — | **Never** — the rule at the top of `CLAUDE.md`. |
 | Empty the vault, or reset the app completely | `lib/vault/reset.ts` | — | **Never** — the one deletion no snapshot can undo. It exists behind a confirmation that names what goes; a tool call is not that. |
-| Reload the app from disk: drop the config and index caches | `reloadAppAction()` | — | **Closed** — an agent's file edits already reach the index through the watcher, and the other half of Reload is `location.reload()`, which only a screen has. |
+| Reload the app from disk: drop the config and index caches | `reloadAppAction()` | — | **Closed** — an agent's file edits already reach the index through the watcher, and the other half of Reload is the page reloading itself — or, in the desktop app, quitting and reopening — which only a screen has. |
 
 ---
 
