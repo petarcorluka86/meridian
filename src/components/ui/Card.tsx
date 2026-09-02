@@ -73,8 +73,19 @@ export function CardHeader({
 }
 
 /** Prose, a form, a chart — anything that is not a list of rows. */
-export function CardBody({ children }: { children: React.ReactNode }) {
-  return <div className={styles.body}>{children}</div>;
+export function CardBody({
+  children,
+  roomy,
+}: {
+  children: React.ReactNode;
+  /** One step more room, for a card that is prose rather than a panel of facts. */
+  roomy?: boolean;
+}) {
+  return (
+    <div className={styles.body} data-roomy={roomy || undefined}>
+      {children}
+    </div>
+  );
 }
 
 /** One row of a list. `tone` tints it: a form's error, a saved confirmation. */
@@ -82,13 +93,26 @@ export function CardRow({
   children,
   pending,
   tone,
+  wrap,
 }: {
   children: React.ReactNode;
   pending?: boolean;
   tone?: 'danger' | 'warning' | 'success';
+  /**
+   * Folds onto a second line rather than pushing its last control out of the
+   * card. Off by default, unlike `Row`: most card rows are a label and one
+   * control, and the ones that are a line of fields — the task form — read as
+   * one line and become nonsense folded.
+   */
+  wrap?: boolean;
 }) {
   return (
-    <div className={styles.row} data-pending={pending || undefined} data-tone={tone}>
+    <div
+      className={styles.row}
+      data-pending={pending || undefined}
+      data-tone={tone}
+      data-wrap={wrap || undefined}
+    >
       {children}
     </div>
   );

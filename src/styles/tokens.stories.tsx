@@ -38,6 +38,7 @@ const TONES = [
   ['--info', '--info-bg', '--info-border'],
 ];
 const CATEGORY = /^--cat-/;
+const SYNTAX = /^--syntax-/;
 const SPACE = [
   '--space-1',
   '--space-2',
@@ -66,10 +67,11 @@ const TYPE = [
   '--type-micro',
   '--type-mono',
   '--type-diff',
+  '--type-code',
 ];
 const TRACKING = ['--tracking-display', '--tracking-title', '--tracking-micro'];
 const ELEVATION = ['--shadow-lift', '--shadow-dialog', '--scrim'];
-const MISC = ['--sans', '--mono', '--icon', '--ring', '--transition', '--clear'];
+const MISC = ['--sans', '--mono', '--writing', '--icon', '--ring', '--transition', '--clear'];
 
 function Swatches({ tokens, names }: { tokens: ReadonlyMap<string, string>; names: string[] }) {
   return (
@@ -86,6 +88,7 @@ export const Colour: StoryObj = {
   render: () => {
     const tokens = useRootTokens();
     const categories = [...tokens.keys()].filter((name) => CATEGORY.test(name));
+    const syntax = [...tokens.keys()].filter((name) => SYNTAX.test(name));
     return (
       <Doc>
         <Section
@@ -131,6 +134,12 @@ export const Colour: StoryObj = {
           note="Six fixed labels rather than four meanings, so they get their own scale. Recolouring a category is one edit here, in the same file as every other colour decision."
         >
           <Swatches tokens={tokens} names={categories} />
+        </Section>
+        <Section
+          title="Syntax palette"
+          note="Markdown, coloured as it is typed in the note editor. Six roles: what a line is, what a run of characters does, and the characters that mark them — dimmer than everything they mark, because they are notation rather than words."
+        >
+          <Swatches tokens={tokens} names={syntax} />
         </Section>
       </Doc>
     );
@@ -307,7 +316,7 @@ export const Coverage: StoryObj = {
       ...MISC,
     ]);
     const ungrouped = [...tokens.keys()].filter(
-      (name) => !claimed.has(name) && !CATEGORY.test(name),
+      (name) => !claimed.has(name) && !CATEGORY.test(name) && !SYNTAX.test(name),
     );
     return (
       <Doc>

@@ -47,6 +47,13 @@
   padding: var(--space-4);
 }
 
+/* One step up, for a card that is a page of prose rather than a panel of facts:
+   the note, where the text is the whole card and needs room around it to read as
+   a page instead of as a field. Two steps would be a margin, not a padding. */
+.body[data-roomy] {
+  padding: var(--space-5);
+}
+
 /* A row in a list. The top border rather than the bottom, so the last row does
    not draw a line against the card's own edge. */
 .row {
@@ -56,6 +63,16 @@
   padding: var(--space-3) var(--space-4);
   border-top: 1px solid var(--line);
 }
+
+/* Opt-in, not the default. A card row is normally a label and one control and
+   has nothing to wrap; the task form is a line of fields that reads as one line
+   and breaks into nonsense if it folds. The note's row is the other kind — four
+   fields and three controls, longer than its column on a narrow window — and it
+   asks for this rather than every row getting it. */
+.row[data-wrap] {
+  flex-wrap: wrap;
+}
+
 .card > .row:first-child,
 .header + .row {
   border-top: 0;
