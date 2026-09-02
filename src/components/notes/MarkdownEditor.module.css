@@ -1,0 +1,97 @@
+/*
+ * The painted copy and the real field, stacked. Every rule that appears twice
+ * below has to: the two boxes only stay aligned while their font, their measure
+ * and their wrapping are identical, so they are declared together and changed
+ * together.
+ */
+.editor {
+  position: relative;
+  width: 100%;
+}
+
+.paint,
+.input {
+  margin: 0;
+  padding: 0;
+  font: var(--type-code);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  tab-size: 2;
+}
+
+/* The `pre` is what has a height, so the editor grows with the note rather than
+   scrolling inside itself. The floor is a window's worth, less the chrome above
+   and below it — an empty note is still somewhere to write. */
+.paint {
+  min-height: calc(100dvh - var(--space-7) * 8);
+  /* The strongest ink, not the body one: everything the syntax colours pick out
+     is coloured, so the plain words are what is left and they should be the
+     firmest thing on the surface rather than the faintest. */
+  color: var(--fg-strong);
+}
+
+.input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--clear);
+  /* The words are the layer underneath; this one contributes only a caret and a
+     selection. `caret-color` is why the text can be invisible and the cursor
+     cannot. */
+  color: transparent;
+  caret-color: var(--fg-strong);
+  resize: none;
+  overflow: hidden;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--fg-faint);
+}
+
+.input::selection {
+  background: var(--selected);
+}
+
+/* ------------------------------------------------------------------ Prism ---
+ * Prism's class names, mapped onto the six syntax tokens. Nothing here picks a
+ * colour: a seventh role is an edit to `tokens.css` first.
+ *
+ * Colour and nothing else. Weight would be the obvious second signal and it is
+ * the one thing this technique cannot spend: the painted copy and the textarea
+ * over it only stay aligned while every character is the same width in both, and
+ * the writing face is proportional. See the note beside `--writing`.
+ */
+.paint :global(.token.punctuation),
+.paint :global(.token.list),
+.paint :global(.token.hr),
+.paint :global(.token.table-header-row) {
+  color: var(--syntax-marker);
+}
+
+.paint :global(.token.title) {
+  color: var(--syntax-heading);
+}
+
+.paint :global(.token.bold),
+.paint :global(.token.italic),
+.paint :global(.token.strike) {
+  color: var(--syntax-emphasis);
+}
+
+.paint :global(.token.code) {
+  color: var(--syntax-code);
+}
+
+.paint :global(.token.url) {
+  color: var(--syntax-link);
+}
+
+.paint :global(.token.blockquote) {
+  color: var(--syntax-quote);
+}

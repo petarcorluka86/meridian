@@ -3,7 +3,7 @@ import { renderMarkdown, splitTitle } from '@/lib/markdown';
 
 /**
  * Note bodies are rendered with dangerouslySetInnerHTML in two places —
- * NoteEditor and AboutCard — and the only thing between them and the DOM is the
+ * NotePane, NoteForm and AboutCard — and the only thing between them and the DOM is the
  * allow-list in lib/markdown.ts. It had no test, so widening `tagNames` or
  * adding `allowDangerousHtml` broke nothing red.
  *

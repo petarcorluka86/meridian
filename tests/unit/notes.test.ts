@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resetConfig } from '@/lib/env';
 import { notePath, slugifyTitle } from '@/lib/vault/notes';
+
+vi.mock('next/cache', () => ({ revalidatePath: () => {} }));
 
 describe('slugifyTitle', () => {
   it('folds Croatian diacritics rather than dropping the letters', () => {
@@ -208,5 +210,116 @@ describe('what counts as a note', () => {
     expect(isNotePathForTests('notes/2026-08-18-loose.md')).toBe(false);
     expect(isNotePathForTests('people/ana-horvat/2026-08-18-loose.md')).toBe(false);
     expect(isNotePathForTests('tasks.json')).toBe(false);
+  });
+});
+
+/**
+ * The note page's one write, which is where creating and editing a note both
+ * end up. What is worth a test is not the writing but the order: front matter,
+ * then the body, then the move — because the move is what changes the path the
+ * first two were called with, and getting that backwards writes into a file that
+ * is no longer there.
+ */
+describe('writeNoteAction', () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'meridian-write-note-'));
+    process.env.VAULT_PATH = dir;
+    resetConfig();
+    fs.mkdirSync(path.join(dir, 'people'), { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'people/entries.json'),
+      JSON.stringify([{ slug: 'ana-horvat', displayName: 'Ana Horvat' }]),
+    );
+    fs.mkdirSync(path.join(dir, 'notes/general'), { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, 'notes/general/2026-08-18-misao.md'),
+      '---\ncategory: idea\ndraft: true\npinned: true\n---\n# Misao\n\nBody.\n',
+    );
+  });
+
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+    delete process.env.VAULT_PATH;
+    resetConfig();
+  });
+
+  const write = async () => {
+    const { writeNoteAction } = await import('@/app/notes/actions');
+    const { invalidateVault } = await import('@/lib/vault/index');
+    invalidateVault();
+    return writeNoteAction;
+  };
+
+  it('creates a note at the path the editor showed, with every field it held', async () => {
+    const writeNoteAction = await write();
+
+    const result = await writeNoteAction(null, {
+      title: 'Staff track',
+      body: 'What she asked for.',
+      category: '1on1',
+      personSlug: 'ana-horvat',
+      project: 'platform-split',
+      draft: true,
+      pinned: false,
+      date: '2026-08-20',
+    });
+
+    expect(result).toEqual({ ok: true, path: 'people/ana-horvat/notes/2026-08-20-staff-track.md' });
+    const raw = fs.readFileSync(
+      path.join(dir, 'people/ana-horvat/notes/2026-08-20-staff-track.md'),
+      'utf8',
+    );
+    expect(raw).toContain('category: 1on1');
+    expect(raw).toContain('draft: true');
+    expect(raw).toContain('project: platform-split');
+    expect(raw).toContain('# Staff track');
+    expect(raw).toContain('What she asked for.');
+  });
+
+  it('writes the body and the front matter of a note that also moves', async () => {
+    const writeNoteAction = await write();
+
+    const result = await writeNoteAction('notes/general/2026-08-18-misao.md', {
+      title: 'Misao',
+      body: 'Rewritten.',
+      category: 'planning',
+      personSlug: 'ana-horvat',
+      project: null,
+      draft: false,
+      pinned: true,
+      date: '2026-08-25',
+    });
+
+    // The move is last, so what comes back is where the file actually is.
+    expect(result).toEqual({ ok: true, path: 'people/ana-horvat/notes/2026-08-25-misao.md' });
+    expect(fs.existsSync(path.join(dir, 'notes/general/2026-08-18-misao.md'))).toBe(false);
+    const raw = fs.readFileSync(
+      path.join(dir, 'people/ana-horvat/notes/2026-08-25-misao.md'),
+      'utf8',
+    );
+    expect(raw).toContain('category: planning');
+    expect(raw).toContain('draft: false');
+    expect(raw).toContain('pinned: true');
+    expect(raw).toContain('Rewritten.');
+  });
+
+  it('reports a bad person rather than throwing, and leaves the note where it was', async () => {
+    const writeNoteAction = await write();
+
+    const result = await writeNoteAction('notes/general/2026-08-18-misao.md', {
+      title: 'Misao',
+      body: 'Body.',
+      category: 'idea',
+      personSlug: 'nobody-here',
+      project: null,
+      draft: true,
+      pinned: true,
+      date: '2026-08-18',
+    });
+
+    expect(result.ok).toBe(false);
+    expect(fs.existsSync(path.join(dir, 'notes/general/2026-08-18-misao.md'))).toBe(true);
   });
 });

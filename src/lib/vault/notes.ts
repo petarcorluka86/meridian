@@ -4,51 +4,11 @@ import { NoteFrontmatter, type NoteCategory } from './schemas';
 import { safeVaultPath } from './paths';
 import { moveFile, mutateTextFile, removeFile, withLock, writeTextAtomic } from './write';
 import fs from 'node:fs';
+import { type NoteLocation, notePath, noteTitleSlug, slugifyTitle } from './note-path';
 
-/**
- * Two, since there is nowhere else a note can be. It used to be three: a note
- * captured without a person landed in `notes/inbox/` and waited to be filed.
- * The waiting was the problem — the only way out of that folder was to name a
- * person, so a note that was about nobody in particular stayed in a queue that
- * could never be emptied.
- */
-export type NoteLocation = 'person' | 'general';
-
-/** "1:1 — staff track" → "1-1-staff-track", capped so a filename stays readable. */
-export function slugifyTitle(title: string): string {
-  const slug = title
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[đ]/g, 'd')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 40)
-    .replace(/-$/, '');
-  return slug || 'note';
-}
-
-/**
- * The folder decides who a note is about, so a path is derived from the three
- * facts that place it — never stored and never read back from front matter.
- */
-export function notePath(opts: {
-  date: string;
-  titleSlug: string;
-  personSlug: string | null;
-  location: NoteLocation;
-}): string {
-  const file = `${opts.date}-${opts.titleSlug}.md`;
-  if (opts.personSlug) return `people/${opts.personSlug}/notes/${file}`;
-  return `notes/general/${file}`;
-}
-
-/** The slug part of an existing filename, so renaming by date keeps the title. */
-function titleSlugOf(note: Note): string {
-  const base = note.path.split('/').pop()!.replace(/\.md$/, '');
-  const withoutDate = base.replace(/^\d{4}-\d{2}-\d{2}-/, '');
-  return withoutDate || slugifyTitle(note.title);
-}
+// Re-exported so the path shape has one importable home for anything on the
+// server; the editor imports it from `./note-path` directly.
+export { type NoteLocation, notePath, noteTitleSlug, slugifyTitle };
 
 /**
  * The four keys, in this order, and nothing else. `project` is last and is
@@ -149,7 +109,12 @@ export async function moveNote(
 
   const location: NoteLocation = personSlug ? 'person' : 'general';
 
-  const next = notePath({ date, titleSlug: titleSlugOf(note), personSlug, location });
+  const next = notePath({
+    date,
+    titleSlug: noteTitleSlug(note.path, note.title),
+    personSlug,
+    location,
+  });
   if (next === path) return { path, moved: false };
 
   if (fs.existsSync(safeVaultPath(next))) {
@@ -188,6 +153,7 @@ export async function createNote(input: {
   personSlug?: string | null;
   project?: string | null;
   draft?: boolean;
+  pinned?: boolean;
   date?: string;
 }): Promise<string> {
   const title = input.title.trim();
@@ -210,7 +176,7 @@ export async function createNote(input: {
     noteFile({
       category: input.category ?? 'generic',
       draft: input.draft ?? false,
-      pinned: false,
+      pinned: input.pinned ?? false,
       project: input.project ?? null,
       body,
     }),

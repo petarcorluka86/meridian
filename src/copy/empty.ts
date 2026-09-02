@@ -266,7 +266,7 @@ export const EMPTY = {
       body: 'Widen the person, project or category filter, or turn off Drafts only.',
       tone: 'neutral',
     },
-    /** The editor column, when the list beside it has nothing to select. */
+    /** The reading column, when the list beside it has nothing to select. */
     unselected: {
       title: 'Nothing to read here',
       body: 'Pick a note from the list to read and edit it.',

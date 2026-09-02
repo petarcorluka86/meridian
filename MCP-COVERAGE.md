@@ -103,6 +103,7 @@ to the project's tasks and notes, and a promise is read by a person.
 | Set pinned | `setNoteMeta()` | `write_note` | **Open** |
 | Set or clear the project | `setNoteProject()` / `setNoteMeta()` | `write_note` | **Open** |
 | Move a note: change its person or its date | `moveNote()` | `move_note` | **Open** |
+| A whole note at once: body, front matter and where it is filed | `writeNoteAction()` | `write_note` then `move_note` | **Open** — two calls rather than one. The page stages the lot because Cancel has to mean something there; an agent has no Cancel, so the composition buys it nothing. |
 | Capture a note with no screen open | `captureNoteAction()` | `write_note` covers it | **Open** |
 | Delete a note | `deleteNote()` | `delete_note` | **Open** |
 

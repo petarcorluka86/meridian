@@ -216,6 +216,73 @@ Two sources of truth for one fact is how a note ends up in one person's folder
 claiming to be about someone else. Moving a note between folders changes who it
 is about — which is exactly what editing a note's person does in the UI.
 
+### Reading a note and writing one are two screens
+
+The Notes screen is a list beside a reading pane, and the pane files rather than
+writes: person, category, project, date, draft and pinned are one control each,
+and each takes effect the moment it moves. That is right for a single deliberate
+change made while looking at the note.
+
+Rewriting the note is `/notes/edit`, which takes the window — two cards of equal
+width, the Markdown in one and the rendered note in the other, the same
+`renderMarkdown` behind both so the preview is the note rather than an
+approximation of it. Half each, so a line of Markdown and the line it becomes are
+the same width; and neither card scrolls on its own, because one scrollbar for
+the page and a second inside it is two documents where there is one. **Nothing is written
+until Save**, which is the one thing that makes it a different screen rather than
+the same one bigger: here you change the person, the date, the category and six
+paragraphs before any of it is meant, and a Cancel that had already applied three
+of them would not be a cancel. `writeNoteAction` lands the whole note in one
+call, and leaving with changes asks first.
+
+**The writing half is a code surface.** A textarea cannot colour what is in it,
+so `MarkdownEditor` is a `pre` painted with the highlighted Markdown and the real
+textarea laid over it — transparent text, a visible caret, the same font and the
+same wrapping rule on both. Two things fall out of that: the `pre` sizes the box,
+so the editor grows with the note rather than scrolling inside itself, and every
+key still belongs to a real textarea — Tab, ⌘S, Escape, the undo stack — rather
+than to a contenteditable pretending to be one. `prismjs` tokenises; the six
+`--syntax-*` tokens colour it, and it takes both schemes like every other
+surface.
+
+It has the twelfth type level to itself, `--type-code`, and a third font stack,
+`--writing`. `--sans` is the interface's voice and `--mono` is a label — a path,
+a count, a diff line, read once and glanced away from — and neither is a page
+somebody writes on for minutes at a time. The trade is that `--writing` is
+proportional, so an indent or a fence in the Markdown does not line up in a
+column the way it does in the file. The plain words take `--fg-strong` rather
+than `--fg`: everything the syntax picks out is already coloured, so what is left
+should be the firmest thing on the surface rather than the faintest.
+
+**The syntax spends colour and only colour**, which is a constraint rather than a
+preference. The painted copy and the textarea over it stay aligned only while
+every character is the same width in both, and `--writing` is proportional — bold
+a run in the paint layer and the caret drifts, measured at 19px over forty
+characters. A monospace face would drift none, which is the other half of the
+trade the face was chosen against.
+
+**The two headers are one component.** `NoteMeta` is the card of facts — person,
+category, project, date, and Draft, Pinned and Delete held to the right — and
+both screens render it rather than each drawing its own. Two cards drawn to match
+stay matched until the first time one of them is touched. What differs is only
+what the handlers do: the pane writes each change as it moves, the page stages it.
+The page's header is that card under the same row the pane has, plus one control
+the pane cannot want — the way back to Notes.
+
+One route for creating and for editing, because they are one screen with one
+field different: no `note=` is a note that does not exist yet, and `person=` /
+`project=` seed it from wherever the writing started. Everything that makes a
+note — the Notes screen's New note, a project's Notes card — goes there, so
+there is one place where a note is written and one place where the file is
+named.
+
+The bar shows the path the note **will** have, not the one it has: moving between
+folders and renaming by date are both visible on disk and both decided here, so
+`notePath()` is recomputed as the controls move. It lives in
+`src/lib/vault/note-path.ts` rather than in `notes.ts` because that file imports
+`node:fs` and a client component cannot — and two implementations of "which file
+is this" would mean the one on the screen was the wrong one.
+
 ### A design system, not a stylesheet
 
 Colour, type, space, shape and elevation are decided once in
@@ -227,8 +294,8 @@ That is the whole point: recolour the accent or round the corners differently an
 every button, chip, card and dialog on every screen follows, because there is
 nowhere else for those decisions to be hiding.
 
-The scales are **closed** — eleven type levels, seven spacing steps, five radii, two
-shadows, two control heights, four tones. An eleventh of anything is an edit to
+The scales are **closed** — twelve type levels, seven spacing steps, five radii, two
+shadows, two control heights, four tones. One more of anything is an edit to
 `tokens.css` and to a primitive, deliberately. Before this existed there were 64
 distinct `font` shorthands at 19 sizes, 17 gap values, the card shape written out
 21 times across 11 modules, and the neutral button declared four times with four
@@ -355,10 +422,13 @@ set of checks and a second set of copy to keep in step with the first.
 `?only=` is a URL rather than a dialog so the screen can be linked to, reloaded
 and gated like any other.
 
-**Setup is the one screen with no sidebar**, and the content is centred in the
-space that leaves. On a first run every link in that nav goes somewhere with no
-vault to read yet, so it is furniture in the way of the only thing there is to
-do; a connection reopened from Settings carries its own way back instead. The
+**Two screens have no sidebar, and they are setup and the note page.** On a
+first run every link in that nav goes somewhere with no vault to read yet, so it
+is furniture in the way of the only thing there is to do; a connection reopened
+from Settings carries its own way back instead. The note page is the other half
+of the same argument from the other end — leaving it is a decision, because it
+stages its changes and asks before discarding them, so a nav that walks straight
+out of it is a way to lose what was typed. Both carry their own way back. The
 pixel gate records the whole window for these screens rather than `[data-screen]`
 — the page frame looks identical whether or not there is a nav beside it, so
 measuring the frame alone would hold neither half of this.
@@ -503,10 +573,11 @@ src/components/ui/        the primitives, and the only place a value is applied
 src/components/ui/index.ts  the barrel a screen imports from
 ```
 
-**84 tokens, and two schemes out of them.** Eleven type levels, seven spacing
-steps, five radii, two shadows, two control heights, four tones × three roles,
-one icon colour, a six-entry category palette. The scales are closed: an
-eleventh of anything is an edit to `tokens.css` and to a primitive, deliberately.
+**92 tokens, and two schemes out of them.** Twelve type levels, three font
+stacks, seven spacing steps, five radii, two shadows, two control heights, four
+tones × three roles, one icon colour, a six-entry category palette, a six-entry
+syntax palette. The scales are closed: a thirteenth type level, or an eighth
+space step, is an edit to `tokens.css` and to a primitive, deliberately.
 
 Every colour is a `light-dark()` pair, so there is one set of tokens rather than
 a palette and a dark palette to keep in step, and `color-scheme` picks the half —
@@ -571,7 +642,7 @@ arithmetic — the surfaces, the two blues and the tone tints are the design's, 
 
 | | |
 | --- | --- |
-| `Text` `Code` `CodeBlock` | the eleven type levels and ten tones. The only way to set a size |
+| `Text` `Code` `CodeBlock` | the ten type levels it exposes, and ten tones. The only way to set a size |
 | `Stack` `Row` `Spacer` `Divider` `Page` `PageHeader` `Columns` | space, in steps |
 | `Button` `ButtonLink` | primary · neutral · danger · ghost, two sizes, `icon` for square |
 | `Chip` `ChipLink` `Segmented` `Segment` `Toggle` | filters, view switches, live settings |
@@ -671,14 +742,17 @@ the right one. A `Pill` that toggles something passes every test in the repo.
 
 ### What is left of the screens' own CSS
 
-Eleven module files, and not one of them sets a colour, a font, a radius or a
+Thirteen module files, and not one of them sets a colour, a font, a radius or a
 spacing value:
 
 | Module | What only it can express |
 | --- | --- |
-| `Shell.module.css` | the fixed sidebar, the scrolling column, and the one screen with neither |
+| `Shell.module.css` | the fixed sidebar, the scrolling column, and the two screens with neither |
 | `vault/Vault.module.css` | the tree's per-level indentation |
-| `notes/Notes.module.css` | the list column beside the editor column |
+| `notes/Notes.module.css` | the list column beside the reading column |
+| `notes/Note.module.css` | the note page's gutter, and its two columns of equal width |
+| `notes/NoteMeta.module.css` | which end of the note's field row its switches sit at |
+| `notes/MarkdownEditor.module.css` | the painted copy and the real field, stacked and kept in step |
 | `help/Help.module.css` | the section list, and the one bulleted prose list |
 | `setup/Setup.module.css` | the first-run splash: centred on the screen, and how far its progress list stops short of the column |
 | `changelog/Changelog.module.css` | the diff's two aligned columns of lines |
@@ -760,9 +834,9 @@ because recording them has to be a deliberate act; a baseline generated
 automatically gates nothing. The gate does not run in CI at all, for the same reason: the
 baselines belong to the machine somebody actually looks at the screens on.
 
-Nineteen screens are gated in each scheme, thirty-eight images in all, including
-Changelog in both diff modes, Settings, the setup wizard and the three connection
-screens it reopens one at a time. The archived project list is not among them,
+Twenty-one screens are gated in each scheme, forty-two images in all, including
+Changelog in both diff modes, Settings, the note page in both of its states, the
+setup wizard and the three connection screens it reopens one at a time. The archived project list is not among them,
 and neither is the setting-up screen the wizard ends on: one is this screen's own
 state rather than a URL and the other is reachable only by finishing the wizard,
 and the gate can only reach what a URL can. Changelog needs a vault that is its own git repository, so
@@ -1001,7 +1075,7 @@ down here.
 
 ```
 src/app/         one folder per screen; page.tsx is a server component
-src/lib/vault/   paths · schemas · frontmatter · index (read) · write · migrate
+src/lib/vault/   paths · note-path · schemas · frontmatter · index (read) · write · migrate
 src/lib/sources/ calendar, github, google-oauth, cache, egress log
 src/lib/sources/bamboohr/  client · cache · roster · inbox · compensation
 src/lib/secrets.ts    the credential shapes refused into the vault
