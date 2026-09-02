@@ -128,6 +128,30 @@ test('changelog-unified', async ({ page }) => {
   await changelog(page, 'changelog-unified', `${OTHER}/changelog?mode=unified`);
 });
 
+/**
+ * The note page, which is the other screen with no sidebar — so the whole window
+ * again, for the same reason the wizard is: the page frame looks identical with
+ * or without a nav beside it, and the absence is the thing being recorded.
+ *
+ * Both of it: a note that exists, and one that does not yet. They differ in the
+ * bar and in nothing else, which is exactly the sort of difference a gate is for.
+ */
+test('note editor', async ({ page }) => {
+  skipWithoutBaseline('note-edit');
+  await page.goto('/notes/edit?note=people%2Fana-horvat%2Fnotes%2F2026-08-12-1on1.md');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(300);
+  await expect(page).toHaveScreenshot('note-edit.png', { maxDiffPixels: 0 });
+});
+
+test('note editor, new note', async ({ page }) => {
+  skipWithoutBaseline('note-new');
+  await page.goto('/notes/edit');
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(300);
+  await expect(page).toHaveScreenshot('note-new.png', { maxDiffPixels: 0 });
+});
+
 test('setup wizard', async ({ page }) => {
   // The screen a new user sees first, and the whole window because the sidebar
   // being absent is the point of it.

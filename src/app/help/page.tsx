@@ -226,8 +226,11 @@ function Guide() {
       'Notes',
       '',
       [
-        'New note starts one from here; it lands on whoever the list is filtered to, or in notes/general/ if that is nobody.',
-        'Editing a note is editing the Markdown file: a monospace surface as tall as the window, Tab indents, ⌘S saves, Escape cancels. What you write is what is on disk, minus the front matter Meridian keeps at the top.',
+        'New note opens the note page; it lands on whoever the list is filtered to, or in notes/general/ if that is nobody.',
+        'The note page takes the whole window: the Markdown on the left, the note as it will read on the right, and the path the file will have across the top. Tab indents, ⌘S saves, Escape leaves. What you write is what is on disk, minus the front matter Meridian keeps at the top.',
+        'The left half is a code surface: the Markdown is coloured as you type it — headings, emphasis, code, links and quotes each their own colour, and the markers around them dimmer than the words.',
+        'Nothing on the note page is written until you press Save, so leaving really does leave the note as it was — and leaving with changes asks first. Open in editor is the way there from the list.',
+        'Both screens show the same row of facts about a note: its person, category, project, date, whether it is a draft and whether it is pinned. Beside the list they take effect as you move them; on the note page they wait for Save with everything else.',
         'Filter by person, by project, by category, or show only drafts.',
         'Pin a note to hold it at the top of the list.',
         'Changing the date renames the file; changing the person moves it into that person’s folder.',

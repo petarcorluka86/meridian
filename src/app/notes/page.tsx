@@ -3,12 +3,13 @@ import { getVault } from '@/lib/vault/index';
 import { renderMarkdown, splitTitle } from '@/lib/markdown';
 import { shortDate } from '@/lib/dates';
 import { NoteFilters } from '@/components/notes/NoteFilters';
-import { NewNote } from '@/components/notes/NewNote';
 import { EMPTY_GLYPH } from '@/components/EmptyGlyphs';
 import { NAV_GLYPH } from '@/components/NavIcons';
-import { NoteEditor, type EditorNote } from '@/components/notes/NoteEditor';
+import { NotePane, type PaneNote } from '@/components/notes/NotePane';
 import { EMPTY } from '@/copy/empty';
 import {
+  AddIcon,
+  ButtonLink,
   CategoryPill,
   categoryOf,
   EmptyState,
@@ -81,13 +82,12 @@ export default async function NotesPage({
     return `/notes?${p}`;
   };
 
-  const editorNote: EditorNote | null = selected
+  const openNote: PaneNote | null = selected
     ? (() => {
         const { title, body } = splitTitle(selected.body);
         return {
           path: selected.path,
           title: title || selected.title,
-          body,
           html: renderMarkdown(body),
           date: selected.date ?? '',
           personSlug: selected.personSlug,
@@ -108,8 +108,20 @@ export default async function NotesPage({
             {/* Always, not only when the vault is empty. Writing one down is the
                 reason somebody opens this screen, and hiding the way to do it
                 behind an empty state means it is missing exactly when there is
-                already a note in the way of it. */}
-            <NewNote person={person} />
+                already a note in the way of it.
+                Filtering by a person means a note written here is about them. */}
+            <ButtonLink
+              variant="primary"
+              full
+              href={
+                person !== 'all' && person !== 'general'
+                  ? `/notes/edit?person=${person}`
+                  : '/notes/edit'
+              }
+              icon={<AddIcon />}
+            >
+              New note
+            </ButtonLink>
             <NoteFilters
               people={people}
               projects={projects}
@@ -161,10 +173,10 @@ export default async function NotesPage({
         ) : null}
       </div>
 
-      {editorNote ? (
-        <NoteEditor note={editorNote} people={people} projects={projects} />
+      {openNote ? (
+        <NotePane note={openNote} people={people} projects={projects} />
       ) : (
-        <div className={`scroll ${styles.editorCol}`}>
+        <div className={`scroll ${styles.readCol}`}>
           <EmptyState glyph={NAV_GLYPH.notes} {...EMPTY.notes.unselected} standalone />
         </div>
       )}

@@ -41,8 +41,9 @@ export type ProjectNote = {
  * moves the file into their folder and changes nothing about the tag — which is
  * the whole reason a project is front matter rather than a folder.
  *
- * It opens the note rather than staying here: a note is a thing you write, and
- * the row that would appear in this list is not where the writing happens.
+ * It opens the note in the editor rather than staying here: a note is a thing
+ * you write, and the row that would appear in this list is not where the
+ * writing happens.
  */
 export function ProjectNotesCard({ id, notes }: { id: string; notes: ProjectNote[] }) {
   const router = useRouter();
@@ -58,7 +59,7 @@ export function ProjectNotesCard({ id, notes }: { id: string; notes: ProjectNote
       if (result.ok) {
         setTitle('');
         setError(null);
-        router.push(`/notes?note=${encodeURIComponent(result.path)}`);
+        router.push(`/notes/edit?note=${encodeURIComponent(result.path)}`);
       } else {
         setError(result.message);
       }

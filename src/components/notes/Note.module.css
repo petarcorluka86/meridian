@@ -1,0 +1,18 @@
+/*
+ * The note page: the reading pane's column, with two cards side by side where it
+ * has one. Layout only — every colour, size and space here comes from a token or
+ * a primitive.
+ */
+.screen {
+  padding: var(--space-5) var(--space-5) var(--space-7);
+}
+
+/* Half each, so a line of Markdown and the line it becomes are the same width.
+   Neither column scrolls on its own: the page scrolls once, which is the only
+   way a long note reads as one document rather than two boxes. */
+.panes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}

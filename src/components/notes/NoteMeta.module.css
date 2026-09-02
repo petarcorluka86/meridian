@@ -1,0 +1,10 @@
+/*
+ * The note's two switches and its Delete, held to the right of its fields.
+ * Layout only — every value here is a token and every control is a primitive.
+ */
+.actions {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}

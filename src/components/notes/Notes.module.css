@@ -1,5 +1,5 @@
 /*
- * A list column beside an editor column. Layout only — every colour, size and
+ * A list column beside a reading column. Layout only — every colour, size and
  * space on this screen comes from a primitive.
  */
 .split {
@@ -43,14 +43,20 @@
   box-shadow: inset 2px 0 0 var(--accent-ink);
 }
 
-.editorCol {
+.readCol {
   flex: 1;
   min-width: 0;
   overflow-y: auto;
   padding: var(--space-5) var(--space-5) var(--space-7);
 }
 
-/* The editor is a reading column, not the full width of the window. */
-.column {
-  max-width: 720px;
+/* The note itself, and the only thing capped on this screen: the toolbar above
+   it and the card of fields run the full width of the column, because those are
+   controls and a control belongs where you left it. The note is words, and words
+   stop at 800px and sit in the middle of whatever is left — the same number as
+   the note page, so a note reads the same width whether you are looking at it
+   here or writing it there. */
+.noteCard {
+  max-width: 800px;
+  margin-inline: auto;
 }
