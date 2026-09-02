@@ -120,8 +120,8 @@ file, it belongs in Help instead.
   `{...EMPTY.tasks.allDone}`. The glyph is the only part the call site chooses,
   because it is the card's own icon and the catalogue does not know it.
 - **Nothing derived is written to disk** — balances, counts, days-since and a
-  project's phase progress are recomputed; `progressOf()` counts the phases every
-  time. A number that is never written down cannot drift.
+  project's progress are recomputed; `progressOf()` counts the phases and the
+  tasks under them every time. A number that is never written down cannot drift.
 - **A malformed file costs only itself.** Arrays validate per row; a bad entry is
   skipped and reported, the rest still load.
 - **Pages are server components that call the store directly.** No `/api/*` for the
@@ -188,6 +188,19 @@ key that names something outside the note: the path genuinely cannot carry it.
 
 Its links live in the record for the same reason — there is no
 `projects/<id>/links.json` to put them in.
+
+**Progress is the phases, weighted by the work inside them.** A ticked phase is
+worth a whole one and a phase under way is worth the fraction of its own tasks
+that are done, so five phases with the third half-finished is 50%, not 40%. Every
+phase weighs the same whatever it holds — a phase is a checkpoint, and one with
+twenty tasks is not four checkpoints. A phase with no tasks is worth nothing
+until it is ticked, because there is nothing there to measure and half of unknown
+is a number nobody can check.
+
+`done` and `total` stay the ticks: "2 of 5 done" is a count, and the percentage
+beside it disagreeing with it is the whole point. 100% is reserved for a project
+whose every phase is ticked — work that is finished and not yet said so stops at
+99, because the tick is the judgement and the tasks are only the evidence for it.
 
 **Deleting a project does not delete its work.** Its tasks and notes stay where
 they are and lose the project, which is what the confirmation promises in the most

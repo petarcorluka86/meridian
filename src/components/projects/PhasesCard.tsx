@@ -172,11 +172,14 @@ export function PhasesCard({
       {phases.length > 0 ? (
         <CardBody>
           <Stack gap={4}>
+            {/* The percentage, not the tick count: the phase bars below it are
+                what it is made of, so a bar that only moved on a tick would
+                contradict every one of them. */}
             <Meter
-              value={progress.done}
-              total={progress.total}
+              value={progress.percent}
+              total={100}
               tone={progress.complete ? 'success' : 'accent'}
-              label="Phases done"
+              label="Project progress"
             />
 
             <Stack gap={3}>

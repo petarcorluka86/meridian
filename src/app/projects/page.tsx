@@ -9,7 +9,7 @@ export default async function ProjectsPage() {
   const vault = getVault();
 
   const view = (project: (typeof vault.projects)[number]): ProjectCardView => {
-    const progress = progressOf(project);
+    const progress = progressOf(project, vault.tasks);
     const openTasks = vault.tasks.filter(
       (t) => t.projectId === project.id && t.status !== 'done',
     ).length;
