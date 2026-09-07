@@ -196,7 +196,7 @@ function Guide() {
       'two views',
       [
         'Simple shows a card per person with their role.',
-        'Detailed turns the same list into a compensation table — monthly rate, last rise, next planned rise — sortable, movable to any month, and blurred until you reveal it.',
+        'Detailed turns the same list into a compensation table — monthly rate, and the last rise and the next planned one each as a date and an amount you can sort by separately — movable to any month, and blurred until you reveal it.',
       ],
     ],
     [

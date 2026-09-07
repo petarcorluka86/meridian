@@ -35,10 +35,18 @@ export type CompRowView = {
   rate: string;
   rateToday: string;
   fromPlan: boolean;
-  lastRise: string;
+  lastRiseOn: string;
+  lastRiseAgo: string;
+  lastRiseAmount: string;
   lastRiseFirst: boolean;
-  nextRise: string;
+  nextRiseOn: string;
+  nextRiseIn: string;
+  nextRiseAmount: string;
   hasNext: boolean;
+  lastRiseYm: number | null;
+  lastRiseDelta: number | null;
+  nextRiseYm: number | null;
+  nextRiseDelta: number | null;
 };
 
 type Props = {
@@ -52,12 +60,16 @@ type Props = {
   dir: 'asc' | 'desc';
 };
 
+// The date and the amount of a rise are two columns rather than one line, so
+// "who is overdue" and "who got the most" are each one press of a header.
 const COLUMNS = [
   { key: 'name', label: 'Person', align: 'start' },
   { key: 'role', label: 'Role', align: 'start' },
   { key: 'rate', label: 'Monthly', align: 'end' },
-  { key: 'last', label: 'Last rise', align: 'end' },
-  { key: 'next', label: 'Next rise', align: 'end' },
+  { key: 'lastOn', label: 'Last rise', align: 'end' },
+  { key: 'lastAmount', label: 'Last amount', align: 'end' },
+  { key: 'nextOn', label: 'Next rise', align: 'end' },
+  { key: 'nextAmount', label: 'Next amount', align: 'end' },
 ] as const;
 
 export function PeopleTable({ rows, asOfMonth, asOfYear, shifted, years, note, sort, dir }: Props) {
@@ -159,17 +171,45 @@ export function PeopleTable({ rows, asOfMonth, asOfYear, shifted, years, note, s
                   </Stack>
                 </Blurred>
               </TD>
-              <TD align="end">
+              <TD align="end" numeric>
                 <Blurred revealed={revealed}>
-                  <Text level="small" tone={row.lastRiseFirst ? 'faint' : 'success'}>
-                    {row.lastRise}
+                  <Stack gap={1} align="end">
+                    <Text level="small" tone={row.lastRiseFirst ? 'faint' : 'strong'}>
+                      {row.lastRiseOn}
+                    </Text>
+                    {row.lastRiseAgo ? (
+                      <Text level="small" tone="faint">
+                        {row.lastRiseAgo}
+                      </Text>
+                    ) : null}
+                  </Stack>
+                </Blurred>
+              </TD>
+              <TD align="end" numeric>
+                <Blurred revealed={revealed}>
+                  <Text level="small" tone={row.lastRiseFirst ? 'faint' : 'success'} numeric>
+                    {row.lastRiseAmount}
                   </Text>
                 </Blurred>
               </TD>
-              <TD align="end">
+              <TD align="end" numeric>
                 <Blurred revealed={revealed}>
-                  <Text level="small" tone={row.hasNext ? 'info' : 'faint'}>
-                    {row.nextRise}
+                  <Stack gap={1} align="end">
+                    <Text level="small" tone={row.hasNext ? 'strong' : 'faint'}>
+                      {row.nextRiseOn}
+                    </Text>
+                    {row.nextRiseIn ? (
+                      <Text level="small" tone="faint">
+                        {row.nextRiseIn}
+                      </Text>
+                    ) : null}
+                  </Stack>
+                </Blurred>
+              </TD>
+              <TD align="end" numeric>
+                <Blurred revealed={revealed}>
+                  <Text level="small" tone={row.hasNext ? 'info' : 'faint'} numeric>
+                    {row.nextRiseAmount}
                   </Text>
                 </Blurred>
               </TD>

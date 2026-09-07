@@ -4,9 +4,14 @@ import { describe, expect, it } from 'vitest';
 import {
   buildTimeline,
   formatEur,
+  lastRiseAmount,
   lastRiseLabel,
+  lastRiseWhen,
+  monthLabel,
   monthsBetween,
+  nextRiseAmount,
   nextRiseLabel,
+  nextRiseWhen,
   rateAt,
   ym,
 } from '@/lib/comp';
@@ -103,6 +108,28 @@ describe('labels', () => {
   it('words the next rise, and says so when there is none', () => {
     expect(nextRiseLabel(rateAt(timeline, ym(2026, 8)), ym(2026, 8))).toBe('in 8 months (+€300)');
     expect(nextRiseLabel(rateAt(timeline, ym(2027, 8)), ym(2027, 8))).toBe('none planned');
+  });
+
+  it('splits into the two halves the table sorts by', () => {
+    const at = rateAt(timeline, ym(2026, 8));
+    expect(lastRiseWhen(at, ym(2026, 8))).toBe('4 months ago');
+    expect(lastRiseAmount(at)).toBe('+€300');
+    expect(nextRiseWhen(at, ym(2026, 8))).toBe('in 8 months');
+    expect(nextRiseAmount(at)).toBe('+€300');
+  });
+
+  it('has an em dash for the amount where there is no rise to price', () => {
+    const first = rateAt(timeline, ym(2023, 5));
+    expect(lastRiseWhen(first, ym(2023, 5))).toBe('first rate');
+    expect(lastRiseAmount(first)).toBe('—');
+    const settled = rateAt(timeline, ym(2027, 8));
+    expect(nextRiseWhen(settled, ym(2027, 8))).toBe('none planned');
+    expect(nextRiseAmount(settled)).toBe('—');
+  });
+
+  it('names the month a rise landed in', () => {
+    expect(monthLabel(ym(2026, 4))).toBe('Apr 2026');
+    expect(monthLabel(ym(2026, 12))).toBe('Dec 2026');
   });
 });
 

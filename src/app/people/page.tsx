@@ -6,8 +6,11 @@ import {
   MONTHS,
   buildTimeline,
   formatEur,
-  lastRiseLabel,
-  nextRiseLabel,
+  lastRiseAmount,
+  lastRiseWhen,
+  monthLabel,
+  nextRiseAmount,
+  nextRiseWhen,
   rateAt,
   ym,
 } from '@/lib/comp';
@@ -77,15 +80,30 @@ export default async function PeoplePage({
           ? `today ${formatEur(today.amount)}`
           : '',
       fromPlan: Boolean(at.active?.planned),
-      lastRise: at.active ? lastRiseLabel(at, asOf) : '—',
+      lastRiseOn: at.active ? monthLabel(at.active.ym) : '—',
+      lastRiseAgo: at.active ? lastRiseWhen(at, asOf) : '',
+      lastRiseAmount: at.active ? lastRiseAmount(at) : '—',
       lastRiseFirst: !at.previous,
-      nextRise: at.active ? nextRiseLabel(at, asOf) : 'none planned',
+      nextRiseOn: at.next ? monthLabel(at.next.ym) : 'none planned',
+      nextRiseIn: at.next ? nextRiseWhen(at, asOf) : '',
+      nextRiseAmount: at.next ? nextRiseAmount(at) : '—',
       hasNext: Boolean(at.next),
+      // The sort is over the numbers behind the labels: '10 months ago' sorts
+      // before '2 months ago' as text, and every one of these reads as a date.
+      lastRiseYm: at.active ? at.active.ym : null,
+      lastRiseDelta: at.active && at.previous ? at.active.amount - at.previous.amount : null,
+      nextRiseYm: at.next ? at.next.ym : null,
+      nextRiseDelta: at.next && at.active ? at.next.amount - at.active.amount : null,
     };
   });
 
   const sort = params.sort ?? 'name';
   const dir = params.dir === 'desc' ? 'desc' : 'asc';
+  // A row with no rise at all has nothing to compare, so it sits at the bottom
+  // whichever way the column is pointing rather than crowding the top of one.
+  const byNumber = (a: number | null, b: number | null, flip: number) =>
+    a === null || b === null ? Number(a === null) - Number(b === null) : (a - b) * flip;
+
   const sorted = rows.slice().sort((a, b) => {
     const flip = dir === 'asc' ? 1 : -1;
     if (sort === 'role') return a.role.localeCompare(b.role) * flip;
@@ -93,8 +111,10 @@ export default async function PeoplePage({
       const parse = (s: string) => Number(s.replace(/[^0-9.]/g, '')) || 0;
       return (parse(a.rate) - parse(b.rate)) * flip;
     }
-    if (sort === 'last') return a.lastRise.localeCompare(b.lastRise) * flip;
-    if (sort === 'next') return a.nextRise.localeCompare(b.nextRise) * flip;
+    if (sort === 'lastOn') return byNumber(a.lastRiseYm, b.lastRiseYm, flip);
+    if (sort === 'lastAmount') return byNumber(a.lastRiseDelta, b.lastRiseDelta, flip);
+    if (sort === 'nextOn') return byNumber(a.nextRiseYm, b.nextRiseYm, flip);
+    if (sort === 'nextAmount') return byNumber(a.nextRiseDelta, b.nextRiseDelta, flip);
     return a.name.localeCompare(b.name) * flip;
   });
 
@@ -104,8 +124,8 @@ export default async function PeoplePage({
   const note = compNote
     ? compNote
     : shifted
-      ? `Monthly, Last rise: BambooHR compensation table (read only). Next rise: plans you keep in the vault. Projected to ${MONTHS[asOfMonth - 1]} ${asOfYear} — planned rises up to that month are counted as if they had happened, and blue means the rate comes from a plan, not BambooHR.`
-      : 'Monthly and Last rise come from the BambooHR compensation table (read only). Next rise comes from plans you keep in the vault — BambooHR never sees them.';
+      ? `Monthly and the last rise: BambooHR compensation table (read only). The next rise: plans you keep in the vault. Projected to ${MONTHS[asOfMonth - 1]} ${asOfYear} — planned rises up to that month are counted as if they had happened, and blue means the rate comes from a plan, not BambooHR.`
+      : 'Monthly and the last rise come from the BambooHR compensation table (read only). The next rise comes from plans you keep in the vault — BambooHR never sees them.';
 
   const years = [thisYear - 1, thisYear, thisYear + 1, thisYear + 2];
 

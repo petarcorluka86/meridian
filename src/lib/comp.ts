@@ -83,18 +83,44 @@ function monthsAhead(months: number): string {
   return `in ${Math.floor(months / 12)} yrs`;
 }
 
-export function lastRiseLabel(at: RateAt, asOf: YearMonth): string {
+function signedEur(delta: number): string {
+  return `${delta >= 0 ? '+' : '−'}${formatEur(Math.abs(delta))}`;
+}
+
+/** 'Apr 2026' — the month itself, for a column that has to sort by date. */
+export function monthLabel(at: YearMonth): string {
+  return `${MONTHS[(at % 100) - 1]} ${Math.floor(at / 100)}`;
+}
+
+export function lastRiseWhen(at: RateAt, asOf: YearMonth): string {
   if (!at.active || !at.previous) return 'first rate';
-  const delta = at.active.amount - at.previous.amount;
-  const sign = delta >= 0 ? '+' : '−';
-  return `${monthsAgo(monthsBetween(at.active.ym, asOf))} (${sign}${formatEur(Math.abs(delta))})`;
+  return monthsAgo(monthsBetween(at.active.ym, asOf));
+}
+
+export function lastRiseAmount(at: RateAt): string {
+  if (!at.active || !at.previous) return '—';
+  return signedEur(at.active.amount - at.previous.amount);
+}
+
+export function nextRiseWhen(at: RateAt, asOf: YearMonth): string {
+  if (!at.next || !at.active) return 'none planned';
+  return monthsAhead(monthsBetween(asOf, at.next.ym));
+}
+
+export function nextRiseAmount(at: RateAt): string {
+  if (!at.next || !at.active) return '—';
+  return signedEur(at.next.amount - at.active.amount);
+}
+
+/** The two halves in one line, for a caller with one field rather than two. */
+export function lastRiseLabel(at: RateAt, asOf: YearMonth): string {
+  const when = lastRiseWhen(at, asOf);
+  return at.active && at.previous ? `${when} (${lastRiseAmount(at)})` : when;
 }
 
 export function nextRiseLabel(at: RateAt, asOf: YearMonth): string {
-  if (!at.next || !at.active) return 'none planned';
-  const delta = at.next.amount - at.active.amount;
-  const sign = delta >= 0 ? '+' : '−';
-  return `${monthsAhead(monthsBetween(asOf, at.next.ym))} (${sign}${formatEur(Math.abs(delta))})`;
+  const when = nextRiseWhen(at, asOf);
+  return at.active && at.next ? `${when} (${nextRiseAmount(at)})` : when;
 }
 
 export const MONTHS = [
