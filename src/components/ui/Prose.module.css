@@ -72,3 +72,61 @@
   border-left: 3px solid var(--line-strong);
   color: var(--fg-muted);
 }
+
+/*
+ * A table in a note — a pipe table or one written as HTML — takes the shape of
+ * `Table`, so it reads as the same thing as the roster. It is in the flow of the
+ * text rather than filling a card, so the top edge is a hairline like the ones
+ * between rows, and a wide one scrolls sideways instead of pushing the column.
+ */
+/* The closing line is the table's, not the last row's: a cell spanning down
+   into that row belongs to an earlier one, and a line drawn per cell would stop
+   short under it. */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  border-bottom: 1px solid var(--line);
+  margin: 0 0 var(--space-3);
+  font: var(--type-small);
+}
+
+.prose th {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-sunken);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font: var(--type-micro);
+  letter-spacing: var(--tracking-micro);
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.prose td {
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.prose tbody tr:first-child td {
+  border-top: 0;
+}
+
+/* A header cell down the side, which only HTML can write. */
+.prose tbody th {
+  background: var(--clear);
+  border-bottom: 0;
+  vertical-align: top;
+  white-space: normal;
+}
+
+.prose th[align="center"],
+.prose td[align="center"] {
+  text-align: center;
+}
+.prose th[align="right"],
+.prose td[align="right"] {
+  text-align: right;
+}

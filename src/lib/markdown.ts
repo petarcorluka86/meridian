@@ -2,6 +2,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
+import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 
@@ -9,6 +10,11 @@ import rehypeStringify from 'rehype-stringify';
  * Notes are the manager's own Markdown, but they can also arrive from an editor, an
  * agent, or a paste. Sanitised on render regardless — the CSP would stop a script
  * from doing much, but a note is never allowed to inject markup either way.
+ *
+ * Raw HTML is parsed rather than dropped, so a table too irregular for a pipe
+ * table — a merged cell, a header down the side — can be written as one. That
+ * is safe only because the allow-list runs after the parse: the tags below are
+ * everything a note may render, whichever syntax produced them.
  */
 const schema = {
   ...defaultSchema,
@@ -48,7 +54,8 @@ const schema = {
 const processor = unified()
   .use(remarkParse)
   .use(remarkGfm)
-  .use(remarkRehype)
+  .use(remarkRehype, { allowDangerousHtml: true })
+  .use(rehypeRaw)
   .use(rehypeSanitize, schema)
   .use(rehypeStringify);
 

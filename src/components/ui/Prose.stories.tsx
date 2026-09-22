@@ -25,6 +25,7 @@ const HTML = `
 <ol><li>Ordered, same rhythm</li><li>Second</li></ol>
 <blockquote>A quote sits behind a 3px line and drops to the muted ink.</blockquote>
 <pre>npm run vault:doctor</pre>
+<table><thead><tr><th>Quarter</th><th align="right">Hires</th><th>Note</th></tr></thead><tbody><tr><td>Q1</td><td align="right">2</td><td>A pipe table and an HTML one render the same</td></tr><tr><td>Q2</td><td align="right">0</td><td>Freeze</td></tr><tr><td>Q3</td><td align="right">3</td><td rowspan="2">A merged cell is what HTML buys</td></tr><tr><td>Q4</td><td align="right">1</td></tr></tbody></table>
 <p>The last child never carries a bottom margin, so a card does not gain a stray row of space under the text.</p>
 `;
 

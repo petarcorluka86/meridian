@@ -229,6 +229,7 @@ function Guide() {
         'New note opens the note page; it lands on whoever the list is filtered to, or in notes/general/ if that is nobody.',
         'The note page takes the whole window: the Markdown on the left, the note as it will read on the right, and the path the file will have across the top. Tab indents, ⌘S saves, Escape leaves. What you write is what is on disk, minus the front matter Meridian keeps at the top.',
         'The left half is a code surface: the Markdown is coloured as you type it — headings, emphasis, code, links and quotes each their own colour, and the markers around them dimmer than the words.',
+        'A table can be a pipe table or written as HTML — table, tr, th and td, with colspan and rowspan when a cell has to span. Either way it renders in the same shape as every other table in Meridian; the HTML carries no styling of its own, and anything that is not a table, a list, a heading, a quote or a link is dropped on render.',
         'Nothing on the note page is written until you press Save, so leaving really does leave the note as it was — and leaving with changes asks first. Open in editor is the way there from the list.',
         'Both screens show the same row of facts about a note: its person, category, project, date, whether it is a draft and whether it is pinned. Beside the list they take effect as you move them; on the note page they wait for Save with everything else.',
         'Filter by person, by project, by category, or show only drafts.',

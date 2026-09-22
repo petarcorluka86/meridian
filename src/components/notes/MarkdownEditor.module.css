@@ -67,10 +67,12 @@
  * over it only stay aligned while every character is the same width in both, and
  * the writing face is proportional. See the note beside `--writing`.
  */
+/* An HTML tag is a marker too — `<td>` is around the words, not among them. */
 .paint :global(.token.punctuation),
 .paint :global(.token.list),
 .paint :global(.token.hr),
-.paint :global(.token.table-header-row) {
+.paint :global(.token.table-header-row),
+.paint :global(.token.tag) {
   color: var(--syntax-marker);
 }
 

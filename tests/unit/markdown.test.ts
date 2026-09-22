@@ -4,8 +4,10 @@ import { renderMarkdown, splitTitle } from '@/lib/markdown';
 /**
  * Note bodies are rendered with dangerouslySetInnerHTML in two places —
  * NotePane, NoteForm and AboutCard — and the only thing between them and the DOM is the
- * allow-list in lib/markdown.ts. It had no test, so widening `tagNames` or
- * adding `allowDangerousHtml` broke nothing red.
+ * allow-list in lib/markdown.ts. It had no test, so widening `tagNames` broke
+ * nothing red. Raw HTML is now parsed on purpose — `allowDangerousHtml` plus
+ * `rehype-raw` — so the allow-list is the only thing doing the work, and every
+ * test below has to hold for HTML written straight into the note as well.
  *
  * The threat is not a manager attacking themselves. It is that a note arrives
  * from an agent, an editor, or a paste, and this origin can drive every Server
@@ -44,6 +46,31 @@ describe('what a note may not render', () => {
     const html = renderMarkdown('<p style="position:fixed;inset:0">covered</p>\n');
     expect(html).not.toContain('style=');
   });
+
+  it('strips what an HTML table tries to smuggle, and keeps the table', () => {
+    const html = renderMarkdown(
+      [
+        '<table style="position:fixed" onclick="alert(1)">',
+        '<tr><td class="x" style="color:red" onmouseover="alert(1)">a<script>alert(1)</script></td></tr>',
+        '</table>',
+        '',
+      ].join('\n'),
+    );
+    expect(html).toContain('<table>');
+    expect(html).toContain('<td>a</td>');
+    expect(html).not.toContain('style=');
+    expect(html).not.toContain('class=');
+    expect(html).not.toMatch(/ on[a-z]+=/);
+    expect(html).not.toContain('<script');
+  });
+
+  it('drops an HTML tag that is not on the list, and keeps its words', () => {
+    const html = renderMarkdown('<div><span>plain</span><img src="x"></div>\n');
+    expect(html).not.toContain('<div');
+    expect(html).not.toContain('<span');
+    expect(html).not.toContain('<img');
+    expect(html).toContain('plain');
+  });
 });
 
 describe('what a note may render', () => {
@@ -63,6 +90,29 @@ describe('what a note may render', () => {
     expect(html).toContain('<table>');
     expect(html).toContain('<del>');
     expect(html).toContain('<li>one</li>');
+  });
+
+  it('renders an HTML table, with the spans a pipe table cannot write', () => {
+    const html = renderMarkdown(
+      [
+        '<table>',
+        '<thead><tr><th>Q</th><th align="right">Hires</th></tr></thead>',
+        '<tbody><tr><td>Q1</td><td rowspan="2" align="right">2</td></tr><tr><td>Q2</td></tr></tbody>',
+        '</table>',
+        '',
+      ].join('\n'),
+    );
+    expect(html).toContain('<thead>');
+    expect(html).toContain('<th align="right">Hires</th>');
+    expect(html).toContain('<td rowspan="2" align="right">2</td>');
+  });
+
+  it('renders an HTML table and a pipe table to the same tags', () => {
+    const pipe = renderMarkdown('| a |\n| --- |\n| 1 |\n');
+    const raw = renderMarkdown(
+      '<table><thead><tr><th>a</th></tr></thead><tbody><tr><td>1</td></tr></tbody></table>\n',
+    );
+    expect(pipe.replace(/\s/g, '')).toBe(raw.replace(/\s/g, ''));
   });
 
   it('renders a task list as text, because input is not on the list', () => {
